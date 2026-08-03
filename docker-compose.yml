@@ -1,0 +1,15 @@
+services:
+  web:
+    build:
+      context: ./web
+      args:
+        # NEXT_PUBLIC_* are baked at build time; set them here or via a .env file.
+        NEXT_PUBLIC_STRIPE_LINK: ${NEXT_PUBLIC_STRIPE_LINK:-}
+        NEXT_PUBLIC_GITHUB_LINK: ${NEXT_PUBLIC_GITHUB_LINK:-https://github.com/chandrasaripaka/engram}
+    image: engram-web:latest
+    ports:
+      - "3000:3000"
+    environment:
+      # Runtime (server-side) — safe to change without rebuilding.
+      WAITLIST_WEBHOOK: ${WAITLIST_WEBHOOK:-}
+    restart: unless-stopped
