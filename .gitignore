@@ -1,0 +1,12 @@
+# deps / build
+node_modules/
+dist/
+*.tsbuildinfo
+# engram local artifacts (never commit the derived index or per-repo memory of THIS repo)
+.engram/index.sqlite
+.engram/**/*.local
+# secrets / env
+.env
+.env.*
+# os
+.DS_Store
