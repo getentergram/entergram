@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(124, 108, 255, 0.18), transparent 60%),
+    #0a0a0f;
+  color: #e7e7ee;
+}
