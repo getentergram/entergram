@@ -15,8 +15,10 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "better-sqlite3": "^13.0.2",
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "zod": "^4.4.3"
   },
   "scripts": {
     "start": "node bin/engram.js"

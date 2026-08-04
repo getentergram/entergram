@@ -28,10 +28,23 @@ engram review                     # triage low-confidence auto-extracted cells
                                   #   --accept <id> | --reject <id> | --tag <id> --to a,b | --why <id> --to "…"
 engram reindex                    # rebuild the SQLite index from the cells
 engram doctor                     # health check (ids, hooks, dangling links, index coverage)
-engram serve                      # MCP server for your agent (Day 5)
+engram serve                      # MCP server (stdio): recall/remember/learn/doctor as tools
 ```
 
 The index is SQLite + FTS5 (`.engram/index.db`, git-ignored and rebuildable). Markdown cells remain the source of truth.
+
+## Connect your agent (MCP)
+
+`engram serve` exposes memory as MCP tools over stdio. Add it once and any MCP client uses it.
+
+**Claude Code** — `.mcp.json` in your repo:
+```json
+{ "mcpServers": { "engram": { "command": "engram", "args": ["serve"] } } }
+```
+**Cursor / Windsurf** — add an MCP server: command `engram`, args `["serve"]`.
+**Continue** — add the same block to `config.json` → `mcpServers`.
+
+Tools: `recall(query, budget?)`, `remember(what, why?, tags?, scope?, type?)`, `learn(source?, limit?)`, `doctor()`.
 
 ## What a cell looks like
 
@@ -53,5 +66,5 @@ hook: Moved auth from sessions to JWT to kill sticky-session infra
 
 ## Roadmap (from the build spec)
 - ✅ Day 4: SQLite/FTS index, docs/README/ADR ingestion, `engram review`, `engram reindex`.
-- Day 5: `engram serve` — MCP server (recall/remember/learn over stdio).
+- ✅ Day 5: `engram serve` — MCP server (recall/remember/learn/doctor over stdio).
 - Day 6: LLM extraction of {decision, reason, outcome} from PRs/issues.

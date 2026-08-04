@@ -101,9 +101,9 @@ program.command("doctor").description("Check memory health").action(() => {
   process.exit(1);
 });
 
-program.command("serve").description("Run the MCP server for your agent (Day 5)").action(() => {
-  console.log("• MCP server lands on Day 5 — recall/remember/learn as MCP tools over stdio.");
-  console.log('  Claude Code: { "mcpServers": { "engram": { "command": "engram", "args": ["serve"] } } }');
+program.command("serve").description("Run the MCP server (stdio) for your agent").action(async () => {
+  const { serve } = await import("../src/mcp.js");
+  await serve();
 });
 
 program.parseAsync();
