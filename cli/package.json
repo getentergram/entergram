@@ -1,0 +1,33 @@
+{
+  "name": "engram",
+  "version": "0.1.0",
+  "description": "Persistent engineering memory for AI coding agents — the why behind your codebase, on tap.",
+  "type": "module",
+  "bin": {
+    "engram": "bin/engram.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "scripts": {
+    "start": "node bin/engram.js"
+  },
+  "keywords": [
+    "ai",
+    "memory",
+    "claude",
+    "cursor",
+    "mcp",
+    "coding-agent",
+    "engineering-memory"
+  ],
+  "license": "MIT"
+}
