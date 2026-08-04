@@ -1,10 +1,11 @@
 // Engram core — cell store + recall. Markdown is the source of truth; the JSON
 // index is a rebuildable cache. No native deps (SQLite/FTS is a Day-4 upgrade).
 import {
-  existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync,
+  existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync,
 } from "node:fs";
 import { join, dirname } from "node:path";
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 
 const DIR = ".engram";
 
@@ -38,9 +39,9 @@ export function initRepo(root) {
     p.config,
     `# Engram config\nname = "${root.split("/").pop()}"\nsources = ["git", "docs"]\n`,
   );
-  writeFileSync(p.state, JSON.stringify({ seenShas: [], lastLearn: null }, null, 2));
-  // Never let the derived index or per-machine artifacts ride the repo; cells DO commit.
-  writeFileSync(p.ignore, "index.json\nstate.json\n*.local\n");
+  writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], lastLearn: null }, null, 2));
+  // The derived SQLite index is rebuildable — never commit it. Cells + state DO commit.
+  writeFileSync(p.ignore, "index.db\nindex.db-shm\nindex.db-wal\nindex.json\n*.local\n");
   return { created: true, path: p.base };
 }
 
@@ -112,8 +113,112 @@ export function readCells(root) {
     .map((f) => {
       const text = readFileSync(join(cells, f), "utf8");
       const { fm, body } = parseFrontmatter(text);
-      return { file: f, id: fm.id, tags: fm.tags || [], hook: fm.hook || "", type: fm.type, body, text };
+      return {
+        file: f, id: fm.id, tags: fm.tags || [], hook: fm.hook || "", type: fm.type,
+        scope: fm.scope, confidence: fm.confidence, created: fm.created, source: fm.source,
+        body, text,
+      };
     });
+}
+
+/** Patch a cell's frontmatter/body in place (used by `review`). */
+export function updateCell(root, id, patch) {
+  const { cells } = paths(root);
+  const f = readdirSync(cells).find((n) => n.startsWith(id + "-"));
+  if (!f) return false;
+  const p = join(cells, f);
+  let text = readFileSync(p, "utf8");
+  if (patch.confidence != null) text = text.replace(/^confidence: .*/m, `confidence: ${patch.confidence}`);
+  if (patch.tags) text = text.replace(/^tags: .*/m, `tags: [${patch.tags.join(", ")}]`);
+  if (patch.why != null) {
+    text = /## Why\n[\s\S]*?(?=\n## |\nRelated:|\n*$)/.test(text)
+      ? text.replace(/## Why\n[\s\S]*?(?=\n## |\nRelated:|\n*$)/, `## Why\n${patch.why}\n`)
+      : text.replace(/(## What\n[\s\S]*?)(\n## |\nRelated:|\n*$)/, `$1\n## Why\n${patch.why}\n$2`);
+  }
+  writeFileSync(p, text);
+  return true;
+}
+
+export function deleteCell(root, id) {
+  const { cells } = paths(root);
+  const f = readdirSync(cells).find((n) => n.startsWith(id + "-"));
+  if (!f) return false;
+  rmSync(join(cells, f));
+  return true;
+}
+
+/** Cells still awaiting human review (low extractor confidence). */
+export function reviewQueue(root, threshold = 0.6) {
+  return readCells(root)
+    .filter((c) => Number(c.confidence) < threshold)
+    .sort((a, b) => Number(a.confidence) - Number(b.confidence));
+}
+
+/** Ingest docs/README/ADRs into cells, one per meaningful section (heuristic v1). */
+export function learnDocs(root) {
+  const p = paths(root);
+  const state = JSON.parse(readFileSync(p.state, "utf8"));
+  const seen = new Set(state.seenDocs || []);
+  const files = docFiles(root);
+  let added = 0, skipped = 0;
+  for (const rel of files) {
+    const text = readFileSync(join(root, rel), "utf8");
+    for (const sec of splitSections(text)) {
+      if (sec.body.trim().length < 40) { skipped++; continue; }
+      const key = createHash("sha1").update(rel + "::" + sec.title).digest("hex").slice(0, 12);
+      if (seen.has(key)) { skipped++; continue; }
+      const isAdr = /adr|decision/i.test(rel);
+      writeCell(root, {
+        type: isAdr ? "decision" : "reference",
+        tags: [...new Set((sec.title + " " + rel).toLowerCase().match(/[a-z][a-z0-9-]{3,}/g) || [])].slice(0, 4),
+        scope: "docs",
+        confidence: isAdr ? 0.7 : 0.5,
+        hook: sec.title,
+        what: sec.body.trim().slice(0, 500),
+        source: { kind: "doc", path: rel, heading: sec.title },
+      });
+      seen.add(key);
+      added++;
+    }
+  }
+  state.seenDocs = [...seen];
+  writeFileSync(p.state, JSON.stringify(state, null, 2));
+  return { added, skipped };
+}
+
+function docFiles(root) {
+  const out = [];
+  const walk = (dir, rel) => {
+    for (const e of readdirSync(join(root, dir === "" ? "." : dir), { withFileTypes: true })) {
+      if (e.name.startsWith(".") || e.name === "node_modules") continue;
+      const r = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) {
+        if (/docs|adr|decisions/i.test(e.name) || rel) walk(r, r);
+      } else if (/\.mdx?$/i.test(e.name) && /readme|changelog|adr|decision|architecture|docs\//i.test(r) || (rel && /\.mdx?$/i.test(e.name))) {
+        out.push(r);
+      }
+    }
+  };
+  // top-level README/CHANGELOG/ARCHITECTURE + anything under docs/ or adr/
+  for (const e of readdirSync(root, { withFileTypes: true })) {
+    if (e.isFile() && /^(readme|changelog|architecture)/i.test(e.name) && /\.mdx?$/i.test(e.name)) out.push(e.name);
+    if (e.isDirectory() && /^(docs|adr|decisions)$/i.test(e.name)) walk(e.name, e.name);
+  }
+  return [...new Set(out)];
+}
+
+function splitSections(text) {
+  const lines = text.split("\n");
+  const secs = [];
+  let title = null, buf = [];
+  const flush = () => { if (title) secs.push({ title, body: buf.join("\n") }); };
+  for (const ln of lines) {
+    const h = /^#{1,3}\s+(.*)/.exec(ln);
+    if (h) { flush(); title = h[1].trim().replace(/[#*`]/g, ""); buf = []; }
+    else buf.push(ln);
+  }
+  flush();
+  return secs.filter((s) => s.title);
 }
 
 const est = (s) => Math.ceil(s.length / 4); // rough tokens
