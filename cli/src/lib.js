@@ -6,6 +6,8 @@ import {
 import { join, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { ghAvailable, harvestPRs, harvestIssues } from "./github.js";
+import { llmAvailable, extractLLM, extractHeuristic } from "./extract.js";
 
 const DIR = ".engram";
 
@@ -37,9 +39,18 @@ export function initRepo(root) {
   mkdirSync(p.cells, { recursive: true });
   writeFileSync(
     p.config,
-    `# Engram config\nname = "${root.split("/").pop()}"\nsources = ["git", "docs"]\n`,
+    [
+      `# Engram config`,
+      `name = "${root.split("/").pop()}"`,
+      `sources = ["git", "docs", "github"]`,
+      ``,
+      `# Doc harvesting is scoped to these dirs/files (never .env, secrets, node_modules).`,
+      `doc_paths = ["docs", "adr", "decisions", "README.md", "CHANGELOG.md", "ARCHITECTURE.md"]`,
+      `exclude = [".env", "node_modules", "secrets"]`,
+      ``,
+    ].join("\n"),
   );
-  writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], lastLearn: null }, null, 2));
+  writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], seenGithub: [], lastLearn: null }, null, 2));
   // The derived SQLite index is rebuildable — never commit it. Cells + state DO commit.
   writeFileSync(p.ignore, "index.db\nindex.db-shm\nindex.db-wal\nindex.json\n*.local\n");
   return { created: true, path: p.base };
