@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { findRoot, writeCell, learnGit, learnDocs, doctor } from "./lib.js";
 import { ensureIndex, reindex, search, indexStats } from "./db.js";
+import { learnPRs } from "./learn.js";
 
 const textResult = (text) => ({ content: [{ type: "text", text }] });
 
@@ -65,19 +66,20 @@ export async function serve() {
     "learn",
     {
       title: "Learn from the repo",
-      description: "Ingest recent git history and docs/README/ADRs into memory (incremental — skips already-seen and low-signal items).",
+      description: "Ingest recent git history, docs/README/ADRs, and merged PRs into memory (incremental — skips already-seen and low-signal items). PRs are extracted into {decision, reason, outcome} when ANTHROPIC_API_KEY is set.",
       inputSchema: {
-        source: z.enum(["all", "git", "docs"]).optional(),
-        limit: z.number().optional().describe("max commits to scan (default 50)"),
+        source: z.enum(["all", "git", "docs", "pr"]).optional(),
+        limit: z.number().optional().describe("max items to scan (default 50)"),
       },
     },
     async ({ source, limit }) => {
       const src = source || "all";
-      let g = { added: 0 }, d = { added: 0 };
+      let g = { added: 0 }, d = { added: 0 }, pr = { added: 0 };
       if (src === "git" || src === "all") g = learnGit(root, { limit: limit ?? 50 });
       if (src === "docs" || src === "all") d = learnDocs(root);
+      if (src === "pr" || src === "all") pr = await learnPRs(root, { limit: limit ?? 50 });
       reindex(root);
-      return textResult(`Learned ${g.added + d.added} new cell(s) (git ${g.added}, docs ${d.added}).`);
+      return textResult(`Learned ${g.added + d.added + pr.added} new cell(s) (git ${g.added}, docs ${d.added}, PRs ${pr.added}).`);
     },
   );
 

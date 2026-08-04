@@ -5,6 +5,8 @@ import {
   updateCell, deleteCell, reviewQueue,
 } from "../src/lib.js";
 import { ensureIndex, reindex, search, indexStats } from "../src/db.js";
+import { learnPRs, learnIssues } from "../src/learn.js";
+import { llmAvailable } from "../src/extract.js";
 
 const program = new Command();
 program.name("engram").description("Persistent engineering memory for AI coding agents.").version("0.1.0");
@@ -51,16 +53,24 @@ program.command("recall").description("Retrieve the facts relevant to a query")
     }
   });
 
-program.command("learn").description("Ingest git history + docs into memory (incremental)")
-  .option("--source <src>", "git|docs|all", "all")
-  .option("--limit <n>", "max commits", (v) => parseInt(v, 10), 50)
-  .action((o) => {
+program.command("learn").description("Ingest git history, docs, and merged PRs into memory (incremental)")
+  .option("--source <src>", "git|docs|pr|issue|all", "all")
+  .option("--limit <n>", "max items to scan", (v) => parseInt(v, 10), 50)
+  .option("--no-llm", "skip LLM extraction (heuristic only)")
+  .action(async (o) => {
     const root = requireRoot();
-    let g = { added: 0, skipped: 0 }, d = { added: 0, skipped: 0 };
-    if (o.source === "git" || o.source === "all") g = learnGit(root, { limit: o.limit });
-    if (o.source === "docs" || o.source === "all") d = learnDocs(root);
+    const src = o.source;
+    const useLLM = o.llm !== false && llmAvailable();
+    let g = { added: 0 }, d = { added: 0 }, pr = { added: 0, viaLLM: 0 }, iss = { added: 0, viaLLM: 0 };
+    if (src === "git" || src === "all") g = learnGit(root, { limit: o.limit });
+    if (src === "docs" || src === "all") d = learnDocs(root);
+    if (src === "pr" || src === "all") pr = await learnPRs(root, { limit: o.limit, useLLM });
+    if (src === "issue") iss = await learnIssues(root, { limit: o.limit, useLLM });
     reindex(root);
-    console.log(`✓ Learned ${g.added + d.added} new cell(s) (git ${g.added}, docs ${d.added}); skipped ${g.skipped + d.skipped}.`);
+    const total = g.added + d.added + pr.added + iss.added;
+    console.log(`✓ Learned ${total} new cell(s) — git ${g.added}, docs ${d.added}, PRs ${pr.added}${iss.added ? `, issues ${iss.added}` : ""}${(pr.viaLLM + iss.viaLLM) ? ` (${pr.viaLLM + iss.viaLLM} via LLM)` : ""}.`);
+    if ((src === "pr" || src === "issue" || src === "all") && !useLLM)
+      console.log("  (heuristic extraction — set ANTHROPIC_API_KEY for {decision, reason, outcome} extraction)");
     const q = reviewQueue(root).length;
     if (q) console.log(`  ${q} cell(s) await review → \`engram review\``);
   });
