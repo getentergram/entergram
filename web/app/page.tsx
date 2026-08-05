@@ -4,6 +4,13 @@ const STRIPE_LINK = process.env.NEXT_PUBLIC_STRIPE_LINK || "#";
 const UPI_LINK = process.env.NEXT_PUBLIC_UPI_LINK || "";
 const GITHUB_LINK = process.env.NEXT_PUBLIC_GITHUB_LINK || "#";
 
+// Subscription Payment Links (optional). When set, the tier can be subscribed to directly;
+// otherwise it falls back to the waitlist.
+const subTier = (name: string, envLink: string | undefined, price: string, unit: string, blurb: string) =>
+  envLink
+    ? { name, price, unit, cta: "Subscribe", href: envLink, blurb, highlight: false }
+    : { name, price, unit, cta: "Join waitlist", href: "#waitlist", blurb, highlight: false };
+
 const features = [
   {
     title: "Learns from your git history",
@@ -35,9 +42,9 @@ const steps = [
 
 const tiers = [
   { name: "Install", price: "$500", unit: "one-off", cta: "Get set up", href: STRIPE_LINK, blurb: "We install Engram on your repo, tune it, and wire your agent in an hour.", highlight: true },
-  { name: "Starter", price: "$19", unit: "/mo", cta: "Join waitlist", href: "#waitlist", blurb: "Solo, one repo." },
-  { name: "Pro", price: "$49", unit: "/mo", cta: "Join waitlist", href: "#waitlist", blurb: "Private sync, PR/issue learning, priority." },
-  { name: "Teams", price: "$199", unit: "/mo per repo", cta: "Join waitlist", href: "#waitlist", blurb: "Shared engineering memory for the whole team." },
+  subTier("Starter", process.env.NEXT_PUBLIC_STRIPE_STARTER, "$19", "/mo", "Solo, one repo."),
+  subTier("Pro", process.env.NEXT_PUBLIC_STRIPE_PRO, "$49", "/mo", "Private sync, PR/issue learning, priority."),
+  subTier("Teams", process.env.NEXT_PUBLIC_STRIPE_TEAMS, "$199", "/mo per repo", "Shared engineering memory for the whole team."),
 ];
 
 export default function Home() {
