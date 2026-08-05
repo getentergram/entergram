@@ -6,30 +6,30 @@ the index is a rebuildable cache. Zero native dependencies.
 ## Install
 
 ```bash
-npm install -g engram        # once published
+npm install -g get-engram        # once published
 # or one-liner:
 curl -fsSL https://engram.dev/install | bash
 ```
 
 Local dev (from this repo, before npm publish):
 ```bash
-cd cli && npm install && npm link   # symlinks the `engram` binary globally
+cd cli && npm install && npm link   # symlinks the `get-engram` binary globally
 ```
 
 ## Commands
 
 ```bash
-engram init                       # scaffold .engram/ in the current repo
-engram learn [--source all|git|docs|pr|issue] [--limit 50] [--no-llm]
+get-engram init                       # scaffold .engram/ in the current repo
+get-engram learn [--source all|git|docs|pr|issue] [--limit 50] [--no-llm]
                                   # ingest git history + docs/README/ADRs + merged PRs → cells
-engram remember "<fact>" \        # write a fact by hand
+get-engram remember "<fact>" \        # write a fact by hand
         --why "…" --tags a,b --scope services/auth --type decision
-engram recall "<query>" [--budget 2000]   # FTS/bm25 retrieval under a token budget
-engram review                     # triage low-confidence auto-extracted cells
+get-engram recall "<query>" [--budget 2000]   # FTS/bm25 retrieval under a token budget
+get-engram review                     # triage low-confidence auto-extracted cells
                                   #   --accept <id> | --reject <id> | --tag <id> --to a,b | --why <id> --to "…"
-engram reindex                    # rebuild the SQLite index from the cells
-engram doctor                     # health check (ids, hooks, dangling links, index coverage)
-engram serve                      # MCP server (stdio): recall/remember/learn/doctor as tools
+get-engram reindex                    # rebuild the SQLite index from the cells
+get-engram doctor                     # health check (ids, hooks, dangling links, index coverage)
+get-engram serve                      # MCP server (stdio): recall/remember/learn/doctor as tools
 ```
 
 The index is SQLite + FTS5 (`.engram/index.db`, git-ignored and rebuildable). Markdown cells remain the source of truth.
@@ -42,13 +42,13 @@ The index is SQLite + FTS5 (`.engram/index.db`, git-ignored and rebuildable). Ma
 
 ## Connect your agent (MCP)
 
-`engram serve` exposes memory as MCP tools over stdio. Add it once and any MCP client uses it.
+`get-engram serve` exposes memory as MCP tools over stdio. Add it once and any MCP client uses it.
 
 **Claude Code** — `.mcp.json` in your repo:
 ```json
-{ "mcpServers": { "engram": { "command": "engram", "args": ["serve"] } } }
+{ "mcpServers": { "get-engram": { "command": "get-engram", "args": ["serve"] } } }
 ```
-**Cursor / Windsurf** — add an MCP server: command `engram`, args `["serve"]`.
+**Cursor / Windsurf** — add an MCP server: command `get-engram`, args `["serve"]`.
 **Continue** — add the same block to `config.json` → `mcpServers`.
 
 Tools: `recall(query, budget?)`, `remember(what, why?, tags?, scope?, type?)`, `learn(source?, limit?)`, `doctor()`.
@@ -72,6 +72,6 @@ hook: Moved auth from sessions to JWT to kill sticky-session infra
 ```
 
 ## Roadmap (from the build spec)
-- ✅ Day 4: SQLite/FTS index, docs/README/ADR ingestion, `engram review`, `engram reindex`.
-- ✅ Day 5: `engram serve` — MCP server (recall/remember/learn/doctor over stdio).
+- ✅ Day 4: SQLite/FTS index, docs/README/ADR ingestion, `get-engram review`, `get-engram reindex`.
+- ✅ Day 5: `get-engram serve` — MCP server (recall/remember/learn/doctor over stdio).
 - ✅ Day 6: GitHub PR/issue harvest + LLM extraction of {decision, reason, outcome}.

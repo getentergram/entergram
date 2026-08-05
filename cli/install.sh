@@ -7,11 +7,11 @@ if ! command -v node >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Installing engram…"
-npm install -g engram
+echo "Installing get-engram…"
+npm install -g get-engram
 
 echo
 echo "✓ Installed. Next:"
 echo "    cd your-project"
-echo "    engram init && engram learn"
-echo "    engram serve      # then add as an MCP server in Claude Code / Cursor"
+echo "    get-engram init && get-engram learn"
+echo "    get-engram serve      # then add as an MCP server in Claude Code / Cursor"

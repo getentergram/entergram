@@ -5,6 +5,7 @@ services:
       args:
         # NEXT_PUBLIC_* are baked at build time; set them here or via a .env file.
         NEXT_PUBLIC_STRIPE_LINK: ${NEXT_PUBLIC_STRIPE_LINK:-}
+        NEXT_PUBLIC_UPI_LINK: ${NEXT_PUBLIC_UPI_LINK:-}
         NEXT_PUBLIC_GITHUB_LINK: ${NEXT_PUBLIC_GITHUB_LINK:-https://github.com/chandrasaripaka/engram}
     image: engram-web:latest
     ports:

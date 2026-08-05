@@ -1,9 +1,10 @@
 {
-  "name": "engram",
+  "name": "get-engram",
   "version": "0.1.0",
   "description": "Persistent engineering memory for AI coding agents — the why behind your codebase, on tap.",
   "type": "module",
   "bin": {
+    "get-engram": "bin/get-engram.js",
     "engram": "bin/engram.js"
   },
   "files": [
@@ -11,6 +12,13 @@
     "src",
     "README.md"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chandrasaripaka/engram.git",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/chandrasaripaka/engram#readme",
+  "bugs": "https://github.com/chandrasaripaka/engram/issues",
   "engines": {
     "node": ">=18"
   },
@@ -21,7 +29,8 @@
     "zod": "^4.4.3"
   },
   "scripts": {
-    "start": "node bin/engram.js"
+    "start": "node bin/get-engram.js",
+    "test": "node --test test/*.test.js"
   },
   "keywords": [
     "ai",

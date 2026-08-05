@@ -66,7 +66,7 @@ export function extractHeuristic(unit) {
     type,
     what: unit.title.trim(),
     why: (unit.body || "").split("\n").find((l) => l.trim())?.trim()
-      || "(rationale not in description — refine with `engram review`)",
+      || "(rationale not in description — refine with `get-engram review`)",
     tags: tags.length ? tags : ["change"],
     scope: "repo",
     confidence: 0.4,

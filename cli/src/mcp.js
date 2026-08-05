@@ -1,10 +1,10 @@
 // MCP server — exposes engram memory as tools any MCP client (Claude Code, Cursor,
 // Windsurf, Continue) can call over stdio. IMPORTANT: in stdio mode the protocol owns
 // stdout; all human/status output MUST go to stderr.
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { findRoot, writeCell, learnGit, learnDocs, doctor } from "./lib.js";
+import { findRoot, writeCell, learnGit, learnDocs, doctor, readCells } from "./lib.js";
 import { ensureIndex, reindex, search, indexStats } from "./db.js";
 import { learnPRs } from "./learn.js";
 
@@ -13,11 +13,11 @@ const textResult = (text) => ({ content: [{ type: "text", text }] });
 export async function serve() {
   const root = findRoot();
   if (!root) {
-    process.stderr.write("engram serve: no .engram/ found — run `engram init` first.\n");
+    process.stderr.write("get-engram serve: no .engram/ found — run `get-engram init` first.\n");
     process.exit(1);
   }
 
-  const server = new McpServer({ name: "engram", version: "0.1.0" });
+  const server = new McpServer({ name: "get-engram", version: "0.1.0" });
 
   server.registerTool(
     "recall",
@@ -32,12 +32,12 @@ export async function serve() {
     },
     async ({ query, budget }) => {
       ensureIndex(root);
-      const { hits, total } = search(root, query, budget ?? 2000);
+      const { hits, total, synthesis } = search(root, query, budget ?? 2000);
       if (!hits.length) return textResult(`No memory matches "${query}".`);
       const body = hits
         .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${h.confidence < 0.6 ? ", unreviewed" : ""})\n  ${h.hook}`)
         .join("\n");
-      return textResult(`${hits.length}/${total} relevant memories for "${query}":\n${body}`);
+      return textResult(`${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}`);
     },
   );
 
@@ -93,6 +93,31 @@ export async function serve() {
     },
   );
 
+  server.registerResource(
+    "cell",
+    new ResourceTemplate("get-engram://cell/{id}", { list: undefined }),
+    { title: "Memory cell", description: "One engram memory cell's raw markdown, by id (e.g. B-0012)." },
+    async (uri, { id }) => {
+      const cell = readCells(root).find((c) => c.id === id);
+      return {
+        contents: [{ uri: uri.href, mimeType: "text/markdown", text: cell ? cell.text : `No cell ${id}.` }],
+      };
+    },
+  );
+
+  server.registerResource(
+    "index",
+    "get-engram://index",
+    { title: "Memory index", description: "One line per cell: id, type, tags, hook — the recall-addressable map." },
+    async (uri) => {
+      const cells = readCells(root);
+      const text = cells
+        .map((c) => `${c.id}  [${(c.tags || []).join(", ")}]  ${c.type}  — ${c.hook}`)
+        .join("\n") || "(empty)";
+      return { contents: [{ uri: uri.href, mimeType: "text/plain", text }] };
+    },
+  );
+
   await server.connect(new StdioServerTransport());
-  process.stderr.write("engram MCP server ready (stdio).\n");
+  process.stderr.write("get-engram MCP server ready (stdio).\n");
 }

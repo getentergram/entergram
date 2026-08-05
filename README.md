@@ -35,12 +35,12 @@ Engram gives your agent a **persistent, local-first engineering memory** built a
 
 ```bash
 # 1. Install
-npm install -g engram        # or: curl -fsSL https://engram.dev/install | bash
+npm install -g get-engram        # or: curl -fsSL https://engram.dev/install | bash
 
 # 2. Learn your repo (git history + docs → memory)
 cd your-project
-engram init
-engram learn
+get-engram init
+get-engram learn
 
 # 3. Connect your agent (below), then just code — it remembers.
 ```
@@ -52,20 +52,20 @@ engram learn
 
 Add to `.mcp.json`:
 ```json
-{ "mcpServers": { "engram": { "command": "engram", "args": ["serve"] } } }
+{ "mcpServers": { "get-engram": { "command": "get-engram", "args": ["serve"] } } }
 ```
 </details>
 
 <details>
 <summary><b>Cursor / Windsurf</b></summary>
 
-Add an MCP server in settings: command `engram`, args `["serve"]`.
+Add an MCP server in settings: command `get-engram`, args `["serve"]`.
 </details>
 
 <details>
 <summary><b>Continue.dev</b></summary>
 
-Add the same `engram serve` block to your `config.json` `mcpServers`.
+Add the same `get-engram serve` block to your `config.json` `mcpServers`.
 </details>
 
 That's it. Your agent now has `recall`, `remember`, and `learn` as tools.
@@ -84,13 +84,13 @@ Markdown is the source of truth; the local SQLite index is just a rebuildable ca
 
 | Command | Does |
 |---|---|
-| `engram init` | Scaffold memory in the current repo |
-| `engram learn` | Ingest git history + docs into memory (incremental) |
-| `engram recall "<q>"` | Test what the agent would retrieve |
-| `engram remember "<fact>"` | Write a fact by hand |
-| `engram review` | Triage auto-extracted facts (accept / edit / reject) |
-| `engram doctor` | Health + coverage check |
-| `engram serve` | Run the MCP server for your agent |
+| `get-engram init` | Scaffold memory in the current repo |
+| `get-engram learn` | Ingest git history + docs into memory (incremental) |
+| `get-engram recall "<q>"` | Test what the agent would retrieve |
+| `get-engram remember "<fact>"` | Write a fact by hand |
+| `get-engram review` | Triage auto-extracted facts (accept / edit / reject) |
+| `get-engram doctor` | Health + coverage check |
+| `get-engram serve` | Run the MCP server for your agent |
 
 ## Pricing
 

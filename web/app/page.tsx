@@ -1,6 +1,7 @@
 import WaitlistForm from "./components/WaitlistForm";
 
 const STRIPE_LINK = process.env.NEXT_PUBLIC_STRIPE_LINK || "#";
+const UPI_LINK = process.env.NEXT_PUBLIC_UPI_LINK || "";
 const GITHUB_LINK = process.env.NEXT_PUBLIC_GITHUB_LINK || "#";
 
 const features = [
@@ -27,9 +28,9 @@ const features = [
 ];
 
 const steps = [
-  { cmd: "npm install -g engram", label: "Install" },
-  { cmd: "engram init && engram learn", label: "Learn your repo (git history + docs → memory)" },
-  { cmd: "engram serve  # add to your agent as an MCP server", label: "Connect your agent — then just code" },
+  { cmd: "npm install -g get-engram", label: "Install" },
+  { cmd: "get-engram init && get-engram learn", label: "Learn your repo (git history + docs → memory)" },
+  { cmd: "get-engram serve  # add to your agent as an MCP server", label: "Connect your agent — then just code" },
 ];
 
 const tiers = [
@@ -128,6 +129,11 @@ export default function Home() {
               >
                 {t.cta}
               </a>
+              {t.name === "Install" && UPI_LINK && (
+                <a href={UPI_LINK} className="mt-2 text-center text-xs text-white/50 hover:text-white hover:underline">
+                  or pay via UPI →
+                </a>
+              )}
             </div>
           ))}
         </div>

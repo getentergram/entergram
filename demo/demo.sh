@@ -5,7 +5,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENGRAM="node $REPO_ROOT/cli/bin/engram.js"    # uses the local CLI; published demo would use `engram`
+ENGRAM="node $REPO_ROOT/cli/bin/engram.js"    # uses the local CLI; published demo would use `get-engram`
 pause() { sleep "${DEMO_PAUSE:-1}"; }
 say() { printf "\n\033[1;35m▶ %s\033[0m\n" "$1"; pause; }
 run() { printf "\033[2m\$ %s\033[0m\n" "$*"; eval "$*"; pause; }
@@ -48,5 +48,5 @@ run "$ENGRAM recall auth jwt redis"
 run "$ENGRAM recall ledger acid postgres"
 
 say "6/6  This is what your AI agent gets, every session, via MCP"
-echo '   .mcp.json →  { "mcpServers": { "engram": { "command": "engram", "args": ["serve"] } } }'
+echo '   .mcp.json →  { "mcpServers": { "get-engram": { "command": "get-engram", "args": ["serve"] } } }'
 printf "\n\033[1;32m✓ The files came and went. The engineering memory persisted.\033[0m\n\n"

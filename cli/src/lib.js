@@ -1,13 +1,11 @@
 // Engram core — cell store + recall. Markdown is the source of truth; the JSON
 // index is a rebuildable cache. No native deps (SQLite/FTS is a Day-4 upgrade).
 import {
-  existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync,
+  existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, statSync,
 } from "node:fs";
 import { join, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { ghAvailable, harvestPRs, harvestIssues } from "./github.js";
-import { llmAvailable, extractLLM, extractHeuristic } from "./extract.js";
 
 const DIR = ".engram";
 
@@ -50,7 +48,7 @@ export function initRepo(root) {
       ``,
     ].join("\n"),
   );
-  writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], seenGithub: [], lastLearn: null }, null, 2));
+  writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], seenPRs: [], seenIssues: [], lastLearn: null }, null, 2));
   // The derived SQLite index is rebuildable — never commit it. Cells + state DO commit.
   writeFileSync(p.ignore, "index.db\nindex.db-shm\nindex.db-wal\nindex.json\n*.local\n");
   return { created: true, path: p.base };
@@ -158,6 +156,51 @@ export function deleteCell(root, id) {
   return true;
 }
 
+function jaccard(a, b) {
+  const A = new Set(a), B = new Set(b);
+  if (!A.size && !B.size) return 0;
+  let inter = 0;
+  for (const x of A) if (B.has(x)) inter++;
+  return inter / (A.size + B.size - inter);
+}
+
+const words = (s) => (s || "").toLowerCase().match(/[a-z0-9]{3,}/g) || [];
+
+/** Find an existing cell that looks like the same fact as `candidate` (tag overlap + hook similarity). */
+export function findDuplicate(root, candidate) {
+  const candTags = candidate.tags || [];
+  const candWords = words(candidate.hook || candidate.what);
+  let best = null, bestScore = 0;
+  for (const c of readCells(root)) {
+    const tagScore = jaccard(candTags, c.tags || []);
+    if (tagScore === 0) continue; // require at least some shared tag before comparing text
+    const hookScore = jaccard(candWords, words(c.hook));
+    const score = tagScore * 0.5 + hookScore * 0.5;
+    if (score > bestScore) { bestScore = score; best = c; }
+  }
+  return bestScore >= 0.5 ? best : null;
+}
+
+/**
+ * Write a cell, but dedup/reconcile against existing cells first (ingestion §4.4-4.5):
+ * same fact found → merge into it (stronger/more-recent confidence wins) instead of
+ * creating a duplicate; return { merged: true } so callers can tally it separately.
+ */
+export function writeCellDeduped(root, candidate) {
+  const dup = findDuplicate(root, candidate);
+  if (!dup) return { ...writeCell(root, candidate), merged: false };
+  const dupConf = Number(dup.confidence ?? 0);
+  const candConf = Number(candidate.confidence ?? 0);
+  if (candConf >= dupConf) {
+    updateCell(root, dup.id, {
+      confidence: Math.max(candConf, dupConf),
+      why: candidate.why || undefined,
+    });
+  }
+  const { cells } = paths(root);
+  return { id: dup.id, file: join(cells, dup.file), merged: true };
+}
+
 /** Cells still awaiting human review (low extractor confidence). */
 export function reviewQueue(root, threshold = 0.6) {
   return readCells(root)
@@ -171,7 +214,7 @@ export function learnDocs(root) {
   const state = JSON.parse(readFileSync(p.state, "utf8"));
   const seen = new Set(state.seenDocs || []);
   const files = docFiles(root);
-  let added = 0, skipped = 0;
+  let added = 0, skipped = 0, merged = 0;
   for (const rel of files) {
     const text = readFileSync(join(root, rel), "utf8");
     for (const sec of splitSections(text)) {
@@ -179,7 +222,7 @@ export function learnDocs(root) {
       const key = createHash("sha1").update(rel + "::" + sec.title).digest("hex").slice(0, 12);
       if (seen.has(key)) { skipped++; continue; }
       const isAdr = /adr|decision/i.test(rel);
-      writeCell(root, {
+      const { merged: wasMerged } = writeCellDeduped(root, {
         type: isAdr ? "decision" : "reference",
         tags: [...new Set((sec.title + " " + rel).toLowerCase().match(/[a-z][a-z0-9-]{3,}/g) || [])].slice(0, 4),
         scope: "docs",
@@ -189,31 +232,53 @@ export function learnDocs(root) {
         source: { kind: "doc", path: rel, heading: sec.title },
       });
       seen.add(key);
-      added++;
+      wasMerged ? merged++ : added++;
     }
   }
   state.seenDocs = [...seen];
   writeFileSync(p.state, JSON.stringify(state, null, 2));
-  return { added, skipped };
+  return { added, skipped, merged };
 }
 
+/** Minimal engram.toml reader — just enough for flat string/array keys (no TOML dep needed). */
+export function readConfig(root) {
+  const out = {
+    name: root.split("/").pop(), sources: ["git", "docs", "github"],
+    doc_paths: ["docs", "adr", "decisions", "README.md", "CHANGELOG.md", "ARCHITECTURE.md"],
+    exclude: ["node_modules", ".env", "secrets"],
+  };
+  const { config } = paths(root);
+  if (!existsSync(config)) return out;
+  for (const line of readFileSync(config, "utf8").split("\n")) {
+    const m = /^(\w+)\s*=\s*(.+)$/.exec(line.trim());
+    if (!m) continue;
+    const [, key, raw] = m;
+    out[key] = raw.startsWith("[")
+      ? raw.replace(/^\[|\]$/g, "").split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter(Boolean)
+      : raw.replace(/^"|"$/g, "");
+  }
+  return out;
+}
+
+/** Doc/README/ADR files in scope per engram.toml's doc_paths, honoring exclude (§8 privacy). */
 function docFiles(root) {
+  const cfg = readConfig(root);
+  const isExcluded = (rel) => cfg.exclude.some((x) => rel.includes(x));
   const out = [];
-  const walk = (dir, rel) => {
-    for (const e of readdirSync(join(root, dir === "" ? "." : dir), { withFileTypes: true })) {
-      if (e.name.startsWith(".") || e.name === "node_modules") continue;
-      const r = rel ? `${rel}/${e.name}` : e.name;
-      if (e.isDirectory()) {
-        if (/docs|adr|decisions/i.test(e.name) || rel) walk(r, r);
-      } else if (/\.mdx?$/i.test(e.name) && /readme|changelog|adr|decision|architecture|docs\//i.test(r) || (rel && /\.mdx?$/i.test(e.name))) {
-        out.push(r);
-      }
+  const walk = (rel) => {
+    for (const e of readdirSync(join(root, rel), { withFileTypes: true })) {
+      if (e.name.startsWith(".")) continue;
+      const r = `${rel}/${e.name}`;
+      if (isExcluded(r)) continue;
+      if (e.isDirectory()) walk(r);
+      else if (/\.mdx?$/i.test(e.name)) out.push(r);
     }
   };
-  // top-level README/CHANGELOG/ARCHITECTURE + anything under docs/ or adr/
-  for (const e of readdirSync(root, { withFileTypes: true })) {
-    if (e.isFile() && /^(readme|changelog|architecture)/i.test(e.name) && /\.mdx?$/i.test(e.name)) out.push(e.name);
-    if (e.isDirectory() && /^(docs|adr|decisions)$/i.test(e.name)) walk(e.name, e.name);
+  for (const entry of cfg.doc_paths) {
+    const abs = join(root, entry);
+    if (!existsSync(abs) || isExcluded(entry)) continue;
+    if (statSync(abs).isDirectory()) walk(entry);
+    else out.push(entry);
   }
   return [...new Set(out)];
 }
@@ -221,10 +286,12 @@ function docFiles(root) {
 function splitSections(text) {
   const lines = text.split("\n");
   const secs = [];
-  let title = null, buf = [];
+  let title = null, buf = [], inFence = false;
   const flush = () => { if (title) secs.push({ title, body: buf.join("\n") }); };
   for (const ln of lines) {
-    const h = /^#{1,3}\s+(.*)/.exec(ln);
+    if (/^\s*(```|~~~)/.test(ln)) { inFence = !inFence; buf.push(ln); continue; }
+    // Headings inside a fenced code block are illustrative content, not real doc structure.
+    const h = !inFence && /^#{1,3}\s+(.*)/.exec(ln);
     if (h) { flush(); title = h[1].trim().replace(/[#*`]/g, ""); buf = []; }
     else buf.push(ln);
   }
@@ -275,17 +342,18 @@ export function doctor(root) {
   return { count: cells.length, problems };
 }
 
-/** Ingest recent git commits into cells (heuristic v1 — LLM extraction lands Day 6). */
-export function learnGit(root, { limit = 50 } = {}) {
+/** Ingest recent git commits into cells (heuristic v1 — LLM extraction is the GitHub-source path below). */
+export function learnGit(root, { limit = 50, since } = {}) {
   const p = paths(root);
   const state = JSON.parse(readFileSync(p.state, "utf8"));
   const seen = new Set(state.seenShas);
   const US = "\x1f", RS = "\x1e";
+  const range = since ? `${since}..HEAD` : "";
   const raw = execSync(
-    `git -C "${root}" log --no-merges -n ${limit} --date=short --pretty=format:%H${US}%an${US}%ad${US}%s${US}%b${RS}`,
+    `git -C "${root}" log --no-merges ${range} -n ${limit} --date=short --pretty=format:%H${US}%an${US}%ad${US}%s${US}%b${RS}`,
     { encoding: "utf8", maxBuffer: 1 << 24 },
   );
-  let added = 0, skipped = 0;
+  let added = 0, skipped = 0, merged = 0;
   for (const rec of raw.split(RS)) {
     const line = rec.replace(/^\n/, "");
     if (!line.trim()) continue;
@@ -299,7 +367,7 @@ export function learnGit(root, { limit = 50 } = {}) {
     const tags = [...new Set(
       subject.toLowerCase().match(/[a-z][a-z0-9-]{3,}/g) || [],
     )].slice(0, 4);
-    writeCell(root, {
+    const { merged: wasMerged } = writeCellDeduped(root, {
       type,
       tags: tags.length ? tags : ["git"],
       scope: "repo",
@@ -307,14 +375,14 @@ export function learnGit(root, { limit = 50 } = {}) {
       created: date,
       hook: subject.trim(),
       what: subject.trim(),
-      why: bodyText.trim() || "(rationale not in commit message — refine with `engram review`)",
+      why: bodyText.trim() || "(rationale not in commit message — refine with `get-engram review`)",
       source: { kind: "commit", sha: sha.slice(0, 9), author, date },
     });
     seen.add(sha);
-    added++;
+    wasMerged ? merged++ : added++;
   }
   state.seenShas = [...seen];
   state.lastLearn = new Date().toISOString();
   writeFileSync(p.state, JSON.stringify(state, null, 2));
-  return { added, skipped };
+  return { added, skipped, merged };
 }
