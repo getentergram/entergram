@@ -66,7 +66,7 @@ export async function serve() {
     "learn",
     {
       title: "Learn from the repo",
-      description: "Ingest recent git history, docs/README/ADRs, and merged PRs into memory (incremental — skips already-seen and low-signal items). PRs are extracted into {decision, reason, outcome} when ANTHROPIC_API_KEY is set.",
+      description: "Ingest recent git history, docs/README/ADRs, and merged PRs into memory (incremental — skips already-seen and low-signal items). PRs are extracted into {decision, reason, outcome} when GEMINI_API_KEY or ANTHROPIC_API_KEY is set.",
       inputSchema: {
         source: z.enum(["all", "git", "docs", "pr"]).optional(),
         limit: z.number().optional().describe("max items to scan (default 50)"),

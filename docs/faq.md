@@ -3,8 +3,8 @@
 **Does my code leave my machine?**
 No. Cells and the index are local files. The only outbound calls are (a) to the Anthropic API for extraction *if* you set `ANTHROPIC_API_KEY`, and (b) to GitHub via `gh` for PR/issue harvest. Both are opt-in per source.
 
-**Do I need an Anthropic key?**
-No — `learn` works offline with a heuristic. A key upgrades PR/commit ingestion to real `{decision, reason, outcome}` extraction. `get-engram learn --no-llm` forces heuristic even if a key is set.
+**Do I need a model API key?**
+No — `learn` works offline with a heuristic. A key upgrades PR/commit ingestion to real `{decision, reason, outcome}` extraction. Engram supports **Gemini** (`GEMINI_API_KEY`, the default) or **Anthropic** (`ANTHROPIC_API_KEY`); it auto-selects Gemini when both are set. `get-engram learn --no-llm` forces heuristic even if a key is set.
 
 **Where is the memory stored? Should I commit it?**
 In `.engram/cells/` as Markdown — commit these to share a team memory (they're reviewable in PRs). The SQLite index (`.engram/index.db`) is git-ignored and rebuilt with `get-engram reindex`.

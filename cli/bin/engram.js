@@ -82,7 +82,7 @@ program.command("learn").description("Ingest Git history, docs, and PRs into mem
       viaLLM: pr.viaLLM + iss.viaLLM,
     })));
     if ((src === "pr" || src === "issue" || src === "all") && !useLLM)
-      console.log(formatInfo("Heuristic extraction is running. Set ANTHROPIC_API_KEY for richer decision and outcome extraction."));
+      console.log(formatInfo("Heuristic extraction is running. Set GEMINI_API_KEY (or ANTHROPIC_API_KEY) for richer decision and outcome extraction."));
     const q = reviewQueue(root).length;
     if (q) console.log(formatInfo(`${q} memory cells need a review. Run \`get-engram review\`.`));
   });

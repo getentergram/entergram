@@ -39,7 +39,7 @@ Cells are plain text you can `git diff` and review in a PR. They commit with you
 `harvest → extract → dedup/reconcile → write cell`:
 
 - **Harvest** — git commits (`git log`, noise-filtered), docs/README/ADR sections, merged PRs + closed issues (`gh`). Incremental via per-source watermarks.
-- **Extract** — with `ANTHROPIC_API_KEY`, each unit goes to the Anthropic API (forced `record_memory` tool-use) → `{type, what, why, outcome, tags, scope, confidence}`. Without a key, a heuristic fallback (title→what, body→why, confidence 0.4) keeps it working offline.
+- **Extract** — with a model key, each unit is sent for structured extraction → `{type, what, why, outcome, tags, scope, confidence}`. Provider auto-selects: **Gemini** (`GEMINI_API_KEY`, via `responseSchema`) or **Anthropic** (`ANTHROPIC_API_KEY`, via forced tool-use); override with `ENGRAM_PROVIDER`. Without a key, a heuristic fallback (title→what, body→why, confidence 0.4) keeps it working offline.
 - **Dedup/reconcile** — the same decision surfacing via a commit *and* its PR is merged into one cell; the stronger/more-recent signal wins (no five contradicting copies).
 
 ## 3. Index (SQLite/FTS5)

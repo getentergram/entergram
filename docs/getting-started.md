@@ -24,14 +24,19 @@ get-engram learn         # ingest git history + docs/README/ADRs + merged PRs
 
 `learn` is incremental — run it anytime; it skips what it's already seen and low-signal noise.
 
-**Richer extraction (recommended):** set an Anthropic key and `learn` extracts structured
-`{decision, reason, outcome}` from PRs/commits instead of the heuristic fallback:
+**Richer extraction (recommended):** set a model API key and `learn` extracts structured
+`{decision, reason, outcome}` from PRs/commits instead of the heuristic fallback. Gemini is the default provider:
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-...
-export ENGRAM_MODEL=claude-haiku-4-5     # optional; default
+export GEMINI_API_KEY=...                        # preferred
+# export ENGRAM_GEMINI_MODEL=gemini-2.0-flash    # optional; default
+#   — or use Anthropic instead —
+# export ANTHROPIC_API_KEY=sk-ant-...
 get-engram learn
 ```
+
+Provider auto-selects: **Gemini if `GEMINI_API_KEY` is set, else Anthropic.** Force it with
+`ENGRAM_PROVIDER=gemini|anthropic|none`.
 
 ## 3. Connect your agent (MCP)
 

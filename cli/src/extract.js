@@ -1,26 +1,44 @@
-// Turn a PR/issue/commit unit into a structured memory. Uses the Anthropic API when
-// ANTHROPIC_API_KEY is set (high-confidence, tool-use structured output); otherwise a
-// heuristic fallback so `learn` always works offline.
+// Turn a PR/issue/commit unit into a structured memory. Provider-agnostic:
+//   GEMINI_API_KEY  → Google Gemini (structured output via responseSchema)   [preferred]
+//   ANTHROPIC_API_KEY → Anthropic (forced tool-use)
+//   neither → heuristic fallback, so `learn` always works offline.
+// Override auto-selection with ENGRAM_PROVIDER=gemini|anthropic|none.
 
-const MODEL = process.env.ENGRAM_MODEL || "claude-haiku-4-5-20251001";
+const GEMINI_MODEL = process.env.ENGRAM_GEMINI_MODEL || "gemini-2.0-flash";
+const ANTHROPIC_MODEL = process.env.ENGRAM_MODEL || "claude-haiku-4-5-20251001";
 
-const RECORD_TOOL = {
-  name: "record_memory",
-  description: "Record the durable engineering memory extracted from a change.",
-  input_schema: {
-    type: "object",
-    properties: {
-      type: { type: "string", enum: ["decision", "gotcha", "convention", "reference", "architecture"] },
-      what: { type: "string", description: "what changed, one sentence" },
-      why: { type: "string", description: "the rationale / motivation" },
-      outcome: { type: "string", description: "the result, if stated (else empty)" },
-      tags: { type: "array", items: { type: "string" }, description: "2-4 lowercase topic tags" },
-      scope: { type: "string", description: "area of the codebase, or 'global'" },
-      confidence: { type: "number", description: "0-1: how clearly a durable decision is present" },
-    },
-    required: ["type", "what", "why", "tags", "confidence"],
-  },
+// Shared field set. Anthropic wants JSON-Schema (lowercase types); Gemini wants its
+// Schema proto (uppercase types). Same fields, two dialects.
+const FIELDS = {
+  type: { desc: "decision | gotcha | convention | reference | architecture", enum: ["decision", "gotcha", "convention", "reference", "architecture"] },
+  what: { desc: "what changed, one sentence" },
+  why: { desc: "the rationale / motivation" },
+  outcome: { desc: "the result, if stated (else empty)" },
+  tags: { desc: "2-4 lowercase topic tags", array: true },
+  scope: { desc: "area of the codebase, or 'global'" },
+  confidence: { desc: "0-1: how clearly a durable decision is present", number: true },
 };
+const REQUIRED = ["type", "what", "why", "tags", "confidence"];
+
+function anthropicSchema() {
+  const properties = {};
+  for (const [k, f] of Object.entries(FIELDS)) {
+    properties[k] = f.array
+      ? { type: "array", items: { type: "string" }, description: f.desc }
+      : { type: f.number ? "number" : "string", description: f.desc, ...(f.enum ? { enum: f.enum } : {}) };
+  }
+  return { type: "object", properties, required: REQUIRED };
+}
+
+function geminiSchema() {
+  const properties = {};
+  for (const [k, f] of Object.entries(FIELDS)) {
+    properties[k] = f.array
+      ? { type: "ARRAY", items: { type: "STRING" } }
+      : { type: f.number ? "NUMBER" : "STRING", ...(f.enum ? { enum: f.enum } : {}) };
+  }
+  return { type: "OBJECT", properties, required: REQUIRED };
+}
 
 function prompt(unit) {
   return `Extract the durable engineering memory from this merged ${unit.kind}.
@@ -29,24 +47,47 @@ Focus on the DECISION and its RATIONALE — skip mechanical/noise changes (set c
 Title: ${unit.title}
 ${unit.body ? "Body:\n" + unit.body.slice(0, 4000) : "(no description)"}
 
-Call record_memory with what/why/outcome/tags/scope/confidence.`;
+Return what/why/outcome, 2-4 tags, scope, and confidence (0-1).`;
+}
+
+export function provider() {
+  const forced = process.env.ENGRAM_PROVIDER;
+  if (forced) return forced === "none" ? null : forced;
+  if (process.env.GEMINI_API_KEY) return "gemini";
+  if (process.env.ANTHROPIC_API_KEY) return "anthropic";
+  return null;
 }
 
 export function llmAvailable() {
-  return Boolean(process.env.ANTHROPIC_API_KEY);
+  return provider() !== null;
 }
 
-/** LLM extraction via the Anthropic Messages API (forced tool use). Returns a memory or null. */
-export async function extractLLM(unit) {
+async function extractGemini(unit) {
+  const key = process.env.GEMINI_API_KEY;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "x-goog-api-key": key, "content-type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt(unit) }] }],
+      generationConfig: { responseMimeType: "application/json", responseSchema: geminiSchema() },
+    }),
+  });
+  if (!res.ok) throw new Error(`Gemini API ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  const data = await res.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  return text ? JSON.parse(text) : null;
+}
+
+async function extractAnthropic(unit) {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return null;
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({
-      model: MODEL,
+      model: ANTHROPIC_MODEL,
       max_tokens: 512,
-      tools: [RECORD_TOOL],
+      tools: [{ name: "record_memory", description: "Record the extracted engineering memory.", input_schema: anthropicSchema() }],
       tool_choice: { type: "tool", name: "record_memory" },
       messages: [{ role: "user", content: prompt(unit) }],
     }),
@@ -55,6 +96,15 @@ export async function extractLLM(unit) {
   const data = await res.json();
   const use = (data.content || []).find((b) => b.type === "tool_use");
   return use ? use.input : null;
+}
+
+/** Extract via the selected provider. Returns a memory object or null (→ caller falls back). */
+export async function extractLLM(unit) {
+  switch (provider()) {
+    case "gemini": return extractGemini(unit);
+    case "anthropic": return extractAnthropic(unit);
+    default: return null;
+  }
 }
 
 /** Offline fallback: title → what, body → why, low confidence for review. */

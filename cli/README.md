@@ -36,7 +36,7 @@ The index is SQLite + FTS5 (`.engram/index.db`, git-ignored and rebuildable). Ma
 
 ## Extraction (git/PR/issue → {decision, reason, outcome})
 
-- Set **`ANTHROPIC_API_KEY`** (optionally `ENGRAM_MODEL`, default `claude-haiku-4-5`) and `learn` extracts high-confidence structured memories from merged PRs/issues via the Anthropic API (forced tool-use).
+- Set a model key and `learn` extracts high-confidence structured memories from merged PRs/issues. Provider auto-selects: **`GEMINI_API_KEY`** (default, `ENGRAM_GEMINI_MODEL` default `gemini-2.0-flash`) or **`ANTHROPIC_API_KEY`** (`ENGRAM_MODEL` default `claude-haiku-4-5`). Force with `ENGRAM_PROVIDER=gemini|anthropic|none`.
 - With no key, it falls back to a heuristic (title→what, body→why, confidence 0.4) so `learn` always works offline. Pass `--no-llm` to force heuristic.
 - Requires `gh` installed + authenticated for PR/issue sources.
 
