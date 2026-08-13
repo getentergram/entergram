@@ -72,7 +72,7 @@ Three components:
 ```markdown
 ---
 id: B-0421
-type: decision            # decision | gotcha | convention | reference | architecture
+type: decision            # decision | gotcha | convention | reference | architecture | procedure
 tags: [auth, jwt, migration]
 scope: services/auth
 source:                   # provenance — what this was learned from (NEW)
@@ -188,6 +188,7 @@ One binary, one server, every agent. That's the universal integration the plan w
 entergram init          # scaffold repo/.entergram/, entergram.toml, privacy .gitignore
 entergram learn [--since SHA] [--source git|pr|docs|all]   # ingestion pipeline
 entergram recall "<query>" [--budget N]                    # test recall from terminal
+entergram dispatch "<query>" [--budget N]                  # procedure-vs-fact selection (§13)
 entergram remember "<what>" [--why ...] [--tags ...]       # manual write-back
 entergram review        # triage low-confidence extracted cells (accept/edit/reject)
 entergram doctor        # hygiene (wraps brain.sh checks)
@@ -265,7 +266,19 @@ billing portal, Kubernetes. Memory + recall + MCP, done exceptionally.
 
 ## 13. Evolution → cognitive runtime (architect for, don't market)
 
-Memory (v1) → recall (v1) → **learn/consolidate** (built) → **skills/orchestration** (already exist as
-effectors) → planning/reflection (v2+). The gate loop is the runtime; today's product turns on the
-first two layers. Say "memory" in the market; keep the runtime in the architecture.
+Memory (v1) → recall (v1) → **learn/consolidate** (built) → **dispatch** (built — the selector) →
+**skills/orchestration** (owed) → planning/reflection (v2+). The gate loop is the runtime; today's
+product turns on memory + recall + learn. Say "memory" in the market; keep the runtime in the
+architecture.
+
+`dispatch(query, budget?)` (`cli/src/db.js`, design in `docs/cognitive-runtime.md`) is now built:
+given a query, it ranks `type: procedure` cells against the fact pool by bm25 and returns the
+procedure as the winner only if it's a stronger match AND its `effector:` script exists on disk —
+otherwise it falls back to the exact shape `recall`/`search()` already return. It also surfaces
+(never follows) any other procedure cells the winner cites via `[[B-NNNN]]`, as `citedProcedures`.
+Wired into the CLI (`entergram dispatch "<query>"`) and the MCP server (`dispatch` tool) alongside
+`recall`. What's still owed: `dispatch` is a selector, not an executor — it never runs, spawns, or
+shells out to an effector — so *orchestration* (a procedure automatically triggering its cited
+sub-procedures, or a human/agent action actually running the effector `dispatch` pointed at) and
+any MARL-style *learned* action selection both remain unbuilt.
 ```

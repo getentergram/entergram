@@ -19,7 +19,7 @@ Each fact is one Markdown file in `.entergram/cells/B-NNNN-*.md` with frontmatte
 ```markdown
 ---
 id: B-0007
-type: decision            # decision | gotcha | convention | reference | architecture
+type: decision            # decision | gotcha | convention | reference | architecture | procedure
 tags: [auth, jwt]
 scope: services/auth
 source: {"kind":"pr","ref":"#812","author":"@alice","date":"2026-05-14","url":"…"}
@@ -48,7 +48,9 @@ Cells are plain text you can `git diff` and review in a PR. They commit with you
 
 ## 4. Surface (MCP + CLI)
 
-`get-entergram serve` exposes memory as MCP tools — `recall`, `remember`, `learn`, `doctor` — over stdio, so any MCP client consumes it. The CLI exposes the same operations for humans and CI.
+`get-entergram serve` exposes memory as MCP tools — `recall`, `dispatch`, `remember`, `learn`, `doctor` — over stdio, so any MCP client consumes it. The CLI exposes the same operations for humans and CI.
+
+`dispatch "<query>"` sits next to `recall`: it selects the strongest-matching `type: procedure` cell — one whose declared `effector:` script actually exists on disk — when it beats every fact, and reports the resolved effector path and why; otherwise it falls back to the same result `recall` returns. It never runs the effector itself (see `docs/cognitive-runtime.md`).
 
 ## Why this shape
 

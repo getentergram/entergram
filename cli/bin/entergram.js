@@ -4,10 +4,10 @@ import {
   findRoot, initRepo, writeCell, doctor, learnGit, learnDocs,
   updateCell, deleteCell, reviewQueue,
 } from "../src/lib.js";
-import { ensureIndex, reindex, search, indexStats } from "../src/db.js";
+import { ensureIndex, reindex, search, dispatch, indexStats } from "../src/db.js";
 import { learnPRs, learnIssues } from "../src/learn.js";
 import { llmAvailable } from "../src/extract.js";
-import { formatSuccess, formatError, formatInfo, formatList, formatLearnSummary } from "../src/output.js";
+import { formatSuccess, formatError, formatInfo, formatList, formatDispatch, formatLearnSummary } from "../src/output.js";
 
 const program = new Command();
 program.name("get-entergram").description("Persistent engineering memory for AI coding agents.").version("0.1.0");
@@ -53,6 +53,16 @@ program.command("recall").description("Retrieve the facts relevant to a query")
       console.log(`    ${h.hook}`);
     }
     if (synthesis) console.log(`\n${synthesis}`);
+  });
+
+program.command("dispatch").description("Select the strongest-matching procedure for a query, or fall back to recall")
+  .argument("<query...>").option("--budget <n>", "token budget for the recall fallback", (v) => parseInt(v, 10), 2000)
+  .action((words, o) => {
+    const root = requireRoot();
+    ensureIndex(root);
+    const q = words.join(" ");
+    const result = dispatch(root, q, o.budget);
+    console.log(formatDispatch(result, q));
   });
 
 program.command("learn").description("Ingest Git history, docs, and PRs into memory")

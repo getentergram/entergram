@@ -125,6 +125,7 @@ export function readCells(root) {
       return {
         file: f, id: fm.id, tags: fm.tags || [], hook: fm.hook || "", type: fm.type,
         scope: fm.scope, confidence: fm.confidence, created: fm.created, source: fm.source,
+        effector: fm.effector,
         body, text,
       };
     });
