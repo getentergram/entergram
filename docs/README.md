@@ -1,9 +1,9 @@
-# Engram docs
+# Entergram docs
 
 Persistent engineering memory for AI coding agents.
 
 - [Getting Started](getting-started.md) — install, index a repo, connect your agent
-- [Why Engram?](why-engram.md) — the problem and the wedge
+- [Why Entergram?](why-entergram.md) — the problem and the wedge
 - [Architecture](architecture.md) — cells, index, extraction, MCP
 - [Comparison](comparison.md) — vs Cursor Memory, Claude Projects, LangGraph, Mem0, LlamaIndex
 - [FAQ](faq.md)

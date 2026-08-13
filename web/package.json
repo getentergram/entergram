@@ -1,5 +1,5 @@
 {
-  "name": "engram-web",
+  "name": "entergram-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -21,5 +21,8 @@
     "postcss": "8.4.39",
     "tailwindcss": "3.4.6",
     "typescript": "5.5.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["sharp"]
   }
 }

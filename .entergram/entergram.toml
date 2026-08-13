@@ -1,0 +1,7 @@
+# Entergram config
+name = "entergram"
+sources = ["git", "docs", "github"]
+
+# Doc harvesting is scoped to these dirs/files (never .env, secrets, node_modules).
+doc_paths = ["docs", "adr", "decisions", "README.md", "CHANGELOG.md", "ARCHITECTURE.md"]
+exclude = [".env", "node_modules", "secrets"]

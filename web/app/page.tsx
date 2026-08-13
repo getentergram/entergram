@@ -35,13 +35,13 @@ const features = [
 ];
 
 const steps = [
-  { cmd: "npm install -g get-engram", label: "Install" },
-  { cmd: "get-engram init && get-engram learn", label: "Learn your repo (git history + docs → memory)" },
-  { cmd: "get-engram serve  # add to your agent as an MCP server", label: "Connect your agent — then just code" },
+  { cmd: "npm install -g get-entergram", label: "Install" },
+  { cmd: "get-entergram init && get-entergram learn", label: "Learn your repo (git history + docs → memory)" },
+  { cmd: "get-entergram serve  # add to your agent as an MCP server", label: "Connect your agent — then just code" },
 ];
 
 const tiers = [
-  { name: "Install", price: "$500", unit: "one-off", cta: "Get set up", href: STRIPE_LINK, blurb: "We install Engram on your repo, tune it, and wire your agent in an hour.", highlight: true },
+  { name: "Install", price: "$500", unit: "one-off", cta: "Get set up", href: STRIPE_LINK, blurb: "We install Entergram on your repo, tune it, and wire your agent in an hour.", highlight: true },
   subTier("Starter", process.env.NEXT_PUBLIC_STRIPE_STARTER, "$19", "/mo", "Solo, one repo."),
   subTier("Pro", process.env.NEXT_PUBLIC_STRIPE_PRO, "$49", "/mo", "Private sync, PR/issue learning, priority."),
   subTier("Teams", process.env.NEXT_PUBLIC_STRIPE_TEAMS, "$199", "/mo per repo", "Shared engineering memory for the whole team."),
@@ -52,7 +52,7 @@ export default function Home() {
     <main className="mx-auto max-w-5xl px-6">
       {/* Nav */}
       <nav className="flex items-center justify-between py-6">
-        <span className="text-lg font-bold tracking-tight">🧠 Engram</span>
+        <span className="text-lg font-bold tracking-tight">🧠 Entergram</span>
         <div className="flex items-center gap-6 text-sm text-white/70">
           <a href="#features" className="hidden hover:text-white sm:inline">Features</a>
           <a href="#pricing" className="hidden hover:text-white sm:inline">Pricing</a>
@@ -84,7 +84,7 @@ export default function Home() {
       {/* Demo slot */}
       <section className="pb-16">
         <div className="flex aspect-video w-full items-center justify-center rounded-2xl border border-white/10 bg-panel">
-          <span className="text-white/30">▶ Demo — “I deleted half my project. The agent rebuilt it because Engram remembered.”</span>
+          <span className="text-white/30">▶ Demo — “I deleted half my project. The agent rebuilt it because Entergram remembered.”</span>
         </div>
       </section>
 
@@ -151,7 +151,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="flex flex-col items-center justify-between gap-4 border-t border-white/10 py-10 text-sm text-white/40 sm:flex-row">
-        <span>🧠 Engram — persistent memory for AI coding agents.</span>
+        <span>🧠 Entergram — persistent memory for AI coding agents.</span>
         <div className="flex gap-6">
           <a href={GITHUB_LINK} className="hover:text-white">GitHub</a>
           <a href="#pricing" className="hover:text-white">Pricing</a>

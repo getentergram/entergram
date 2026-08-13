@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       await fetch(webhook, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "engram-landing", ts: new Date().toISOString() }),
+        body: JSON.stringify({ email, source: "entergram-landing", ts: new Date().toISOString() }),
       });
     } catch {
       // Don't fail the signup if the forward hiccups; we still captured it in logs.

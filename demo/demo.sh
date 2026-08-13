@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Engram 3-minute demo — deterministic, runnable. Tells the story:
+# Entergram 3-minute demo — deterministic, runnable. Tells the story:
 #   "The codebase remembers WHY, even after the files are gone."
-# Usage:  bash demo/demo.sh        (from the engram repo root)
+# Usage:  bash demo/demo.sh        (from the entergram repo root)
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-ENGRAM="node $REPO_ROOT/cli/bin/engram.js"    # uses the local CLI; published demo would use `get-engram`
+ENTERGRAM="node $REPO_ROOT/cli/bin/entergram.js"    # uses the local CLI; published demo would use `get-entergram`
 pause() { sleep "${DEMO_PAUSE:-1}"; }
 say() { printf "\n\033[1;35m▶ %s\033[0m\n" "$1"; pause; }
 run() { printf "\033[2m\$ %s\033[0m\n" "$*"; eval "$*"; pause; }
@@ -31,22 +31,22 @@ echo y > ledger.ts && git add . && git commit -qm "Use Postgres for the ledger t
 run "git --no-pager log --oneline"
 
 say "2/6  Give it a memory — one command"
-run "$ENGRAM init"
-run "$ENGRAM learn --source all --no-llm"
+run "$ENTERGRAM init"
+run "$ENTERGRAM learn --source all --no-llm"
 
 say "3/6  Ask WHY — the kind of thing a new engineer (or a fresh agent) asks"
-run "$ENGRAM recall why is auth stateless"
-run "$ENGRAM recall why postgres ledger"
+run "$ENTERGRAM recall why is auth stateless"
+run "$ENTERGRAM recall why postgres ledger"
 
 say "4/6  💥 Disaster: half the project is deleted"
 run "rm -rf docs auth.ts ledger.ts README.md"
-run "ls -A | grep -v .engram || true"
+run "ls -A | grep -v .entergram || true"
 echo "   (source + docs are gone — a fresh agent would have nothing to go on)"; pause
 
 say "5/6  But the memory survived — the WHY is still on tap"
-run "$ENGRAM recall auth jwt redis"
-run "$ENGRAM recall ledger acid postgres"
+run "$ENTERGRAM recall auth jwt redis"
+run "$ENTERGRAM recall ledger acid postgres"
 
 say "6/6  This is what your AI agent gets, every session, via MCP"
-echo '   .mcp.json →  { "mcpServers": { "get-engram": { "command": "get-engram", "args": ["serve"] } } }'
+echo '   .mcp.json →  { "mcpServers": { "get-entergram": { "command": "get-entergram", "args": ["serve"] } } }'
 printf "\n\033[1;32m✓ The files came and went. The engineering memory persisted.\033[0m\n\n"

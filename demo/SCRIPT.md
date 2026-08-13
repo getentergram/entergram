@@ -1,4 +1,4 @@
-# Engram — 3-minute demo script
+# Entergram — 3-minute demo script
 
 The runnable demo is `demo/demo.sh` (deterministic). This is the recording guide to turn it
 into the landing-page GIF + the launch video.
@@ -13,12 +13,12 @@ into the landing-page GIF + the launch video.
 | Time | On screen (demo.sh beat) | Voiceover |
 |---|---|---|
 | 0:00 | `git log` of Acme Billing — 3 decisions + an ADR | "Every codebase records decisions — in commits, PRs, docs. Your AI agent forgets them every session." |
-| 0:20 | `get-engram init` + `get-engram learn` | "One command gives it a memory — built from the repo's own history." |
-| 0:45 | `get-engram recall "why is auth stateless"` | "Now ask *why*. It knows: JWT, to kill the Redis dependency — pulled from the ADR and the commit." |
+| 0:20 | `get-entergram init` + `get-entergram learn` | "One command gives it a memory — built from the repo's own history." |
+| 0:45 | `get-entergram recall "why is auth stateless"` | "Now ask *why*. It knows: JWT, to kill the Redis dependency — pulled from the ADR and the commit." |
 | 1:15 | `rm -rf docs auth.ts ledger.ts README.md` | "Now the disaster. Half the project is deleted. A fresh agent would have nothing." |
-| 1:40 | `get-engram recall "auth jwt redis"` still returns the decision | "But the memory survived. The *why* is still on tap — independent of the files." |
+| 1:40 | `get-entergram recall "auth jwt redis"` still returns the decision | "But the memory survived. The *why* is still on tap — independent of the files." |
 | 2:20 | `.mcp.json` snippet | "And this is exactly what Claude Code, Cursor, and Windsurf get — every session — through one MCP server." |
-| 2:40 | Closing card | "Engram. The why behind your codebase, on tap. engram.dev" |
+| 2:40 | Closing card | "Entergram. The why behind your codebase, on tap. entergram.dev" |
 
 ## The hero GIF (short loop)
 Trim to beats **0:45 → 1:40**: ask why → delete everything → recall still answers. That 15-second

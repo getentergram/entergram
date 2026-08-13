@@ -1,4 +1,4 @@
-# Engram — Technical Build Spec (working name)
+# Entergram — Technical Build Spec (working name)
 
 *Persistent engineering memory for AI coding agents. Productizes the existing `~/.claude/brain`
 system (cells + INDEX + gate loop + `brain.sh` + skills) into a shippable dev-infra product.*
@@ -28,10 +28,10 @@ system (cells + INDEX + gate loop + `brain.sh` + skills) into a shippable dev-in
 |---|---|
 | `B-NNN-*.md` cells (frontmatter + body) | Cell store — same format, +source/confidence fields |
 | `INDEX.md` (grep-addressable map) | SQLite FTS index (grep still works as fallback) |
-| `brain.sh` (doctor/next-id/stats/dups/stale) | `engram` CLI internals — battle-tested hygiene |
+| `brain.sh` (doctor/next-id/stats/dups/stale) | `entergram` CLI internals — battle-tested hygiene |
 | Gate loop (recall→write-back→consolidate→decay) | The ingestion + recall engine |
 | Skills + effectors | `learn` extractors + future orchestration layer |
-| Cross-machine sync + per-machine blacklist | `engram sync` + privacy guard (reused verbatim) |
+| Cross-machine sync + per-machine blacklist | `entergram sync` + privacy guard (reused verbatim) |
 | `redact-identity` scanner | Pre-share leak check for team/public brains |
 
 **This is why 14 days is plausible:** the primitives are dogfooded across 184 cells, 4 machines,
@@ -44,10 +44,10 @@ system (cells + INDEX + gate loop + `brain.sh` + skills) into a shippable dev-in
 ```
 ┌─────────────────────────── developer machine ───────────────────────────┐
 │                                                                          │
-│   repo/.engram/                    engram CLI                MCP server  │
+│   repo/.entergram/                    entergram CLI                MCP server  │
 │   ├── cells/B-NNN-*.md   ◄────────  ingest  ──────►  SQLite   (stdio)    │
 │   ├── index.sqlite                  recall           index    recall()   │
-│   ├── engram.toml                   doctor                    remember() │
+│   ├── entergram.toml                   doctor                    remember() │
 │   └── .gitignore (privacy guard)    sync                       learn()   │
 │                                                              resources   │
 │        ▲ source of truth              ▲                          ▲       │
@@ -55,12 +55,12 @@ system (cells + INDEX + gate loop + `brain.sh` + skills) into a shippable dev-in
 │     git history                 human/agent                 Claude Code, │
 │     docs / ADRs                 write-back                  Cursor, etc.  │
 └──────────────────────────────────────────────────────────────────────────┘
-        (optional) engram sync  →  private git remote / managed store
+        (optional) entergram sync  →  private git remote / managed store
 ```
 
 Three components:
 - **Engine** (CLI + SQLite + markdown cells) — ingest, index, recall, hygiene.
-- **MCP server** (`engram serve`) — exposes recall/remember/learn to any MCP-speaking agent.
+- **MCP server** (`entergram serve`) — exposes recall/remember/learn to any MCP-speaking agent.
 - **Sync** (optional, phase 2) — push/pull the cell store to a private remote; per-repo team brain.
 
 ---
@@ -139,7 +139,7 @@ harvest → chunk → extract → dedup → reconcile → write-back → doctor
 6. **Write-back**: emit cell markdown + upsert SQLite row + edges.
 7. **Doctor**: validate (links resolve, frontmatter well-formed, no dangling) — gate the commit.
 
-Quality guards: confidence < 0.6 → **review queue** (`engram review`), not silently trusted.
+Quality guards: confidence < 0.6 → **review queue** (`entergram review`), not silently trusted.
 "Learn from git history" degrades on messy repos — surface what was skipped, never claim full coverage.
 
 ---
@@ -160,7 +160,7 @@ selective recall over an auto-built decision index.
 
 ## 6. MCP surface (the distribution wedge)
 
-`engram serve` → MCP server over stdio.
+`entergram serve` → MCP server over stdio.
 
 **Tools:**
 - `recall(query, budget?)` → relevant cells + synthesis
@@ -168,12 +168,12 @@ selective recall over an auto-built decision index.
 - `learn(source?, since?)` → run ingestion (e.g. "learn from the last 50 commits")
 - `doctor()` → health/coverage report
 
-**Resources:** each cell exposed as `engram://cell/B-NNN`; `engram://index` for the map.
+**Resources:** each cell exposed as `entergram://cell/B-NNN`; `entergram://index` for the map.
 
 **Client config (the "5-minute" install):**
 - Claude Code — add to `.mcp.json`:
   ```json
-  { "mcpServers": { "engram": { "command": "engram", "args": ["serve"] } } }
+  { "mcpServers": { "entergram": { "command": "entergram", "args": ["serve"] } } }
   ```
 - Cursor / Windsurf — MCP settings entry (same command).
 - Continue — `config.json` mcpServers block.
@@ -185,17 +185,17 @@ One binary, one server, every agent. That's the universal integration the plan w
 ## 7. CLI
 
 ```
-engram init          # scaffold repo/.engram/, engram.toml, privacy .gitignore
-engram learn [--since SHA] [--source git|pr|docs|all]   # ingestion pipeline
-engram recall "<query>" [--budget N]                    # test recall from terminal
-engram remember "<what>" [--why ...] [--tags ...]       # manual write-back
-engram review        # triage low-confidence extracted cells (accept/edit/reject)
-engram doctor        # hygiene (wraps brain.sh checks)
-engram sync [push|pull]                                 # phase 2 — team/cross-machine
-engram serve         # MCP server (stdio)
+entergram init          # scaffold repo/.entergram/, entergram.toml, privacy .gitignore
+entergram learn [--since SHA] [--source git|pr|docs|all]   # ingestion pipeline
+entergram recall "<query>" [--budget N]                    # test recall from terminal
+entergram remember "<what>" [--why ...] [--tags ...]       # manual write-back
+entergram review        # triage low-confidence extracted cells (accept/edit/reject)
+entergram doctor        # hygiene (wraps brain.sh checks)
+entergram sync [push|pull]                                 # phase 2 — team/cross-machine
+entergram serve         # MCP server (stdio)
 ```
 
-Distribution: `npm i -g engram` (Node wrapper) or `curl … | bash`. Node/TS core (fast MCP libs,
+Distribution: `npm i -g entergram` (Node wrapper) or `curl … | bash`. Node/TS core (fast MCP libs,
 Cursor/Continue ecosystem), SQLite via better-sqlite3, `simple-git` + `gh` for harvest.
 
 ---
@@ -205,7 +205,7 @@ Cursor/Continue ecosystem), SQLite via better-sqlite3, `simple-git` + `gh` for h
 - Default: **nothing leaves the machine.** Extraction can run against a local model or the user's own
   API key; the cell store is local files.
 - Reuse the per-machine blacklist + `redact-identity` scanner before any `sync push` or team share.
-- `engram.toml` declares what sources are in-scope (never scans `.env`, secrets, `node_modules`).
+- `entergram.toml` declares what sources are in-scope (never scans `.env`, secrets, `node_modules`).
 
 ---
 
@@ -213,13 +213,13 @@ Cursor/Continue ecosystem), SQLite via better-sqlite3, `simple-git` + `gh` for h
 
 | Day | Deliverable | Technical notes (the *how*) |
 |---|---|---|
-| 1 | **Positioning**: name, domain, README rewrite, ICP, one-liner | See Day-1 pack below; name → Engram; ICP = senior eng on 50k+ LOC, 6mo+ repos on Claude/Cursor |
+| 1 | **Positioning**: name, domain, README rewrite, ICP, one-liner | See Day-1 pack below; name → Entergram; ICP = senior eng on 50k+ LOC, 6mo+ repos on Claude/Cursor |
 | 2 | **Landing page**: hero, demo GIF slot, features, pricing, waitlist, Stripe link (Next.js/Vercel/Tailwind) | No blog, no docs yet |
-| 3 | **Installation**: one-command install + CLI shell (`init`/`remember`/`recall`/`learn`/`doctor`) | `npm i -g engram` or `curl…\|bash`; wraps `brain.sh` internals |
+| 3 | **Installation**: one-command install + CLI shell (`init`/`remember`/`recall`/`learn`/`doctor`) | `npm i -g entergram` or `curl…\|bash`; wraps `brain.sh` internals |
 | 4 | **Memory engine**: repo indexing (README, docs, ADRs, git history) into SQLite | Cell schema §3; source of truth = markdown, SQLite = FTS index; no external DB |
 | 5 | **Agent integration**: Claude Code, Cursor, Windsurf, Continue | Ship as **MCP server** (§6) — the real "one integration" |
 | 6 | **GitHub integration**: learn from commits/PRs/issues → {decision, reason, outcome, author} | Ingestion pipeline §4; squash-aware; incremental watermark |
-| 7 | **Demo** (3-min): "deleted half my project, Claude rebuilt it because Engram remembered" | The sales asset — recall §5 over the auto-built index |
+| 7 | **Demo** (3-min): "deleted half my project, Claude rebuilt it because Entergram remembered" | The sales asset — recall §5 over the auto-built index |
 | 8 | **Docs**: Getting Started, Architecture, Why, FAQ, Comparison (Cursor memory / Claude Projects / LangGraph / mem0 / LlamaIndex) | Objection-handling |
 | 9 | **Payments**: Stripe — Starter $19 / Pro $49 / Teams $199 / Enterprise book-demo | Per-repo for Teams |
 | 10 | **First customers**: DM 100 founders + 100 CTOs + 100 AI engineers — "$500, I set up your engineering memory in an hour" | Cash-first |
@@ -237,7 +237,7 @@ treat the engine as the thing that can't slip.
 
 ## 10. Pricing (per-repo, services-first)
 
-- **Brain Install — $500 one-off**: I set up Engram on your repo (ingest, MCP wiring, tuning). Cash + design-partner intimacy.
+- **Brain Install — $500 one-off**: I set up Entergram on your repo (ingest, MCP wiring, tuning). Cash + design-partner intimacy.
 - **Solo — $19/mo**, **Pro — $49/mo** (private sync, PR/issue learn, priority).
 - **Team — $199/mo per repo** (shared engineering memory — the real money; keep it central even without RBAC).
 - Enterprise — book a call (local-first/on-prem is the wedge vs cloud memory tools).
@@ -255,7 +255,7 @@ billing portal, Kubernetes. Memory + recall + MCP, done exceptionally.
 
 | Risk | Mitigation |
 |---|---|
-| Auto-extraction quality (garbage in on messy repos) | Confidence scoring + `engram review` queue; skip-noise heuristics; never claim full coverage |
+| Auto-extraction quality (garbage in on messy repos) | Confidence scoring + `entergram review` queue; skip-noise heuristics; never claim full coverage |
 | Crowded "AI memory" market | Position as *engineering-decision* memory (git-mined), local-first, agent-agnostic — not chat memory |
 | MCP client drift across tools | Server is one artifact; per-tool config is thin and versioned in docs |
 | Big-repo ingest cost/time | Incremental watermark; PR-level units; prompt-cache the extractor; cap first-run to last N months |

@@ -1,13 +1,13 @@
 # Getting Started
 
-Engram gives your AI coding agent a persistent memory built from your repo's own history. Five minutes, three steps.
+Entergram gives your AI coding agent a persistent memory built from your repo's own history. Five minutes, three steps.
 
 ## 1. Install
 
 ```bash
-npm install -g get-engram        # once published
+npm install -g get-entergram        # once published
 # or:
-curl -fsSL https://engram.dev/install | bash
+curl -fsSL https://entergram.dev/install | bash
 ```
 
 Requires Node ≥ 18. For PR/issue learning you also need [`gh`](https://cli.github.com) installed and authenticated.
@@ -18,8 +18,8 @@ Requires Node ≥ 18. For PR/issue learning you also need [`gh`](https://cli.git
 
 ```bash
 cd your-project
-get-engram init          # scaffolds .engram/ (cells = Markdown, source of truth)
-get-engram learn         # ingest git history + docs/README/ADRs + merged PRs
+get-entergram init          # scaffolds .entergram/ (cells = Markdown, source of truth)
+get-entergram learn         # ingest git history + docs/README/ADRs + merged PRs
 ```
 
 `learn` is incremental — run it anytime; it skips what it's already seen and low-signal noise.
@@ -29,24 +29,24 @@ get-engram learn         # ingest git history + docs/README/ADRs + merged PRs
 
 ```bash
 export GEMINI_API_KEY=...                        # preferred
-# export ENGRAM_GEMINI_MODEL=gemini-2.0-flash    # optional; default
+# export ENTERGRAM_GEMINI_MODEL=gemini-2.0-flash    # optional; default
 #   — or use Anthropic instead —
 # export ANTHROPIC_API_KEY=sk-ant-...
-get-engram learn
+get-entergram learn
 ```
 
 Provider auto-selects: **Gemini if `GEMINI_API_KEY` is set, else Anthropic.** Force it with
-`ENGRAM_PROVIDER=gemini|anthropic|none`.
+`ENTERGRAM_PROVIDER=gemini|anthropic|none`.
 
 ## 3. Connect your agent (MCP)
 
-`get-engram serve` runs an MCP server over stdio. Add it once; any MCP client uses it.
+`get-entergram serve` runs an MCP server over stdio. Add it once; any MCP client uses it.
 
 **Claude Code** — `.mcp.json` in your repo:
 ```json
-{ "mcpServers": { "engram": { "command": "get-engram", "args": ["serve"] } } }
+{ "mcpServers": { "entergram": { "command": "get-entergram", "args": ["serve"] } } }
 ```
-**Cursor / Windsurf** — add an MCP server: command `get-engram`, args `["serve"]`.
+**Cursor / Windsurf** — add an MCP server: command `get-entergram`, args `["serve"]`.
 **Continue** — same block under `mcpServers` in `config.json`.
 
 Your agent now has `recall`, `remember`, `learn`, and `doctor` tools. Ask it *why* something in the codebase is the way it is — it recalls the decision instead of guessing.
@@ -54,10 +54,10 @@ Your agent now has `recall`, `remember`, `learn`, and `doctor` tools. Ask it *wh
 ## Everyday commands
 
 ```bash
-get-engram recall "why is auth stateless"   # what the agent retrieves, from the terminal
-get-engram remember "Use ULIDs for public ids" --why "sortable + collision-safe" --type decision
-get-engram review                            # triage low-confidence auto-extracted memories
-get-engram doctor                            # health + coverage
+get-entergram recall "why is auth stateless"   # what the agent retrieves, from the terminal
+get-entergram remember "Use ULIDs for public ids" --why "sortable + collision-safe" --type decision
+get-entergram review                            # triage low-confidence auto-extracted memories
+get-entergram doctor                            # health + coverage
 ```
 
-Next: [Architecture](architecture.md) · [Why Engram?](why-engram.md)
+Next: [Architecture](architecture.md) · [Why Entergram?](why-entergram.md)

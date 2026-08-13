@@ -10,11 +10,11 @@ import { llmAvailable } from "../src/extract.js";
 import { formatSuccess, formatError, formatInfo, formatList, formatLearnSummary } from "../src/output.js";
 
 const program = new Command();
-program.name("get-engram").description("Persistent engineering memory for AI coding agents.").version("0.1.0");
+program.name("get-entergram").description("Persistent engineering memory for AI coding agents.").version("0.1.0");
 
 function requireRoot() {
   const root = findRoot();
-  if (!root) { console.error(formatError("No memory store found. Run `get-engram init` first.")); process.exit(1); }
+  if (!root) { console.error(formatError("No memory store found. Run `get-entergram init` first.")); process.exit(1); }
   return root;
 }
 
@@ -22,7 +22,7 @@ program.command("init").description("Set up a memory store for this repository")
   const root = process.cwd();
   const { created, path } = initRepo(root);
   console.log(created ? formatSuccess(`Initialized memory at ${path}`) : formatInfo(`Memory already exists at ${path}`));
-  if (created) console.log(formatInfo("Next: run `get-engram learn` and then connect your agent with `get-engram serve`."));
+  if (created) console.log(formatInfo("Next: run `get-entergram learn` and then connect your agent with `get-entergram serve`."));
 });
 
 program.command("remember").description("Save a fact or decision into memory")
@@ -84,7 +84,7 @@ program.command("learn").description("Ingest Git history, docs, and PRs into mem
     if ((src === "pr" || src === "issue" || src === "all") && !useLLM)
       console.log(formatInfo("Heuristic extraction is running. Set GEMINI_API_KEY (or ANTHROPIC_API_KEY) for richer decision and outcome extraction."));
     const q = reviewQueue(root).length;
-    if (q) console.log(formatInfo(`${q} memory cells need a review. Run \`get-engram review\`.`));
+    if (q) console.log(formatInfo(`${q} memory cells need a review. Run \`get-entergram review\`.`));
   });
 
 program.command("review").description("Review low-confidence memory cells")

@@ -1,4 +1,4 @@
-// Engram core — cell store + recall. Markdown is the source of truth; the JSON
+// Entergram core — cell store + recall. Markdown is the source of truth; the JSON
 // index is a rebuildable cache. No native deps (SQLite/FTS is a Day-4 upgrade).
 import {
   existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync, rmSync, statSync,
@@ -7,9 +7,9 @@ import { join, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
 
-const DIR = ".engram";
+const DIR = ".entergram";
 
-/** Walk up from `start` to find the repo root containing `.engram/`. */
+/** Walk up from `start` to find the repo root containing `.entergram/`. */
 export function findRoot(start = process.cwd()) {
   let dir = start;
   for (;;) {
@@ -25,7 +25,7 @@ export function paths(root) {
   return {
     base,
     cells: join(base, "cells"),
-    config: join(base, "engram.toml"),
+    config: join(base, "entergram.toml"),
     state: join(base, "state.json"),
     ignore: join(base, ".gitignore"),
   };
@@ -38,7 +38,7 @@ export function initRepo(root) {
   writeFileSync(
     p.config,
     [
-      `# Engram config`,
+      `# Entergram config`,
       `name = "${root.split("/").pop()}"`,
       `sources = ["git", "docs", "github"]`,
       ``,
@@ -240,7 +240,7 @@ export function learnDocs(root) {
   return { added, skipped, merged };
 }
 
-/** Minimal engram.toml reader — just enough for flat string/array keys (no TOML dep needed). */
+/** Minimal entergram.toml reader — just enough for flat string/array keys (no TOML dep needed). */
 export function readConfig(root) {
   const out = {
     name: root.split("/").pop(), sources: ["git", "docs", "github"],
@@ -260,7 +260,7 @@ export function readConfig(root) {
   return out;
 }
 
-/** Doc/README/ADR files in scope per engram.toml's doc_paths, honoring exclude (§8 privacy). */
+/** Doc/README/ADR files in scope per entergram.toml's doc_paths, honoring exclude (§8 privacy). */
 function docFiles(root) {
   const cfg = readConfig(root);
   const isExcluded = (rel) => cfg.exclude.some((x) => rel.includes(x));
@@ -375,7 +375,7 @@ export function learnGit(root, { limit = 50, since } = {}) {
       created: date,
       hook: subject.trim(),
       what: subject.trim(),
-      why: bodyText.trim() || "(rationale not in commit message — refine with `get-engram review`)",
+      why: bodyText.trim() || "(rationale not in commit message — refine with `get-entergram review`)",
       source: { kind: "commit", sha: sha.slice(0, 9), author, date },
     });
     seen.add(sha);

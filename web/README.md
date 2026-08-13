@@ -1,4 +1,4 @@
-# Engram — Landing page
+# Entergram — Landing page
 
 Next.js (App Router) + Tailwind. Vercel-ready.
 
@@ -14,7 +14,7 @@ npm run dev                   # http://localhost:3000
 1. Push the repo (already private on GitHub).
 2. Import into Vercel, set **Root Directory = `web`**.
 3. Add env vars from `.env.example` (`NEXT_PUBLIC_STRIPE_LINK`, `NEXT_PUBLIC_GITHUB_LINK`, optional `WAITLIST_WEBHOOK`).
-4. Deploy. Point your domain (e.g. engram.dev) at it.
+4. Deploy. Point your domain (e.g. entergram.dev) at it.
 
 ## What's here
 - `app/page.tsx` — the single landing page (hero, demo slot, features, how-it-works, pricing, footer).

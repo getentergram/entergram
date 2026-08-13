@@ -2,9 +2,9 @@
 node_modules/
 dist/
 *.tsbuildinfo
-# engram local artifacts (never commit the derived index or per-repo memory of THIS repo)
-.engram/index.sqlite
-.engram/**/*.local
+# entergram local artifacts (never commit the derived index or per-repo memory of THIS repo)
+.entergram/index.sqlite
+.entergram/**/*.local
 # secrets / env
 .env
 .env.*

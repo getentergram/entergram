@@ -5,7 +5,7 @@ The landing page takes money through **Stripe Payment Links** (no backend needed
 
 ## 1. Stripe — the $500 install (one-off)
 
-1. dashboard.stripe.com → **Payment Links** → New → one-time, $500, name "Engram Install".
+1. dashboard.stripe.com → **Payment Links** → New → one-time, $500, name "Entergram Install".
 2. Copy the link (`https://buy.stripe.com/…`).
 3. Set `NEXT_PUBLIC_STRIPE_LINK` to it.
 

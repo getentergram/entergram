@@ -1,4 +1,4 @@
-// MCP server — exposes engram memory as tools any MCP client (Claude Code, Cursor,
+// MCP server — exposes entergram memory as tools any MCP client (Claude Code, Cursor,
 // Windsurf, Continue) can call over stdio. IMPORTANT: in stdio mode the protocol owns
 // stdout; all human/status output MUST go to stderr.
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -13,11 +13,11 @@ const textResult = (text) => ({ content: [{ type: "text", text }] });
 export async function serve() {
   const root = findRoot();
   if (!root) {
-    process.stderr.write("get-engram serve: no .engram/ found — run `get-engram init` first.\n");
+    process.stderr.write("get-entergram serve: no .entergram/ found — run `get-entergram init` first.\n");
     process.exit(1);
   }
 
-  const server = new McpServer({ name: "get-engram", version: "0.1.0" });
+  const server = new McpServer({ name: "get-entergram", version: "0.1.0" });
 
   server.registerTool(
     "recall",
@@ -95,8 +95,8 @@ export async function serve() {
 
   server.registerResource(
     "cell",
-    new ResourceTemplate("get-engram://cell/{id}", { list: undefined }),
-    { title: "Memory cell", description: "One engram memory cell's raw markdown, by id (e.g. B-0012)." },
+    new ResourceTemplate("get-entergram://cell/{id}", { list: undefined }),
+    { title: "Memory cell", description: "One entergram memory cell's raw markdown, by id (e.g. B-0012)." },
     async (uri, { id }) => {
       const cell = readCells(root).find((c) => c.id === id);
       return {
@@ -107,7 +107,7 @@ export async function serve() {
 
   server.registerResource(
     "index",
-    "get-engram://index",
+    "get-entergram://index",
     { title: "Memory index", description: "One line per cell: id, type, tags, hook — the recall-addressable map." },
     async (uri) => {
       const cells = readCells(root);
@@ -119,5 +119,5 @@ export async function serve() {
   );
 
   await server.connect(new StdioServerTransport());
-  process.stderr.write("get-engram MCP server ready (stdio).\n");
+  process.stderr.write("get-entergram MCP server ready (stdio).\n");
 }

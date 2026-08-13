@@ -2,10 +2,10 @@
 //   GEMINI_API_KEY  → Google Gemini (structured output via responseSchema)   [preferred]
 //   ANTHROPIC_API_KEY → Anthropic (forced tool-use)
 //   neither → heuristic fallback, so `learn` always works offline.
-// Override auto-selection with ENGRAM_PROVIDER=gemini|anthropic|none.
+// Override auto-selection with ENTERGRAM_PROVIDER=gemini|anthropic|none.
 
-const GEMINI_MODEL = process.env.ENGRAM_GEMINI_MODEL || "gemini-2.0-flash";
-const ANTHROPIC_MODEL = process.env.ENGRAM_MODEL || "claude-haiku-4-5-20251001";
+const GEMINI_MODEL = process.env.ENTERGRAM_GEMINI_MODEL || "gemini-2.0-flash";
+const ANTHROPIC_MODEL = process.env.ENTERGRAM_MODEL || "claude-haiku-4-5-20251001";
 
 // Shared field set. Anthropic wants JSON-Schema (lowercase types); Gemini wants its
 // Schema proto (uppercase types). Same fields, two dialects.
@@ -51,7 +51,7 @@ Return what/why/outcome, 2-4 tags, scope, and confidence (0-1).`;
 }
 
 export function provider() {
-  const forced = process.env.ENGRAM_PROVIDER;
+  const forced = process.env.ENTERGRAM_PROVIDER;
   if (forced) return forced === "none" ? null : forced;
   if (process.env.GEMINI_API_KEY) return "gemini";
   if (process.env.ANTHROPIC_API_KEY) return "anthropic";
@@ -116,7 +116,7 @@ export function extractHeuristic(unit) {
     type,
     what: unit.title.trim(),
     why: (unit.body || "").split("\n").find((l) => l.trim())?.trim()
-      || "(rationale not in description — refine with `get-engram review`)",
+      || "(rationale not in description — refine with `get-entergram review`)",
     tags: tags.length ? tags : ["change"],
     scope: "repo",
     confidence: 0.4,

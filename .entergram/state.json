@@ -1,0 +1,43 @@
+{
+  "seenShas": [
+    "61998d32d311eacfa38e6c31b8dd75de8ac2eba3",
+    "1d49c07c2edee2f09bac24d00356333e643d611c",
+    "52c3a8428c072723d390c52482f7e24e993cc663",
+    "b1ddb07248d81125abaf210e9acae92c4496118c",
+    "4f2f6b46f40b7fb10bfc7876f80ee46b41e8ab8e",
+    "0fb88b582d59cb155eec1ed283513d8c913701eb",
+    "59cd9d284ea0e868c1788e67bd29e509fdb4ec06",
+    "7c1f2acee970b9dfb8f2878f0187163fb84f6835"
+  ],
+  "seenDocs": [
+    "2dbe4d2da4b3",
+    "14cd34617e30",
+    "a0155339cc38",
+    "0ec25553a500",
+    "295f704dface",
+    "12958b40b9df",
+    "d362dad8ec6c",
+    "b7610208efae",
+    "6d4276f46043",
+    "ffbd2ad52055",
+    "37071ccb175e",
+    "eb7009c10d71",
+    "f1fd81f5e864",
+    "017d72cb4cda",
+    "67c792d59b65",
+    "34f5a607a52f",
+    "b54161276459",
+    "54cd257baa61",
+    "4476a92de879",
+    "d782b0623f3d",
+    "e4a892537276",
+    "bdbb63588b30",
+    "0d98cc3496f7",
+    "e8eeab270e4e",
+    "468e603322d4",
+    "3710f9850e4d"
+  ],
+  "seenPRs": [],
+  "seenIssues": [],
+  "lastLearn": "2026-08-04T14:27:14.468Z"
+}

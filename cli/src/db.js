@@ -84,7 +84,7 @@ function synthesize(query, hits) {
   const lead = (decisions.length ? decisions : top).map((h) => h.hook.replace(/\.$/, ""));
   const unreviewed = top.filter((h) => h.confidence < 0.6).length;
   return `For "${query}": ${lead.join("; ")}.`
-    + (unreviewed ? ` (${unreviewed} of these ${unreviewed === 1 ? "is" : "are"} unreviewed extractions — verify with \`get-engram review\` before relying on it.)` : "");
+    + (unreviewed ? ` (${unreviewed} of these ${unreviewed === 1 ? "is" : "are"} unreviewed extractions — verify with \`get-entergram review\` before relying on it.)` : "");
 }
 
 /** FTS/bm25 recall, packed under a token budget. */
