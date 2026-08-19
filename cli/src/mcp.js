@@ -5,7 +5,7 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { findRoot, writeCell, learnGit, learnDocs, doctor, readCells } from "./lib.js";
-import { ensureIndex, reindex, search, indexStats } from "./db.js";
+import { ensureIndex, reindex, search, dispatch, indexStats } from "./db.js";
 import { learnPRs } from "./learn.js";
 
 const textResult = (text) => ({ content: [{ type: "text", text }] });
@@ -38,6 +38,38 @@ export async function serve() {
         .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${h.confidence < 0.6 ? ", unreviewed" : ""})\n  ${h.hook}`)
         .join("\n");
       return textResult(`${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}`);
+    },
+  );
+
+  server.registerTool(
+    "dispatch",
+    {
+      title: "Dispatch: select a procedure, or fall back to recall",
+      description:
+        "Select the strongest-matching action for a query: a citable procedure bound to an effector script, if one is a stronger match than any fact AND its effector actually exists on disk — otherwise the same result `recall` would return. dispatch NEVER runs, spawns, or shells out to the effector; it only reports which one would fire and why. Running it is always your decision.",
+      inputSchema: {
+        query: z.string().describe("what you're trying to do"),
+        budget: z.number().optional().describe("token budget for the recall fallback (default 2000)"),
+      },
+    },
+    async ({ query, budget }) => {
+      ensureIndex(root);
+      const result = dispatch(root, query, budget ?? 2000);
+      if (result.winner === "procedure") {
+        const { cell, effectorPath, why, citedProcedures } = result;
+        const cites = citedProcedures?.length
+          ? `\nCites: ${citedProcedures.map((c) => `${c.id} (${c.hook})`).join(", ")}`
+          : "";
+        return textResult(
+          `Procedure ${cell.id} [${cell.tags.join(", ")}] matched: ${cell.hook}\nEffector: ${effectorPath}\n${why}${cites}\n(This is a selection only — nothing has been executed.)`,
+        );
+      }
+      const { hits, total, synthesis } = result;
+      if (!hits.length) return textResult(`No procedure or memory matches "${query}".`);
+      const body = hits
+        .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${h.confidence < 0.6 ? ", unreviewed" : ""})\n  ${h.hook}`)
+        .join("\n");
+      return textResult(`No procedure matched strongly enough — falling back to recall. ${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}`);
     },
   );
 

@@ -87,6 +87,7 @@ Markdown is the source of truth; the local SQLite index is just a rebuildable ca
 | `get-entergram init` | Scaffold memory in the current repo |
 | `get-entergram learn` | Ingest git history + docs into memory (incremental) |
 | `get-entergram recall "<q>"` | Test what the agent would retrieve |
+| `get-entergram dispatch "<q>"` | Select the strongest-matching procedure (or fall back to recall) |
 | `get-entergram remember "<fact>"` | Write a fact by hand |
 | `get-entergram review` | Triage auto-extracted facts (accept / edit / reject) |
 | `get-entergram doctor` | Health + coverage check |
