@@ -7,5 +7,7 @@ Persistent engineering memory for AI coding agents.
 - [Architecture](architecture.md) — cells, index, extraction, MCP
 - [Comparison](comparison.md) — vs Cursor Memory, Claude Projects, LangGraph, Mem0, LlamaIndex
 - [FAQ](faq.md)
+- [Cognitive Runtime](cognitive-runtime.md) — architecture rationale for what's built after recall (not a v1 feature)
+- [Enterprise Onboarding](enterprise-onboarding.md) — connector tiers, agent integration, deployment topology, and the individual → team → product → org scopes
 
 One line: **the *why* behind your codebase — decisions, rationale, architecture — on tap in Claude Code, Cursor, and Windsurf.**

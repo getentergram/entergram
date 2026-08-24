@@ -10,3 +10,6 @@ dist/
 .env.*
 # os
 .DS_Store
+
+# Agent worktrees / local agent scratch
+.claude/
