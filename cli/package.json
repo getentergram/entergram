@@ -10,7 +10,9 @@
   "files": [
     "bin",
     "src",
-    "README.md"
+    "README.md",
+    "NOTICE",
+    "LICENSE"
   ],
   "repository": {
     "type": "git",
@@ -30,7 +32,7 @@
   },
   "scripts": {
     "start": "node bin/get-entergram.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js test/runtime/*.test.js"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["better-sqlite3"]

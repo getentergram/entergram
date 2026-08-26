@@ -1,0 +1,2154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Entergram — decision memory for the enterprise brain.">
+<title>Entergram — Pitch</title>
+</head>
+<body>
+<style>
+  :root{
+    --bg: #EEF1EC;
+    --surface: #E2E7DF;
+    --surface-2: #D6DDD1;
+    --ink: #14201B;
+    --ink-soft: #47564C;
+    --ink-faint: #7C8A7A;
+    --accent: #B5622A;
+    --accent-soft: #D98F52;
+    --accent-2: #7A4A3A;
+    --rule: #C7CFC2;
+    --code-bg: #E5E9E0;
+    --shadow: 0 1px 0 rgba(20,32,27,0.06);
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+    --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #0D1210;
+      --surface: #161D1A;
+      --surface-2: #1E2621;
+      --ink: #E9EEE7;
+      --ink-soft: #9DAA9B;
+      --ink-faint: #6B7A69;
+      --accent: #E0954C;
+      --accent-soft: #F0B37C;
+      --accent-2: #C97A5C;
+      --rule: #2A332E;
+      --code-bg: #101613;
+      --shadow: 0 1px 0 rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #0D1210;
+    --surface: #161D1A;
+    --surface-2: #1E2621;
+    --ink: #E9EEE7;
+    --ink-soft: #9DAA9B;
+    --ink-faint: #6B7A69;
+    --accent: #E0954C;
+    --accent-soft: #F0B37C;
+    --accent-2: #C97A5C;
+    --rule: #2A332E;
+    --code-bg: #101613;
+    --shadow: 0 1px 0 rgba(0,0,0,0.4);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 1px 1px, var(--rule) 1px, transparent 1.6px) 0 0/28px 28px,
+      var(--bg);
+    color:var(--ink);
+    font-family:var(--font-serif);
+    -webkit-font-smoothing:antialiased;
+    scroll-snap-type: y proximity;
+  }
+
+  ::selection{ background:var(--accent-soft); color:var(--bg); }
+
+  a{ color:var(--accent); }
+  a:focus-visible, button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 1.1rem;
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+  }
+  .eyebrow::before{
+    content:"";
+    width:1.4rem;
+    height:1px;
+    background:var(--accent);
+    display:inline-block;
+  }
+
+  h1,h2,h3{ font-family:var(--font-mono); font-weight:600; text-wrap:balance; letter-spacing:-0.01em; margin:0; color:var(--ink); }
+  p{ line-height:1.65; color:var(--ink-soft); margin:0; }
+  .prose{ max-width:62ch; }
+  .prose + .prose{ margin-top:1rem; }
+
+  .rail{
+    position:fixed;
+    right:1.4rem;
+    top:50%;
+    transform:translateY(-50%);
+    display:flex;
+    flex-direction:column;
+    gap:.55rem;
+    z-index:50;
+  }
+  .rail button{
+    width:9px; height:9px; border-radius:50%;
+    border:1px solid var(--ink-faint);
+    background:transparent;
+    padding:0; cursor:pointer;
+    transition:background .2s, border-color .2s, transform .2s;
+  }
+  .rail button.active{ background:var(--accent); border-color:var(--accent); transform:scale(1.3); }
+  @media (max-width: 720px){ .rail{ display:none; } }
+
+  .counter{
+    position:fixed;
+    left:1.4rem;
+    bottom:1.4rem;
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    color:var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    z-index:50;
+    letter-spacing:.04em;
+  }
+  .brandmark{
+    position:fixed;
+    left:1.4rem;
+    top:1.4rem;
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    letter-spacing:.1em;
+    color:var(--ink-faint);
+    z-index:50;
+  }
+  @media (max-width: 720px){ .counter, .brandmark{ display:none; } }
+
+  .slide{
+    min-height:100vh;
+    min-height:100dvh;
+    width:100%;
+    scroll-snap-align:start;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding: 6rem clamp(1.5rem, 6vw, 6.5rem);
+    border-bottom:1px solid var(--rule);
+    position:relative;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .slide.in-view{ opacity:1; transform:translateY(0); }
+  @media (prefers-reduced-motion: reduce){
+    .slide{ opacity:1; transform:none; transition:none; }
+  }
+  .slide:last-of-type{ border-bottom:none; }
+
+  .slide-inner{ max-width:74rem; width:100%; margin:0 auto; }
+
+  /* ---- Cover ---- */
+  #s1{ justify-content:space-between; padding-top:5rem; }
+  .cover-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:2rem; flex-wrap:wrap; }
+  .cover-badges{ display:flex; gap:.6rem; flex-wrap:wrap; font-family:var(--font-mono); font-size:.72rem; }
+  .badge{
+    border:1px solid var(--rule);
+    padding:.35rem .65rem;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .wordmark{
+    font-family:var(--font-mono);
+    font-weight:700;
+    font-size:clamp(3.4rem, 11vw, 8rem);
+    letter-spacing:-0.03em;
+    line-height:.95;
+    margin:1.4rem 0 1rem;
+  }
+  .wordmark .dot{ color:var(--accent); }
+  .tagline{
+    font-family:var(--font-serif);
+    font-style:italic;
+    font-size:clamp(1.15rem,2.4vw,1.6rem);
+    color:var(--ink);
+    max-width:38ch;
+    margin-bottom:.9rem;
+  }
+  #memcanvas{ width:100%; height:180px; display:block; margin-top:2.5rem; }
+  .scrolldown{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--ink-faint);
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    align-self:flex-start;
+  }
+
+  /* ---- grids / features ---- */
+  .grid-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); margin-top:2.5rem; border:1px solid var(--rule); }
+  .grid-3 > div{ background:var(--bg); padding:1.8rem 1.6rem; }
+  @media (max-width:860px){ .grid-3{ grid-template-columns:1fr; } }
+  .feat-num{ font-family:var(--font-mono); color:var(--accent); font-size:.78rem; margin-bottom:.8rem; }
+  .feat-title{ font-family:var(--font-mono); font-weight:600; font-size:1.05rem; margin-bottom:.6rem; color:var(--ink); }
+  .feat-body{ font-size:.95rem; }
+
+  .pull{
+    font-family:var(--font-mono);
+    font-size:clamp(1.3rem,2.6vw,1.9rem);
+    color:var(--accent);
+    border-left:2px solid var(--accent);
+    padding-left:1.2rem;
+    margin-top:2.2rem;
+    max-width:44ch;
+    line-height:1.4;
+  }
+
+  .problem-list{ list-style:none; margin:2.2rem 0 0; padding:0; display:grid; gap:.9rem; max-width:40ch; }
+  .problem-list li{
+    font-family:var(--font-mono);
+    font-size:.9rem;
+    color:var(--ink-soft);
+    padding-left:1.3rem;
+    position:relative;
+  }
+  .problem-list li::before{ content:"—"; position:absolute; left:0; color:var(--accent); }
+
+  /* ---- layers ---- */
+  .layers{ margin-top:2.4rem; display:grid; gap:1px; background:var(--rule); border:1px solid var(--rule); max-width:56rem; }
+  .layer{ background:var(--bg); padding:1.5rem 1.7rem; display:grid; grid-template-columns:2.6rem 10rem 1fr; gap:1.2rem; align-items:baseline; }
+  @media (max-width:720px){ .layer{ grid-template-columns:2rem 1fr; } .layer .layer-name{ grid-column:2; } .layer .layer-desc{ grid-column:2; } }
+  .layer-idx{ font-family:var(--font-mono); color:var(--accent); font-size:.85rem; }
+  .layer-name{ font-family:var(--font-mono); font-weight:600; font-size:1rem; color:var(--ink); }
+  .layer-desc{ font-size:.92rem; }
+  .footnote{ margin-top:1.6rem; font-family:var(--font-mono); font-size:.82rem; color:var(--ink-faint); }
+
+  /* ---- pipeline ---- */
+  .pipeline{ display:flex; flex-wrap:wrap; align-items:center; gap:0; margin-top:2.4rem; }
+  .pipe-step{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    border:1px solid var(--rule);
+    background:var(--surface);
+    padding:.65rem 1rem;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .pipe-arrow{ color:var(--accent-soft); padding:0 .5rem; font-family:var(--font-mono); }
+  .source-list{ margin-top:2rem; display:grid; gap:.55rem; max-width:52rem; }
+  .source-list .row{ display:grid; grid-template-columns:11rem 1fr; gap:1rem; font-size:.92rem; }
+  @media (max-width:640px){ .source-list .row{ grid-template-columns:1fr; } }
+  .source-list .tag{ font-family:var(--font-mono); color:var(--accent-soft); font-size:.82rem; }
+
+  /* ---- recall steps ---- */
+  .steps{ counter-reset:step; margin-top:2.2rem; display:grid; gap:1.1rem; max-width:50rem; }
+  .step{ display:grid; grid-template-columns:2.4rem 1fr; gap:1rem; }
+  .step::before{
+    counter-increment:step;
+    content: counter(step);
+    font-family:var(--font-mono);
+    color:var(--accent);
+    font-size:.85rem;
+    border:1px solid var(--rule);
+    width:1.9rem; height:1.9rem;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .step p{ font-size:.95rem; padding-top:.15rem; }
+
+  /* ---- tables ---- */
+  .table-scroll{ overflow-x:auto; margin-top:2rem; border:1px solid var(--rule); }
+  table{ border-collapse:collapse; width:100%; min-width:560px; font-size:.88rem; }
+  th,td{ text-align:left; padding:.7rem .9rem; border-bottom:1px solid var(--rule); white-space:nowrap; }
+  th{ font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); background:var(--surface); }
+  td{ color:var(--ink-soft); }
+  td.yes{ color:var(--accent); font-family:var(--font-mono); }
+  tr:last-child td{ border-bottom:none; }
+  td code, .code{ font-family:var(--font-mono); background:var(--code-bg); padding:.1rem .4rem; font-size:.85em; color:var(--ink); }
+
+  .codeblock{
+    font-family:var(--font-mono);
+    font-size:.82rem;
+    background:var(--code-bg);
+    border:1px solid var(--rule);
+    padding:1.1rem 1.3rem;
+    margin-top:1.6rem;
+    overflow-x:auto;
+    max-width:44rem;
+    color:var(--ink);
+    line-height:1.6;
+    white-space:pre;
+  }
+
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:3rem; margin-top:2.2rem; }
+  @media (max-width:860px){ .two-col{ grid-template-columns:1fr; gap:2rem; } }
+  .col-title{ font-family:var(--font-mono); font-size:.85rem; color:var(--accent); margin-bottom:1rem; text-transform:uppercase; letter-spacing:.06em; }
+
+  .principle-list{ margin-top:2.2rem; display:grid; gap:1.2rem; max-width:52rem; }
+  .principle{ display:grid; grid-template-columns:1.4rem 1fr; gap:1rem; }
+  .principle .mark{ color:var(--accent); font-family:var(--font-mono); }
+  .principle p{ font-size:.95rem; }
+
+  /* ---- pricing ---- */
+  .pricing-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:2.2rem; }
+  @media (max-width:960px){ .pricing-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .pricing-grid{ grid-template-columns:1fr; } }
+  .price-card{ background:var(--bg); padding:1.5rem 1.2rem; display:flex; flex-direction:column; gap:.5rem; }
+  .price-card.hi{ background:var(--surface); }
+  .price-name{ font-family:var(--font-mono); font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); }
+  .price-amt{ font-family:var(--font-mono); font-size:1.5rem; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .price-for{ font-size:.85rem; color:var(--ink-soft); margin-top:auto; }
+  .icp{ margin-top:2rem; font-family:var(--font-mono); font-size:.85rem; color:var(--ink-soft); border-left:2px solid var(--accent); padding-left:1rem; max-width:44rem; }
+
+  /* ---- proof / founder's brain ---- */
+  .stat-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:2.2rem; }
+  @media (max-width:760px){ .stat-grid{ grid-template-columns:repeat(2,1fr); } }
+  .stat-card{ background:var(--bg); padding:1.4rem 1.3rem; }
+  .stat-num{ font-family:var(--font-mono); font-size:1.7rem; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .stat-lbl{ font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin-top:.3rem; }
+  .reuse-note{ margin-top:1.6rem; font-size:.9rem; max-width:58ch; }
+  .tagbar{ margin-top:1.8rem; display:flex; flex-wrap:wrap; gap:.5rem; max-width:56rem; }
+  .tagchip{ font-family:var(--font-mono); font-size:.76rem; border:1px solid var(--rule); padding:.3rem .6rem; color:var(--ink-soft); }
+  .tagchip b{ color:var(--accent); font-weight:600; }
+  .scalar{ font-family:var(--font-mono); color:var(--accent); font-weight:600; font-variant-numeric:tabular-nums; }
+  .story{ max-width:64ch; }
+  .story p{ margin-top:1rem; }
+  .story p:first-child{ margin-top:0; }
+
+  /* ---- inline SVG diagrams ---- */
+  .diagram-wrap{ margin-top:2.2rem; max-width:60rem; }
+  .diagram-fig{ margin:0; }
+  .diagram-fig svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .diagram-fig .node{ fill:var(--surface); stroke:var(--ink-faint); stroke-width:1; }
+  .diagram-fig .node.hub{ fill:var(--surface-2); stroke:var(--accent); stroke-width:1.4; }
+  .diagram-fig .lbl{ font-family:var(--font-mono); font-size:11px; fill:var(--ink); }
+  .diagram-fig .lbl-sm{ font-family:var(--font-mono); font-size:9.5px; fill:var(--ink-faint); }
+  .diagram-fig .lbl-accent{ font-family:var(--font-mono); font-size:9.5px; fill:var(--accent); font-weight:600; }
+  .diagram-fig .edge{ fill:none; stroke:var(--ink-faint); stroke-width:1.1; }
+  .diagram-fig .edge.accent{ stroke:var(--accent); stroke-width:1.6; }
+  .diagram-fig .edge.dashed{ stroke-dasharray:3,3; }
+  .diagram-fig .arrowhead{ fill:var(--ink-faint); }
+  .diagram-fig .arrowhead.accent{ fill:var(--accent); }
+  .diagram-fig figcaption{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-faint); margin-top:1.1rem; max-width:56ch; line-height:1.55; }
+
+  .table-scroll.reusemap table{ min-width:640px; }
+
+  /* ---- horizontal bar rows (tag frequency) ---- */
+  .hbars{ margin-top:2rem; display:grid; gap:.55rem; max-width:52rem; }
+  .hbar-row{ display:grid; grid-template-columns:8.5rem 1fr 2.4rem; align-items:center; gap:.8rem; }
+  .hbar-label{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-soft); }
+  .hbar-track{ height:9px; background:var(--surface-2); position:relative; }
+  .hbar-fill{ height:100%; background:var(--accent); }
+  .hbar-val{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink); text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* ---- vertical growth chart (commits/month) ---- */
+  .vchart{ margin-top:2.4rem; display:flex; align-items:flex-end; gap:2.2rem; height:170px; max-width:32rem; border-bottom:1px solid var(--rule); padding-bottom:0; }
+  .vchart-col{ display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:.5rem; flex:1; }
+  .vchart-val{ font-family:var(--font-mono); font-size:.85rem; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .vchart-bar{ width:100%; background:var(--accent); }
+  .vchart-bar.partial{ background:var(--accent-soft); }
+  .vchart-lbl{ font-family:var(--font-mono); font-size:.72rem; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.06em; margin-top:.6rem; }
+  .vchart-labels{ display:flex; gap:2.2rem; max-width:32rem; }
+  .vchart-labels > div{ flex:1; text-align:center; }
+
+  /* ---- timeline ---- */
+  .timeline{ margin-top:2.2rem; display:grid; gap:0; max-width:62rem; }
+  .tl-row{ display:grid; grid-template-columns:5rem 1fr; gap:1.4rem; padding:.85rem 0; border-bottom:1px solid var(--rule); }
+  .tl-row:last-child{ border-bottom:none; }
+  .tl-day{ font-family:var(--font-mono); color:var(--accent); font-size:.85rem; }
+  .tl-body b{ font-family:var(--font-mono); font-weight:600; color:var(--ink); font-size:.92rem; }
+  .tl-body span{ display:block; font-size:.88rem; color:var(--ink-soft); margin-top:.15rem; }
+  .proof{ margin-top:2rem; font-family:var(--font-mono); font-size:1rem; color:var(--accent); }
+  .proof .url{ display:block; font-size:.78rem; color:var(--ink-faint); margin-top:.5rem; }
+
+  /* ---- roadmap ---- */
+  .roadmap{ display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; margin-top:2.2rem; font-family:var(--font-mono); font-size:.85rem; }
+  .rm-node{ border:1px solid var(--rule); padding:.55rem .9rem; background:var(--surface); }
+  .rm-node.built{ color:var(--accent); border-color:var(--accent); }
+  .rm-arrow{ color:var(--ink-faint); }
+  .notbuild{ margin-top:2.2rem; border:1px solid var(--rule); padding:1.3rem 1.5rem; max-width:52rem; background:var(--surface); }
+  .notbuild p{ font-size:.88rem; }
+  .notbuild .lbl{ font-family:var(--font-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint); margin-bottom:.6rem; display:block; }
+  .cta-row{ display:flex; gap:.9rem; flex-wrap:wrap; margin-top:2.4rem; }
+  .cta{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    padding:.8rem 1.3rem;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    text-decoration:none;
+    transition:background .15s, color .15s;
+  }
+  .cta.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .cta:hover{ background:var(--ink); color:var(--bg); }
+  .cta.primary:hover{ background:var(--accent-soft); border-color:var(--accent-soft); color:#fff; }
+  .footer-line{ margin-top:2.5rem; font-family:var(--font-mono); font-size:.75rem; color:var(--ink-faint); }
+
+  /* ---- print / PDF export: one slide per page, forced light palette ----
+     .slide is display:flex on screen; Chrome's print engine does not reliably
+     honor forced page breaks on flex containers/items, so it's switched to
+     block display for print — page breaks only behave predictably on block
+     boxes. Page size is widescreen-slide-shaped (13.333in × 7.5in, the same
+     ratio PowerPoint/Keynote export at) rather than a cramped Letter page,
+     since the on-screen layout was never designed against an 8.5in page. */
+  @page{ size: 13.333in 15in; margin: 0; }
+  @media print{
+    :root{
+      --bg: #EEF1EC; --surface: #E2E7DF; --surface-2: #D6DDD1;
+      --ink: #14201B; --ink-soft: #47564C; --ink-faint: #7C8A7A;
+      --accent: #B5622A; --accent-soft: #D98F52; --accent-2: #7A4A3A;
+      --rule: #C7CFC2; --code-bg: #E5E9E0;
+    }
+    body{ background:var(--bg) !important; }
+    .rail, .counter, .brandmark, .scrolldown, #memcanvas{ display:none !important; }
+    .slide{
+      display:block !important;
+      opacity:1 !important;
+      transform:none !important;
+      transition:none !important;
+      min-height:auto !important;
+      height:15in;
+      padding: 0.45in 0.65in !important;
+      border-bottom:none !important;
+      break-after:page;
+      page-break-after:always;
+    }
+    .slide:last-of-type{ break-after:auto; page-break-after:auto; }
+    .cover-top{ display:block !important; }
+    .cover-top canvas{ display:none !important; }
+  }
+
+  .prose p + p, .story p + p{ margin-top:0.9rem; }
+  @media print{
+    .two-col{ grid-template-columns:1fr 1fr !important; gap:2.2rem !important; }
+    .prose p + p, .story p + p{ margin-top:0.75rem; }
+    /*  3. Tables clipped their right-hand columns on paper: cells are
+        white-space:nowrap and the wrapper relies on overflow-x:auto, which
+        cannot scroll in print — so wide rows were silently truncated.
+        Let cells wrap and drop the min-width for print only. */
+    .table-scroll{ overflow:visible !important; }
+    table{ min-width:0 !important; width:100% !important; table-layout:auto; }
+    th, td{ white-space:normal !important; vertical-align:top; }
+  }
+
+  .prose p + p, .story p + p{ margin-top:0.9rem; }
+  .layer-hi{ background:var(--surface-2) !important; }
+  .layer-hi .layer-name{ color:var(--accent); }
+  td.hi, tr.hi td{ background:var(--surface-2); color:var(--ink); }
+  .srcnote{ margin-top:1.4rem; font-family:var(--font-mono); font-size:.72rem;
+            color:var(--ink-faint); max-width:70ch; line-height:1.6; }
+  @media print{
+    .two-col{ grid-template-columns:1fr 1fr !important; gap:2.2rem !important; }
+    .prose p + p, .story p + p{ margin-top:0.75rem; }
+    .table-scroll{ overflow:visible !important; }
+    table{ min-width:0 !important; width:100% !important; table-layout:auto; }
+    th, td{ white-space:normal !important; vertical-align:top; }
+  }
+</style>
+
+<nav class="rail" aria-label="Slide navigation">
+  <button data-target="s1" aria-label="Slide 1"></button>
+  <button data-target="s2" aria-label="Slide 2"></button>
+  <button data-target="s3" aria-label="Slide 3"></button>
+  <button data-target="s4" aria-label="Slide 4"></button>
+  <button data-target="s5" aria-label="Slide 5"></button>
+  <button data-target="s6" aria-label="Slide 6"></button>
+  <button data-target="s7" aria-label="Slide 7"></button>
+  <button data-target="s8" aria-label="Slide 8"></button>
+  <button data-target="s9" aria-label="Slide 9"></button>
+  <button data-target="s10" aria-label="Slide 10"></button>
+  <button data-target="s11" aria-label="Slide 11"></button>
+  <button data-target="s12" aria-label="Slide 12"></button>
+  <button data-target="s13" aria-label="Slide 13"></button>
+  <button data-target="s14" aria-label="Slide 14"></button>
+  <button data-target="s15" aria-label="Slide 15"></button>
+  <button data-target="s16" aria-label="Slide 16"></button>
+  <button data-target="s17" aria-label="Slide 17"></button>
+  <button data-target="s18" aria-label="Slide 18"></button>
+  <button data-target="s19" aria-label="Slide 19"></button>
+  <button data-target="s20" aria-label="Slide 20"></button>
+  <button data-target="s21" aria-label="Slide 21"></button>
+  <button data-target="s22" aria-label="Slide 22"></button>
+  <button data-target="s23" aria-label="Slide 23"></button>
+  <button data-target="s24" aria-label="Slide 24"></button>
+  <button data-target="s25" aria-label="Slide 25"></button>
+  <button data-target="s26" aria-label="Slide 26"></button>
+  <button data-target="s27" aria-label="Slide 27"></button>
+  <button data-target="s28" aria-label="Slide 28"></button>
+  <button data-target="s29" aria-label="Slide 29"></button>
+  <button data-target="s30" aria-label="Slide 30"></button>
+  <button data-target="s31" aria-label="Slide 31"></button>
+  <button data-target="s32" aria-label="Slide 32"></button>
+  <button data-target="s33" aria-label="Slide 33"></button>
+  <button data-target="s34" aria-label="Slide 34"></button>
+  <button data-target="s35" aria-label="Slide 35"></button>
+  <button data-target="s36" aria-label="Slide 36"></button>
+  <button data-target="s37" aria-label="Slide 37"></button>
+  <button data-target="s38" aria-label="Slide 38"></button>
+  <button data-target="s39" aria-label="Slide 39"></button>
+  <button data-target="s40" aria-label="Slide 40"></button>
+  <button data-target="s41" aria-label="Slide 41"></button>
+  <button data-target="s42" aria-label="Slide 42"></button>
+  <button data-target="s43" aria-label="Slide 43"></button>
+  <button data-target="s44" aria-label="Slide 44"></button>
+  <button data-target="s45" aria-label="Slide 45"></button>
+  <button data-target="s46" aria-label="Slide 46"></button>
+  <button data-target="s47" aria-label="Slide 47"></button>
+</nav>
+<div class="brandmark">ENTERGRAM · PITCH</div>
+<div class="counter" id="counter">01 / 47</div>
+
+<!-- 1 — COVER -->
+<section class="slide" id="s1">
+  <div class="slide-inner cover-top">
+    <div>
+      <div class="eyebrow">ENTERGRAM</div>
+      <h1 class="wordmark">entergram<span class="dot">.</span></h1>
+      <p class="tagline">Decision memory for the enterprise brain.</p>
+      <p class="prose">The industry is converging on a shared architecture for organizational cognition — sensors, event streams, knowledge graphs, agent orchestration. Every serious vendor builds the graph. None of them preserve <em>why</em> the organization decided what it decided. Entergram is that layer.</p>
+      <div class="cover-badges" style="margin-top:1.6rem;">
+        <span class="badge">decision lineage</span>
+        <span class="badge">agent-agnostic (MCP)</span>
+        <span class="badge">local-first</span>
+        <span class="badge">shipped &amp; dogfooded</span>
+      </div>
+    </div>
+    <canvas id="memcanvas" aria-hidden="true"></canvas>
+  </div>
+  <div class="scrolldown">The category, first →</div>
+</section>
+
+<!-- 2 — MATURITY MODEL -->
+<section class="slide" id="s2">
+  <div class="slide-inner">
+    <div class="eyebrow">THE CATEGORY · HOW WE GOT HERE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Search → RAG → Agents → Enterprise Brain.</h2>
+    <p class="prose" style="margin-top:1rem;">Each stage solved the previous one's bottleneck and exposed the next. The pattern is not "bigger chatbot" — it's a steady migration of intelligence out of the model and into a persistent substrate around it.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Stage</th><th>What it did</th><th>What it couldn't do</th></tr>
+        <tr><td>Enterprise search</td><td>Found the document</td><td>Didn't read or synthesize it</td></tr>
+        <tr><td>RAG</td><td>Answered from retrieved text</td><td>No persistence — every session starts cold</td></tr>
+        <tr><td>Agents</td><td>Performed multi-step work</td><td>No shared memory; each agent re-learns alone</td></tr>
+        <tr><td class="hi"><b>Enterprise brain</b></td><td class="hi">Remembers, reasons, governs, acts — across all systems and all agents</td><td class="hi">Still doesn't preserve organizational <em>judgement</em> (see the frontier slide)</td></tr>
+      </table>
+    </div>
+    <div class="pull">The intelligence moved out of the model and into the substrate.</div>
+  </div>
+</section>
+
+<!-- 3 — FOUR VERBS -->
+<section class="slide" id="s3">
+  <div class="slide-inner">
+    <div class="eyebrow">THE CATEGORY · WHAT AN ENTERPRISE BRAIN IS</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Four verbs, not one product.</h2>
+    <p class="prose" style="margin-top:1rem;">Across vendors the working definition converges: a shared organizational memory that remembers, reasons, governs, and acts — over people, systems, documents, meetings, and the agents themselves.</p>
+    <div class="layers">
+      <div class="layer"><div class="layer-idx">01</div><div class="layer-name">Remember</div><div class="layer-desc">Organizational knowledge is never lost to attrition, tool migration, or time.</div></div>
+      <div class="layer"><div class="layer-idx">02</div><div class="layer-name">Reason</div><div class="layer-desc">Connect information that was never filed together — reconstruct a causal chain across systems.</div></div>
+      <div class="layer"><div class="layer-idx">03</div><div class="layer-name">Govern</div><div class="layer-desc">Honour permissions, lineage, and compliance. Non-negotiable for enterprise adoption.</div></div>
+      <div class="layer"><div class="layer-idx">04</div><div class="layer-name">Act</div><div class="layer-desc">Trigger and coordinate work, rather than only answering questions about it.</div></div>
+    </div>
+    <div class="footnote">Note the asymmetry: “remember” is listed first by nearly everyone, and is the one most implementations reduce to retrieval over current state.</div>
+  </div>
+</section>
+
+<!-- 4 — THE PROBLEM -->
+<section class="slide" id="s4">
+  <div class="slide-inner">
+    <div class="eyebrow">THE PROBLEM · WHAT IT COSTS</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Your agent is brilliant and amnesiac.</h2>
+    <div class="prose" style="margin-top:1.4rem;">
+      <p>Every session it re-reads the same files, re-derives the same architecture, and re-asks questions your team answered six months ago. It doesn't know why auth moved to JWT, why that module is shaped the way it is, or what broke last time someone touched the payment path.</p>
+    </div>
+    <ul class="problem-list">
+      <li>Re-reads the same files, every session</li>
+      <li>Re-derives the same architecture, every session</li>
+      <li>Re-asks questions the team already answered</li>
+    </ul>
+    <div class="pull">That re-derivation is the hidden tax on every prompt.</div>
+  </div>
+</section>
+
+<!-- 5 — THE PROBLEM, CONCRETELY -->
+<section class="slide" id="s5">
+  <div class="slide-inner">
+    <div class="eyebrow">THE PROBLEM, CONCRETELY</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">One question, asked a thousand times: “why is it built this way?”</h2>
+    <p class="prose" style="margin-top:1rem;">Every non-trivial change runs into it. Here is the same question, answered two ways.</p>
+    <div class="two-col">
+      <div>
+        <div class="col-title">Today — the agent reconstructs</div>
+        <div class="prose" style="font-size:.95rem;">
+          <p>It greps the codebase. Opens twelve files. Reads a migration. Infers intent from a variable name. Burns twenty minutes and a large slice of the context window — then produces a <em>plausible</em> answer.</p>
+          <p>Sometimes the plausible answer is wrong, and it re-introduces the exact design that failed last year. Nobody notices until production does.</p>
+        </div>
+      </div>
+      <div>
+        <div class="col-title">With Entergram — it recalls</div>
+        <div class="codeblock" style="max-width:none;">$ recall "why is auth stateless here?"
+
+→ We moved auth from sessions to JWT
+  in May.
+
+  Sessions forced a Redis dependency
+  and blocked horizontal scaling.
+
+  Redis left the auth path; p99 login
+  latency fell 40%. Cookie sessions
+  still exist under /legacy.
+
+  source: PR #812 · @alice · 2026-05-14</div>
+      </div>
+    </div>
+    <div class="pull">“We tried X. It failed because Y. That's why we do Z.” One query, not twenty minutes.</div>
+  </div>
+</section>
+
+<!-- 6 — TWELVE LAYERS -->
+<section class="slide" id="s6">
+  <div class="slide-inner">
+    <div class="eyebrow">THE CONVERGENCE · A REFERENCE ARCHITECTURE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Independent vendors, one architecture — twelve layers.</h2>
+    <p class="prose" style="margin-top:1rem;">Compare Glean, Microsoft, Google, Palantir and Personaas and the same stack appears, under different names. Convergence this consistent is usually a sign the decomposition is real rather than fashionable.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>#</th><th>Layer</th><th>Cognitive function</th><th>Typical implementation</th></tr>
+        <tr><td>01</td><td>Sensors</td><td>Observe</td><td>Connectors into Slack, Jira, GitHub, CRM, ERP, meetings</td></tr>
+        <tr><td>02</td><td>Event stream</td><td>Perceive in time</td><td>Event sourcing / Kafka — preserves causality and order</td></tr>
+        <tr><td>03</td><td>Extraction</td><td>Understand entities</td><td>NER, relation extraction, entity linking</td></tr>
+        <tr><td>04</td><td>Knowledge graph</td><td>Understand relationships</td><td>Property/RDF graphs, enterprise ontology</td></tr>
+        <tr><td class="hi">05</td><td class="hi"><b>Memory</b></td><td class="hi">Remember history</td><td class="hi">Episodic / semantic / procedural stores</td></tr>
+        <tr><td>06</td><td>Hybrid retrieval</td><td>Find evidence</td><td>Graph + vector + SQL + API, routed by intent</td></tr>
+        <tr><td>07</td><td>Reasoning</td><td>Explain</td><td>Multi-hop traversal, graph RAG, agentic planning</td></tr>
+        <tr><td class="hi">08</td><td class="hi"><b>Decision memory</b></td><td class="hi">Preserve <em>why</em></td><td class="hi">Largely unbuilt — the subject of this pitch</td></tr>
+        <tr><td>09</td><td>Planning</td><td>Simulate futures</td><td>Scenario and counterfactual simulation</td></tr>
+        <tr><td>10</td><td>Agent orchestration</td><td>Execute</td><td>Shared-memory multi-agent coordination</td></tr>
+        <tr><td>11</td><td>Governance</td><td>Protect</td><td>RBAC/ABAC, permission inheritance, lineage, audit</td></tr>
+        <tr><td>12</td><td>Continuous learning</td><td>Improve</td><td>Feedback on whether recalled knowledge helped</td></tr>
+      </table>
+    </div>
+    <div class="footnote">The load-bearing insight: the LLM is only layer 7's language cortex. The durable value sits in the event stream, the graph, the memory, and the governance model — which is why the model vendors are not automatically the winners here.</div>
+  </div>
+</section>
+
+<!-- 7 — WHO IS BUILDING WHAT -->
+<section class="slide" id="s7">
+  <div class="slide-inner">
+    <div class="eyebrow">THE CONVERGENCE · WHO IS BUILDING WHAT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Everyone is building the graph. Nobody is building the judgement.</h2>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Vendor</th><th>Core construct</th><th>Real strength</th><th>What it doesn't hold</th></tr>
+        <tr><td>Glean</td><td>Enterprise Knowledge Graph</td><td>Very wide connector estate; permission-mirrored retrieval; positions the graph — not the model — as the moat</td><td>Current-state relationships, not the rationale behind them</td></tr>
+        <tr><td>Microsoft</td><td>Microsoft Graph + Copilot</td><td>Unmatched distribution across Teams/SharePoint/Outlook where work already lives</td><td>Activity and content graph; rejected alternatives aren't modelled</td></tr>
+        <tr><td>Google</td><td>Knowledge Graph + Gemini Enterprise</td><td>People / content / interaction linking at scale before the model reasons</td><td>Same — entity relationships, not decision lineage</td></tr>
+        <tr><td>Palantir</td><td>Ontology of operational objects</td><td>Reasons over operational reality, not documents; strongest formal modelling</td><td>Models the world as it is, not the argument about how it got there</td></tr>
+        <tr><td>Personaas <span class="lbl-sm">(Hyderabad)</span></td><td>Role-specific AI personas over shared org memory</td><td>Genuinely distinct: distributed cognition — Sales / Support / Analyst personas learn separately, share a substrate; captures the “how” of work passively</td><td>Encodes how good performers <em>execute</em>; not an auditable record of why the org chose a path</td></tr>
+        <tr><td class="hi"><b>Entergram</b></td><td class="hi">Decision cells with provenance</td><td class="hi">Layer 8 — what was decided, why, what it cost, how it changed</td><td class="hi">Not a connector estate, not an ontology, not a persona mesh</td></tr>
+      </table>
+    </div>
+    <div class="srcnote">Sources: vendor architecture material and public product documentation; Personaas descriptions from their own platform pages. Characterisations of competitor gaps are our reading of published architecture, not vendor statements — and worth re-testing before any external use of this slide.</div>
+  </div>
+</section>
+
+<!-- 8 — THE MISSING FRONTIER -->
+<section class="slide" id="s8">
+  <div class="slide-inner">
+    <div class="eyebrow">THE FRONTIER · WHAT NOBODY HAS SOLVED</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Current systems model the organization's state. None model its reasoning.</h2>
+    <p class="prose" style="margin-top:1rem;">This is the most useful finding in the whole landscape. Across every vendor, the same six things are missing — and they are precisely the things a senior engineer or an operator actually needs.</p>
+    <div class="two-col">
+      <div>
+        <div class="col-title">Modelled well today</div>
+        <ul class="problem-list" style="max-width:none;">
+          <li>Documents and content</li>
+          <li>People and org structure</li>
+          <li>Entities and their relationships</li>
+          <li>Permissions and access</li>
+          <li>Workflows and tasks</li>
+          <li>Current state of systems</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title">Structurally absent</div>
+        <ul class="problem-list" style="max-width:none;">
+          <li><b>Intent</b> — what were we actually trying to achieve?</li>
+          <li><b>Tradeoffs</b> — what did we give up, knowingly?</li>
+          <li><b>Rejected alternatives</b> — what did we try that failed?</li>
+          <li><b>Confidence</b> — how sure were we, and were we right?</li>
+          <li><b>Evolving belief</b> — what changed our mind, and when?</li>
+          <li><b>Counterfactuals</b> — what if we'd chosen the other path?</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pull">A graph of entities tells you what exists. It cannot tell you what was decided, or why.</div>
+  </div>
+</section>
+
+<!-- 9 — WHERE ENTERGRAM SITS -->
+<section class="slide" id="s9">
+  <div class="slide-inner">
+    <div class="eyebrow">WHERE ENTERGRAM SITS</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">We are not competing for the graph. We are the layer above it.</h2>
+    <div class="prose" style="margin-top:1.1rem;">
+      <p>Building a wider connector estate than Microsoft, or a better ontology than Palantir, would be a losing fight — those are distribution and capital games. The decision layer is neither. It's a data-capture and curation problem, and it is unowned.</p>
+      <p>It is also the layer that only compounds with time-in-place: a competitor can index today's repo tomorrow, but nobody can retroactively reconstruct the argument behind a decision made two years ago and revised twice since.</p>
+    </div>
+    <div class="layers">
+      <div class="layer"><div class="layer-idx">L04</div><div class="layer-name">Knowledge graph</div><div class="layer-desc">Owned by the incumbents. We consume it, we don't rebuild it — and we interoperate rather than replace.</div></div>
+      <div class="layer layer-hi"><div class="layer-idx">L08</div><div class="layer-name">Decision memory</div><div class="layer-desc"><b>Ours.</b> Decisions, rationale, rejected options, outcomes, and revisions — each with provenance back to the PR, thread, or meeting that produced it.</div></div>
+      <div class="layer layer-hi"><div class="layer-idx">L12</div><div class="layer-name">Learning signal</div><div class="layer-desc"><b>Ours.</b> Whether recalled judgement actually helped, captured per query — the feedback nobody else is positioned to collect.</div></div>
+      <div class="layer"><div class="layer-idx">L10</div><div class="layer-name">Agent orchestration</div><div class="layer-desc">Whoever the customer already runs. We are the memory underneath, via MCP — not a competing agent.</div></div>
+    </div>
+    <div class="pull">Start where the pain is sharpest and the data is already structured: engineering.</div>
+  </div>
+</section>
+
+<!-- 10 — GENERALITY — THREE SHAPES -->
+<section class="slide" id="s10">
+  <div class="slide-inner">
+    <div class="eyebrow">GENERALITY · THE SAME TWELVE LAYERS, THREE SHAPES</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">The architecture is domain-independent. What changes is the sensors and the stakes.</h2>
+    <p class="prose" style="margin-top:1rem;">A decision cell doesn't know what industry it's in. It records what was decided, what was rejected, why, and what happened. What differs between an engineering org, a hospital, and a 60-person hardware company is which systems emit the events, who is allowed to read them back, and what it costs when the rationale is lost.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Layer</th><th>Software org</th><th>Hospital</th><th>Small hardware co</th></tr>
+        <tr><td>Sensors</td><td>Git, PRs, issues, CI</td><td>EHR, orders, incident reports, M&amp;M minutes</td><td>Jira, firmware repo, support tickets, RMA logs</td></tr>
+        <tr><td>Events</td><td>Commit, merge, deploy, rollback</td><td>Protocol change, formulary decision, adverse event</td><td>Spec freeze, tooling change, field failure, recall</td></tr>
+        <tr><td class="hi">Decision memory</td><td class="hi">Why this architecture</td><td class="hi">Why this protocol</td><td class="hi">Why this component / supplier</td></tr>
+        <tr><td>Governance</td><td>Repo permissions</td><td><b>PHI — the binding constraint</b></td><td>IP + supplier NDAs</td></tr>
+        <tr><td>Cost of loss</td><td>Repeated regression</td><td><b>Patient harm; regulatory exposure</b></td><td>Re-learning a field failure at scale</td></tr>
+      </table>
+    </div>
+    <div class="footnote">The two slides that follow work each column concretely. Both are illustrative compositions of the reference architecture — not descriptions of any named organisation's internal systems.</div>
+  </div>
+</section>
+
+<!-- 11 — DOMAIN — HOSPITAL -->
+<section class="slide" id="s11">
+  <div class="slide-inner">
+    <div class="eyebrow">DOMAIN · HOW A HOSPITAL COMPOSES ITS BRAIN</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">A hospital already runs the loop — on paper, in committees, and in people's heads.</h2>
+    <p class="prose" style="margin-top:1rem;">Clinical medicine is arguably the most decision-dense industry there is, and it already has the ritual: morbidity &amp; mortality review, formulary committees, protocol revision, root-cause analysis. What it lacks is a queryable record of <em>why</em> the protocol reads the way it does today.</p>
+    <div class="two-col">
+      <div>
+        <div class="col-title">What the brain ingests</div>
+        <ul class="problem-list" style="max-width:none;">
+          <li>Protocol and order-set revisions (what changed, and on whose authority)</li>
+          <li>M&amp;M and root-cause findings — the institution's hard-won negatives</li>
+          <li>Formulary and device decisions, with the alternatives that lost</li>
+          <li>Incident reports and near-misses</li>
+          <li>Staffing and escalation policy changes</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title">What it can then answer</div>
+        <div class="codeblock" style="max-width:none;">"why does our sepsis pathway
+ differ from the national guideline?"
+
+→ Revised after a 2024 review:
+  two escalation delays traced to
+  the standard trigger threshold
+  in our ED's staffing pattern.
+
+  Alternative considered: adopt
+  guideline unchanged + add a
+  nurse-initiated override.
+  Rejected — override compliance
+  measured under 40% here.
+
+  Outcome: time-to-antibiotic
+  improved; revisit at next audit.
+
+  source: M&amp;M 2024-11 · Protocol
+  Cmte minutes · owner: Dr. R</div>
+      </div>
+    </div>
+    <div class="principle-list" style="margin-top:1.6rem;">
+      <div class="principle"><span class="mark">→</span><p><b>Governance is the entry ticket, not a feature.</b> PHI means permission inheritance, audit trail, and lineage are preconditions. Local-first helps — the record can live inside the hospital's own boundary — but enterprise RBAC/SSO is a genuine prerequisite we have <em>not</em> built. This is a design-partner conversation, not a sale we could serve today.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>The decision record is deliberately not clinical advice.</b> It returns what this institution decided and why, with provenance — an institutional-memory tool for clinicians and committees, not a diagnostic or treatment recommender. That distinction is what keeps it outside the regulated-device question.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 — DOMAIN — SMALL HARDWARE CO -->
+<section class="slide" id="s12">
+  <div class="slide-inner">
+    <div class="eyebrow">DOMAIN · HOW A SMALL HARDWARE COMPANY COMPOSES ITS BRAIN</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">A 60-person connected-hardware company: fewer people, higher cost per forgotten decision.</h2>
+    <p class="prose" style="margin-top:1rem;">Take the archetype of a smart-lock/IoT company — firmware, mobile apps, cloud backend, a physical BOM, suppliers, and units already in customers' doors. Small teams are usually assumed not to need organizational memory. The opposite is true: with one or two people per domain, a single departure removes an entire body of reasoning, and hardware decisions are the most expensive kind to re-learn.</p>
+    <div class="two-col">
+      <div>
+        <div class="col-title">Where its decisions actually live</div>
+        <ul class="problem-list" style="max-width:none;">
+          <li>Firmware repo + OTA release history</li>
+          <li>Component and supplier choices — the BOM's argument</li>
+          <li>Field failures, RMA patterns, warranty claims</li>
+          <li>Certification and regional compliance decisions</li>
+          <li>Support tickets where the same root cause recurs</li>
+          <li>The Slack thread where the tradeoff was actually settled</li>
+        </ul>
+      </div>
+      <div>
+        <div class="col-title">The question that pays for it</div>
+        <div class="codeblock" style="max-width:none;">"why are we on this BLE
+ module and not the cheaper one?"
+
+→ Evaluated both in 2024. The
+  cheaper module cut ~$1.40/unit.
+
+  Rejected: intermittent pairing
+  failures below 0°C in field
+  testing — a warranty-return risk
+  in cold-climate markets.
+
+  Revisit condition: vendor's
+  rev-C silicon, if it clears the
+  same cold-soak test.
+
+  source: hardware review thread
+  + field test log · 2024-08</div>
+      </div>
+    </div>
+    <div class="principle-list" style="margin-top:1.6rem;">
+      <div class="principle"><span class="mark">→</span><p><b>Why small companies are a better wedge than they look.</b> No knowledge-management function, no Glean deployment, no ontology team — and the pain lands on the founder or lead engineer personally. Adoption is one person deciding, not a committee.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>The counter-argument, stated honestly.</b> A 60-person company may believe it doesn't need this — the reasoning still fits in a few people's heads. The trigger isn't headcount, it's the first time a decision has to be re-derived after the person who made it left. That's when the record is worth what it costs.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 — ENTERPRISE — TWO PLANES -->
+<section class="slide" id="s13">
+  <div class="slide-inner">
+    <div class="eyebrow">ENTERPRISE ONBOARDING · THE TWO PLANES</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">MCP is the read side. It does nothing for ingest.</h2>
+    <p class="prose" style="margin-top:1rem;">This is the distinction most of the category blurs. “We support MCP” is not an answer to “how do you get our Jira data.” Ingest and consumption are separate planes, with separate integration strategies and separate failure modes.</p>
+    <div class="diagram-wrap" style="max-width:64rem;">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 1000 372" role="img" aria-label="Two planes meeting at Entergram: an ingest plane on the left where source systems are read via webhooks, APIs and federation, and a consumption plane on the right where agents and humans read memory back via MCP and REST.">
+          <defs>
+            <marker id="dE-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" class="arrowhead"></polygon></marker>
+            <marker id="dE-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon></marker>
+          </defs>
+
+          <text class="lbl-accent" x="20" y="24" text-anchor="start">INGEST PLANE — WRITE</text>
+          <text class="lbl-accent" x="980" y="24" text-anchor="end">CONSUMPTION PLANE — READ</text>
+
+          <rect class="node" x="20" y="44" width="200" height="46"></rect>
+          <text class="lbl-sm" x="120" y="63" text-anchor="middle">GitHub · GitLab</text>
+          <text class="lbl-sm" x="120" y="77" text-anchor="middle">PRs, reviews, reverts</text>
+          <rect class="node" x="20" y="102" width="200" height="46"></rect>
+          <text class="lbl-sm" x="120" y="121" text-anchor="middle">Jira · Linear</text>
+          <text class="lbl-sm" x="120" y="135" text-anchor="middle">rationale, won't-do</text>
+          <rect class="node" x="20" y="160" width="200" height="46"></rect>
+          <text class="lbl-sm" x="120" y="179" text-anchor="middle">Slack · Teams</text>
+          <text class="lbl-sm" x="120" y="193" text-anchor="middle">where tradeoffs settle</text>
+          <rect class="node" x="20" y="218" width="200" height="46"></rect>
+          <text class="lbl-sm" x="120" y="237" text-anchor="middle">Confluence · Notion</text>
+          <text class="lbl-sm" x="120" y="251" text-anchor="middle">ADRs, post-mortems</text>
+          <rect class="node" x="20" y="276" width="200" height="46"></rect>
+          <text class="lbl-sm" x="120" y="295" text-anchor="middle">Meet · incidents</text>
+          <text class="lbl-sm" x="120" y="309" text-anchor="middle">transcripts, RCA</text>
+
+          <line class="edge accent" x1="222" y1="183" x2="376" y2="170" marker-end="url(#dE-acc)"></line>
+          <text class="lbl-accent" x="298" y="150" text-anchor="middle">webhooks · APIs</text>
+          <text class="lbl-accent" x="298" y="163" text-anchor="middle">federation</text>
+
+          <rect class="node hub" x="380" y="120" width="240" height="100"></rect>
+          <text class="lbl" x="500" y="152" text-anchor="middle">ENTERGRAM</text>
+          <text class="lbl-sm" x="500" y="172" text-anchor="middle">extract → dedup → reconcile</text>
+          <text class="lbl-sm" x="500" y="188" text-anchor="middle">decision cells + provenance</text>
+          <text class="lbl-sm" x="500" y="206" text-anchor="middle">review queue before trusted</text>
+
+          <line class="edge accent" x1="622" y1="170" x2="776" y2="150" marker-end="url(#dE-acc)"></line>
+          <text class="lbl-accent" x="700" y="130" text-anchor="middle">MCP · REST/OpenAPI</text>
+
+          <rect class="node" x="780" y="60" width="200" height="46"></rect>
+          <text class="lbl-sm" x="880" y="79" text-anchor="middle">Claude Code · Cursor</text>
+          <text class="lbl-sm" x="880" y="93" text-anchor="middle">MCP native</text>
+          <rect class="node" x="780" y="118" width="200" height="46"></rect>
+          <text class="lbl-sm" x="880" y="137" text-anchor="middle">Copilot · Codex · Gemini</text>
+          <text class="lbl-sm" x="880" y="151" text-anchor="middle">REST + tool schema</text>
+          <rect class="node" x="780" y="176" width="200" height="46"></rect>
+          <text class="lbl-sm" x="880" y="195" text-anchor="middle">internal agents</text>
+          <text class="lbl-sm" x="880" y="209" text-anchor="middle">OpenAPI contract</text>
+          <rect class="node" x="780" y="234" width="200" height="46"></rect>
+          <text class="lbl-sm" x="880" y="253" text-anchor="middle">humans</text>
+          <text class="lbl-sm" x="880" y="267" text-anchor="middle">CLI · review queue</text>
+
+          <path class="edge dashed accent" d="M 880 292 C 700 336, 300 336, 120 330" fill="none" marker-end="url(#dE-acc)"></path>
+          <text class="lbl-accent" x="500" y="362" text-anchor="middle">agents WRITE decisions back — the loop that compounds without human data entry</text>
+        </svg>
+        <figcaption>The write direction on the right-hand side is the one that matters most: an agent that records the decision it just helped make is how the memory grows without anyone doing data entry.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 14 — ENTERPRISE — CONNECTOR STRATEGY -->
+<section class="slide" id="s14">
+  <div class="slide-inner">
+    <div class="eyebrow">ENTERPRISE ONBOARDING · CONNECTOR STRATEGY</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">We will not build 200 connectors — and we don't need to.</h2>
+    <p class="prose" style="margin-top:1rem;">Search platforms ship 275+ connectors because <em>any</em> document might answer <em>any</em> query. Decision memory needs the surfaces where rationale is actually stated — a small, predictable set. That's a structural advantage, not a gap.</p>
+    <div class="layers">
+      <div class="layer layer-hi">
+        <div class="layer-idx">T1</div>
+        <div class="layer-name">Build natively (~6)</div>
+        <div class="layer-desc">The decision-dense surfaces: code review, issue trackers, chat threads where tradeoffs settle, ADR/design docs, meeting transcripts, incident tooling. Event-native via webhooks where available, not polling.</div>
+      </div>
+      <div class="layer">
+        <div class="layer-idx">T2</div>
+        <div class="layer-name">Federate, don't rebuild</div>
+        <div class="layer-desc">Salesforce, ServiceNow, HubSpot, SAP, Workday, SharePoint — read them <em>through</em> Glean's API or Microsoft Graph. One integration inherits an entire connector estate. Their capex becomes our ingest layer.</div>
+      </div>
+      <div class="layer">
+        <div class="layer-idx">T3</div>
+        <div class="layer-name">Customer-built long tail</div>
+        <div class="layer-desc">A documented webhook + JSON schema + SDK so the customer's platform team wires their bespoke internal systems. Every enterprise has a tool no vendor will ever connect to; the answer is a stable contract.</div>
+      </div>
+    </div>
+    <div class="footnote">Explicit non-goal: we do not compete on connector count. If a deal turns on “do you have a Workday connector,” we federate or we lose it — rather than spend the company matching a search vendor's integration surface. This also reframes Glean from competitor to substrate, which is a partnership story as much as a competitive one.</div>
+  </div>
+</section>
+
+<!-- 15 — ENTERPRISE — DEPLOYMENT TOPOLOGY -->
+<section class="slide" id="s15">
+  <div class="slide-inner">
+    <div class="eyebrow">ENTERPRISE ONBOARDING · DEPLOYMENT TOPOLOGY</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">The store graduates. The schema never changes.</h2>
+    <p class="prose" style="margin-top:1rem;">A cell is the same object at every scope — decided, rejected, why, outcome, provenance. What changes is where cells live. Git is genuinely the right store for an individual and a team, and genuinely the wrong one past that.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Scope</th><th>Store</th><th>Transport</th><th>Auth</th><th>Why it holds</th></tr>
+        <tr><td>Individual</td><td>files + SQLite index</td><td>local FS</td><td>filesystem</td><td>One person, one repo. No service needed.</td></tr>
+        <tr><td>Team</td><td>same files, in the repo</td><td><b>git</b> (sync push/pull)</td><td>repo permissions</td><td>Cells review in PRs like code.</td></tr>
+        <tr class="hi"><td class="hi"><b>Product</b></td><td class="hi">cell service + object store</td><td class="hi">HTTPS API</td><td class="hi">SSO (OIDC)</td><td class="hi"><b>The graduation point</b> — multi-writer, cross-repo. Git breaks here.</td></tr>
+        <tr><td>Organisation</td><td>event log + cells + index + graph adapter</td><td>API + webhooks</td><td>SSO + SCIM + mirrored ACLs</td><td>Cross-department, audit, retention, residency.</td></tr>
+      </table>
+    </div>
+    <div class="principle-list" style="margin-top:1.4rem;">
+      <div class="principle"><span class="mark">→</span><p><b>Why git stops working:</b> no row-level permissions, no partial visibility, no multi-tenant story. Fine for one team sharing one repo; wrong for a department.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>Local-first isn't abandoned at scale — it becomes the edge.</b> Individual and team scopes keep working offline, unchanged. Enterprise deployment ships single-tenant VPC/on-prem by default, because a decision record is more sensitive than the code it describes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 16 — ENTERPRISE — FOUR BRAINS INTERACT -->
+<section class="slide" id="s16">
+  <div class="slide-inner">
+    <div class="eyebrow">ENTERPRISE ONBOARDING · HOW THE FOUR BRAINS INTERACT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Read down. Promote up. Never copy.</h2>
+    <p class="prose" style="margin-top:1rem;">Higher scopes are views over lower ones <em>plus</em> their own cells — not duplicated stores. Two rules make that tractable at enterprise scale.</p>
+    <div class="diagram-wrap" style="max-width:60rem;">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 900 420" role="img" aria-label="Four nested scopes — individual, team, product, organisation — with a promote-up arrow on the left and a read-down arrow on the right, and permissions mirrored from source systems.">
+          <defs>
+            <marker id="dF-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon></marker>
+            <marker id="dF-arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><polygon points="0,0 10,5 0,10" class="arrowhead"></polygon></marker>
+          </defs>
+
+          <rect class="node" x="200" y="330" width="500" height="60"></rect>
+          <text class="lbl" x="450" y="354" text-anchor="middle">INDIVIDUAL</text>
+          <text class="lbl-sm" x="450" y="372" text-anchor="middle">working notes · personal gotchas</text>
+
+          <rect class="node" x="170" y="240" width="560" height="60"></rect>
+          <text class="lbl" x="450" y="264" text-anchor="middle">TEAM BRAIN</text>
+          <text class="lbl-sm" x="450" y="282" text-anchor="middle">conventions · gotchas + view of its members</text>
+
+          <rect class="node" x="140" y="150" width="620" height="60"></rect>
+          <text class="lbl" x="450" y="174" text-anchor="middle">PRODUCT BRAIN</text>
+          <text class="lbl-sm" x="450" y="192" text-anchor="middle">architecture · roadmap · pricing + view of its teams</text>
+
+          <rect class="node hub" x="110" y="60" width="680" height="60"></rect>
+          <text class="lbl" x="450" y="84" text-anchor="middle">ORG BRAIN</text>
+          <text class="lbl-sm" x="450" y="102" text-anchor="middle">policy · cross-dept decisions + filtered view of every product</text>
+
+          <line class="edge accent" x1="95" y1="345" x2="95" y2="95" marker-end="url(#dF-acc)"></line>
+          <text class="lbl-accent" x="60" y="230" text-anchor="middle" transform="rotate(-90 60 230)">PROMOTE UP — a cell earns wider scope</text>
+
+          <line class="edge dashed" x1="810" y1="95" x2="810" y2="345" marker-end="url(#dF-arw)"></line>
+          <text class="lbl-sm" x="848" y="230" text-anchor="middle" transform="rotate(90 848 230)">READ DOWN — permission-gated</text>
+        </svg>
+        <figcaption>Promotion is explicit: a cell earns wider scope when it proves durable. That is the same curation discipline that keeps the store authoritative instead of noisy — and it doubles as the access-control boundary.</figcaption>
+      </figure>
+    </div>
+    <div class="footnote"><b>Permissions are mirrored, never re-invented.</b> Visibility derives from the source system's ACL — repo access, Slack channel membership, Confluence space permissions. Asking an enterprise to re-model its access control inside our product is both a security risk and a deployment blocker. <b>Cross-scope effect is the product value:</b> a gotcha promoted to team scope stops three colleagues repeating it; a product decision at org scope is what lets finance attribute cost.</div>
+  </div>
+</section>
+
+<!-- 17 — ENTERPRISE — ONBOARDING SEQUENCE -->
+<section class="slide" id="s17">
+  <div class="slide-inner">
+    <div class="eyebrow">ENTERPRISE ONBOARDING · THE SEQUENCE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Land at team scope, where the product already works.</h2>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Phase</th><th>Duration</th><th>What happens</th><th>Exit criteria</th></tr>
+        <tr><td>0 — Assessment</td><td>~3 days</td><td>Inventory decision-dense sources; pick one repo + one team; agree what “useful recall” means to them</td><td>Named pilot team, named success question</td></tr>
+        <tr class="hi"><td class="hi"><b>1 — Pilot</b></td><td class="hi">2 weeks</td><td class="hi">Tier-1 ingest on one repo; backfill history; MCP wired to whatever agent they run; review queue triaged with the team</td><td class="hi"><b>Their engineer gets a correct answer to a real “why is it like this”</b></td></tr>
+        <tr><td>2 — Team</td><td>30 days</td><td>Whole team writing back; Slack + Confluence added; conventions promoted to team scope</td><td>Cells written by humans and agents unprompted</td></tr>
+        <tr><td>3 — Department</td><td>90 days</td><td>Product scope; second team; Tier-2 federation if they run Glean/MS Graph; SSO</td><td>Cross-team recall works; permission mirroring verified</td></tr>
+        <tr><td>4 — Organisation</td><td>6 months+</td><td>Org scope; non-engineering functions; audit, retention, residency</td><td>Decision lineage reaches leadership without a status deck</td></tr>
+      </table>
+    </div>
+    <div class="pull">The pilot must produce one genuinely useful recall against their own history. Nothing else survives procurement.</div>
+  </div>
+</section>
+
+<!-- 18 — ENTERPRISE — WHAT ISN'T BUILT -->
+<section class="slide" id="s18">
+  <div class="slide-inner">
+    <div class="eyebrow">ENTERPRISE ONBOARDING · WHAT ISN'T BUILT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Design partner, not enterprise sale — and here's exactly why.</h2>
+    <p class="prose" style="margin-top:1rem;">An enterprise buyer discovers all of this in week one, so it's better said here. The architecture above is designed; these parts are not implemented.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Capability</th><th>Status</th><th>Consequence</th></tr>
+        <tr><td>RBAC / ABAC, SSO, SCIM, permission mirroring</td><td><b>Designed, not built</b></td><td>The single largest gap between today's product and an enterprise deployment</td></tr>
+        <tr><td>The cell service (product/org scope)</td><td>Not built — files + SQLite today</td><td>Works to team scope; product scope needs the service</td></tr>
+        <tr><td><code class="code">sync push/pull</code> (git transport, team scope)</td><td>In progress</td><td>Team scope is the near-term ceiling</td></tr>
+        <tr><td>Tier-2 federation (Glean, MS Graph readers)</td><td>Not built</td><td>Long-tail sources need Tier-3 or nothing today</td></tr>
+        <tr><td>REST/OpenAPI surface for non-MCP agents</td><td>Specified, not shipped</td><td>Copilot / Codex / Gemini not yet consumable</td></tr>
+        <tr><td>Audit, retention, data residency</td><td>Not built</td><td>Blocks regulated buyers outright</td></tr>
+      </table>
+    </div>
+    <div class="pull">Pilot where it works today. Build the enterprise layer against a real customer's constraints, not speculatively.</div>
+  </div>
+</section>
+
+<!-- 19 — FOUR CATEGORIES -->
+<section class="slide" id="s19">
+  <div class="slide-inner">
+    <div class="eyebrow">WHY THIS IS DIFFERENT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Four different problems that all get called “memory”.</h2>
+    <p class="prose" style="margin-top:1rem;">The category confusion is the main reason this space looks crowded. These are not competing implementations of one thing — they answer different questions.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Category</th><th>Question it answers</th><th>Where you see it</th></tr>
+        <tr><td>Retrieval / RAG</td><td>“Find me text relevant to this query.”</td><td>vector search over docs and code</td></tr>
+        <tr><td>Codebase context</td><td>“What does the code look like <em>today</em>?”</td><td>Sourcegraph, Augment Context Engine</td></tr>
+        <tr><td>Agent memory</td><td>“What did I discuss with this user before?”</td><td>Cursor memories, Mem0, Zep, Letta</td></tr>
+        <tr><td class="yes">Entergram</td><td class="yes">“What has this organisation <em>learned</em> — what did we decide, why, what went wrong, and how did that change?”</td><td class="yes">the gap</td></tr>
+      </table>
+    </div>
+    <div class="pull">Retrieval finds information. Entergram preserves judgement.</div>
+  </div>
+</section>
+
+<!-- 20 — WHY NOT A FEATURE -->
+<section class="slide" id="s20">
+  <div class="slide-inner">
+    <div class="eyebrow">THE STRATEGIC QUESTION</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">“Why isn't this just a feature of Claude, Codex, or Cursor?”</h2>
+    <div class="prose" style="margin-top:1.1rem;">
+      <p>Because the memory has to outlive the agent. A team on Claude Code today was on Copilot two years ago and may be on an internal agent next year. Every one of those migrations throws away vendor-held memory — which is precisely the asset that should have been compounding.</p>
+    </div>
+    <div class="principle-list">
+      <div class="principle"><span class="mark">→</span><p><b>Wrong positioning:</b> “memory for Claude Code.” That is a feature, and the platform absorbs it.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>Right positioning:</b> the independent memory layer <i>underneath</i> whichever agents a company runs. Agents are the interchangeable part.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>Structurally agent-agnostic:</b> one MCP server, consumed identically by Claude Code, Cursor, Windsurf, Continue. Adding an agent is a config line, not a migration.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>And it isn't the platforms' incentive.</b> A vendor's memory is a retention mechanism — portability works against them. Neutrality is only credible from an independent layer.</p></div>
+    </div>
+    <div class="pull">Agents will keep changing. The organisation's memory shouldn't have to.</div>
+  </div>
+</section>
+
+<!-- 21 — EVIDENCE — DOGFOODING -->
+<section class="slide" id="s21">
+  <div class="slide-inner">
+    <div class="eyebrow">EVIDENCE · THIS STARTED AS A WORKAROUND</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Not a concept — a personal practice, productized.</h2>
+    <p class="prose" style="margin-top:1.2rem;">Entergram isn't a green-field bet on what engineers might want. Cells B-0009 and B-0011 say it outright: it productizes <code class="code">~/.claude/brain</code>, a cross-project memory this operator has run by hand, on themselves, for months — before a single line of the product existed.</p>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-num">198</div><div class="stat-lbl">Cells committed</div></div>
+      <div class="stat-card"><div class="stat-num">8.5&nbsp;MB</div><div class="stat-lbl">Durable memory</div></div>
+      <div class="stat-card"><div class="stat-num">650</div><div class="stat-lbl">Commits to the store</div></div>
+      <div class="stat-card"><div class="stat-num">10+</div><div class="stat-lbl">Projects covered</div></div>
+    </div>
+    <div class="col-title" style="margin-top:2.4rem;">What becomes what</div>
+    <div class="table-scroll reusemap">
+      <table>
+        <tr><th>Exists today, by hand</th><th>Becomes, in the product</th></tr>
+        <tr><td><code class="code">B-NNN-*.md</code> cells</td><td>Cell store — same format, plus source/confidence fields</td></tr>
+        <tr><td><code class="code">INDEX.md</code></td><td>SQLite FTS index (grep still works as a fallback)</td></tr>
+        <tr><td><code class="code">brain.sh</code> (doctor / next-id / stats / dups / stale)</td><td>Entergram CLI internals — hygiene battle-tested on real use</td></tr>
+        <tr><td>Gate loop (recall → write-back → consolidate → decay)</td><td>The ingestion + recall engine</td></tr>
+        <tr><td>Skills + effectors</td><td><code class="code">learn</code> extractors + future orchestration</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 22 — WHAT ENTERGRAM DOES -->
+<section class="slide" id="s22">
+  <div class="slide-inner">
+    <div class="eyebrow">THE PRODUCT</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">A memory your agent actually keeps.</h2>
+    <p class="prose" style="margin-top:1.2rem;">Entergram gives your agent a persistent, local-first engineering memory, built automatically from your repo's own history.</p>
+    <div class="grid-3">
+      <div>
+        <div class="feat-num">01</div>
+        <div class="feat-title">Learns from your codebase</div>
+        <div class="feat-body">README, docs, ADRs, and git history — commits, PRs, issues — become durable memory of decisions, reasons, and outcomes.</div>
+      </div>
+      <div>
+        <div class="feat-num">02</div>
+        <div class="feat-title">Recalls selectively</div>
+        <div class="feat-body">The agent gets only the handful of facts relevant to the current task, never a document dump. A 5,000-fact memory costs the same per query as a 50-fact one.</div>
+      </div>
+      <div>
+        <div class="feat-num">03</div>
+        <div class="feat-title">Works with any agent</div>
+        <div class="feat-body">One MCP server. Claude Code, Cursor, Windsurf, Continue.dev — same recall, remember, and learn tools everywhere.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 23 — WHAT RECALL RETURNS -->
+<section class="slide" id="s23">
+  <div class="slide-inner">
+    <div class="eyebrow">THE PRODUCT · WHAT AN AGENT GETS</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">The agent gets the decision, not the archive.</h2>
+    <div class="steps">
+      <div class="step"><p>Parse the query into candidate tags and FTS terms.</p></div>
+      <div class="step"><p>Rank by full-text relevance — SQLite FTS5, bm25, over hooks, bodies, and tags together. Tag pre-filtering and embedding rerank are on the roadmap, not yet shipped.</p></div>
+      <div class="step"><p>Pack top-K cells until the token budget runs out — hooks first, bodies as budget allows.</p></div>
+      <div class="step"><p>Return structured facts — id, hook, why, source, confidence — plus a one-paragraph synthesis.</p></div>
+    </div>
+    <div class="pull">Connect a 300k-line repo. The agent understands the architecture in one query, not fifty.</div>
+  </div>
+</section>
+
+<!-- 24 — GOVERNANCE -->
+<section class="slide" id="s24">
+  <div class="slide-inner">
+    <div class="eyebrow">GOVERNANCE · A FIRST-CLASS LAYER, NOT A FEATURE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Decision memory is the most sensitive data in the company.</h2>
+    <div class="prose" style="margin-top:1.1rem;">
+      <p>A record of what an organization decided, what it rejected, and what it got wrong is more sensitive than the code it produced. Every serious platform in this space treats permissions, lineage and audit as architecture rather than configuration — mirroring source-system permissions instead of copying data into an unrestricted index.</p>
+    </div>
+    <div class="principle-list">
+      <div class="principle"><span class="mark">→</span><p><b>Local-first by default.</b> Cells are plain files in the customer's own repo. Nothing leaves the machine unless sync is explicitly configured — the strongest possible answer to “where does our decision history live?”</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>Provenance on every fact.</b> Each cell carries its source — PR, commit, thread, or document — so a recalled claim is auditable rather than asserted.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>Reviewable before trusted.</b> Auto-extracted memory starts low-confidence and passes through human review; the store is plain Markdown, diffable in a normal PR.</p></div>
+      <div class="principle"><span class="mark">→</span><p><b>Honest gap.</b> Enterprise-grade RBAC/ABAC, SSO and permission inheritance are <em>not</em> built. That is a real requirement for large-org deployment and is on the roadmap, not in the product.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 25 — WHO BUYS IT -->
+<section class="slide" id="s25">
+  <div class="slide-inner">
+    <div class="eyebrow">WHO BUYS IT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">The wedge: teams with long-lived codebases and heavy agent use.</h2>
+    <div class="table-scroll">
+      <table>
+        <tr><th></th><th>Who</th><th>Why they care</th></tr>
+        <tr><td><b>User</b></td><td>Senior / staff engineer on a 50k+ LOC, 6-month-plus codebase</td><td>They are the one the agent keeps asking, and the one who answers the same question repeatedly</td></tr>
+        <tr><td><b>Champion</b></td><td>Tech lead or eng manager</td><td>Owns onboarding time, review load, and repeated incidents</td></tr>
+        <tr><td><b>Payer</b></td><td>VP Eng / CTO (Teams tier, per repo)</td><td>Buys reduced re-derivation cost and retained knowledge across attrition</td></tr>
+        <tr><td><b>Trigger</b></td><td>A senior engineer leaves, or an agent ships a regression that repeats a known failure</td><td>The cost of lost rationale becomes concrete and attributable</td></tr>
+      </table>
+    </div>
+    <div class="icp">Sharpest early signal: the team already runs agents daily <em>and</em> has a codebase old enough that its original authors have partly moved on.</div>
+  </div>
+</section>
+
+<!-- 26 — TRACTION -->
+<section class="slide" id="s26">
+  <div class="slide-inner">
+    <div class="eyebrow">TRACTION · SHIPPED, NOT SLIDEWARE</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Shipped, not slideware.</h2>
+    <div class="timeline">
+      <div class="tl-row"><div class="tl-day">DAY 1</div><div class="tl-body"><b>Positioning</b><span>Name, ICP, README rewrite — Entergram, senior engineer, 50k+ LOC repos on Claude/Cursor.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 2</div><div class="tl-body"><b>Landing page</b><span>Next.js 15 + Tailwind — hero, demo slot, features, pricing, waitlist, Stripe link.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 3</div><div class="tl-body"><b>CLI</b><span>init / learn / remember / recall / doctor + serve stub, Markdown cell store — verified end-to-end.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 4</div><div class="tl-body"><b>Memory engine</b><span>SQLite/FTS5 index, docs/README/ADR ingestion, review + reindex — verified.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 5</div><div class="tl-body"><b>MCP server</b><span>recall / remember / learn / doctor over stdio — verified via JSON-RPC handshake.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 6</div><div class="tl-body"><b>GitHub harvest</b><span>PR/issue mining + Anthropic LLM extraction, heuristic fallback — verified.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 7</div><div class="tl-body"><b>Runnable demo</b><span>Files-gone / memory-intact story, plus a three-minute recording script.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 8</div><div class="tl-body"><b>Documentation</b><span>Getting-started, architecture, why, comparison, FAQ.</span></div></div>
+      <div class="tl-row"><div class="tl-day">DAY 9</div><div class="tl-body"><b>Payments</b><span>Subscription tiers chargeable via Stripe links, with waitlist fallback.</span></div></div>
+      <div class="tl-row"><div class="tl-day">SINCE</div><div class="tl-body"><b>Shipped to production</b><span>Renamed to get-entergram on npm, migrated to pnpm, dockerized, and deployed live on GCP Cloud Run.</span></div></div>
+    </div>
+    <div class="proof">Dogfooded across 180+ facts, 4 machines, 500+ commits.
+      <span class="url">live on GCP Cloud Run · asia-south1</span>
+    </div>
+  </div>
+</section>
+
+<!-- 27 — BUSINESS MODEL -->
+<section class="slide" id="s27">
+  <div class="slide-inner">
+    <div class="eyebrow">BUSINESS MODEL</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Cash now, recurring memory after.</h2>
+    <div class="pricing-grid">
+      <div class="price-card hi">
+        <div class="price-name">Install</div>
+        <div class="price-amt">$500</div>
+        <div class="price-for">One-off. We set it up on your repo, tune it, wire your agent.</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-amt">$19/mo</div>
+        <div class="price-for">Solo, one repo.</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Pro</div>
+        <div class="price-amt">$49/mo</div>
+        <div class="price-for">Private sync, PR/issue learning, priority.</div>
+      </div>
+      <div class="price-card hi">
+        <div class="price-name">Teams</div>
+        <div class="price-amt">$199/mo</div>
+        <div class="price-for">Per repo. Shared engineering memory for the whole team — the real money.</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Enterprise</div>
+        <div class="price-amt">Book a demo</div>
+        <div class="price-for">On-prem / local-first at scale.</div>
+      </div>
+    </div>
+    <div class="icp">ICP — a senior engineer on a 50,000+ line, six-month-or-older repo, already living in Claude Code or Cursor.</div>
+    <p class="prose" style="margin-top:1rem; font-size:.85rem;">Payment path: Stripe for the recurring tiers, plus a Razorpay UPI link prepped under the $500 install tier for the India market.</p>
+  </div>
+</section>
+
+<!-- 28 — THE MOAT -->
+<section class="slide" id="s28">
+  <div class="slide-inner">
+    <div class="eyebrow">THE MOAT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">The moat isn't extraction. It's the accumulated record — and it can't be backfilled.</h2>
+    <p class="prose" style="margin-top:1rem;">An extraction pipeline is reproducible; a competitor could build one. Three things compound instead, and only with time-in-place.</p>
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-idx">01</div>
+        <div class="layer-name">The record</div>
+        <div class="layer-desc">Years of decisions, with provenance and outcomes, for <em>this</em> organisation. A new vendor can index today's repo — they cannot reconstruct the reasoning of a decision made two years ago and revised twice since. Late entrants start empty.</div>
+      </div>
+      <div class="layer">
+        <div class="layer-idx">02</div>
+        <div class="layer-name">The curation discipline</div>
+        <div class="layer-desc">What earns durability: extract → dedup → reconcile, so one authoritative answer survives instead of five contradicting notes. Retrieval quality degrades with volume; curated memory improves with it.</div>
+      </div>
+      <div class="layer">
+        <div class="layer-idx">03</div>
+        <div class="layer-name">The usefulness feedback loop</div>
+        <div class="layer-desc">Whether recalled knowledge actually helped is now recorded per query. That signal is what lets selection improve over time — and it only exists for whoever is already embedded in the workflow.</div>
+      </div>
+    </div>
+    <div class="pull">Switching cost isn't the tool. It's walking away from your own history.</div>
+  </div>
+</section>
+
+<!-- 29 — EXPANSION BRIDGE -->
+<section class="slide" id="s29">
+  <div class="slide-inner">
+    <div class="eyebrow">THE EXPANSION CASE · EARNED, NOT ASSUMED</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Engineering is the wedge. Decision memory is the category.</h2>
+    <div class="prose" style="margin-top:1.1rem;">
+      <p>Engineering first because the pain is sharpest and — critically — the source data is already structured, timestamped and machine-readable. Commits, PRs and reviews are an organizational event stream that happens to already exist.</p>
+      <p>Nothing about a decision cell is engineering-specific. A pricing call, a vendor choice, a post-mortem, a reorg: same shape — what was decided, what was rejected, why, what happened. Once the substrate is trusted in engineering, extending it is a connector problem, not a new architecture.</p>
+    </div>
+    <div class="roadmap">
+      <span class="rm-node built">engineering decision memory</span><span class="rm-arrow">→</span>
+      <span class="rm-node">product &amp; GTM decisions</span><span class="rm-arrow">→</span>
+      <span class="rm-node">cost / ROI attribution</span><span class="rm-arrow">→</span>
+      <span class="rm-node">organizational decision memory</span>
+    </div>
+    <div class="footnote">Treat the slides that follow as option value on top of the wedge — not as something you have to believe today.</div>
+  </div>
+</section>
+
+<!-- 30 — EVOLUTION: FOUR STAGES -->
+<section class="slide" id="s30">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · THE EVOLUTION, STAGE BY STAGE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">One brain becomes an enterprise nervous system in four stages — each triggered by a specific failure.</h2>
+    <p class="prose" style="margin-top:1rem;">Nobody buys the enterprise version on day one. Each stage begins because the previous one broke in a predictable way, and each is a paying tier before the next becomes necessary. Skip a stage and the memory has no contributors to draw from — the substrate only works if it was already being fed at the tier below.</p>
+    <div class="diagram-wrap" style="max-width:64rem;">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 1020 470" role="img" aria-label="Four evolution stages left to right — individual, team, department, enterprise — each showing its scope, the failure that triggers the next stage, its cadence, and the pricing tier it corresponds to, above a widening band representing the growing memory substrate.">
+          <defs>
+            <marker id="dD-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <text class="lbl-accent" x="15" y="28" text-anchor="start">STAGE 01</text>
+          <text class="lbl-accent" x="265" y="28" text-anchor="start">STAGE 02</text>
+          <text class="lbl-accent" x="515" y="28" text-anchor="start">STAGE 03</text>
+          <text class="lbl-accent" x="765" y="28" text-anchor="start">STAGE 04</text>
+
+          <rect class="node" x="15" y="42" width="215" height="62"></rect>
+          <text class="lbl" x="122" y="68" text-anchor="middle">INDIVIDUAL</text>
+          <text class="lbl-sm" x="122" y="86" text-anchor="middle">one dev, one repo</text>
+
+          <rect class="node" x="265" y="42" width="215" height="62"></rect>
+          <text class="lbl" x="372" y="68" text-anchor="middle">TEAM</text>
+          <text class="lbl-sm" x="372" y="86" text-anchor="middle">one squad, shared repo</text>
+
+          <rect class="node" x="515" y="42" width="215" height="62"></rect>
+          <text class="lbl" x="622" y="68" text-anchor="middle">DEPARTMENT</text>
+          <text class="lbl-sm" x="622" y="86" text-anchor="middle">eng + product + GTM</text>
+
+          <rect class="node hub" x="765" y="42" width="240" height="62"></rect>
+          <text class="lbl" x="885" y="68" text-anchor="middle">ENTERPRISE</text>
+          <text class="lbl-sm" x="885" y="86" text-anchor="middle">every function, one substrate</text>
+
+          <line class="edge accent" x1="230" y1="73" x2="261" y2="73" marker-end="url(#dD-arrow-accent)"></line>
+          <line class="edge accent" x1="480" y1="73" x2="511" y2="73" marker-end="url(#dD-arrow-accent)"></line>
+          <line class="edge accent" x1="730" y1="73" x2="761" y2="73" marker-end="url(#dD-arrow-accent)"></line>
+
+          <text class="lbl-sm" x="15" y="140" text-anchor="start">HOLDS</text>
+          <text class="lbl-sm" x="15" y="158" text-anchor="start">my decisions,</text>
+          <text class="lbl-sm" x="15" y="171" text-anchor="start">my gotchas</text>
+          <text class="lbl-sm" x="265" y="158" text-anchor="start">the squad's</text>
+          <text class="lbl-sm" x="265" y="171" text-anchor="start">shared rationale</text>
+          <text class="lbl-sm" x="515" y="158" text-anchor="start">specs, proof points,</text>
+          <text class="lbl-sm" x="515" y="171" text-anchor="start">market signal</text>
+          <text class="lbl-sm" x="765" y="158" text-anchor="start">cost, revenue,</text>
+          <text class="lbl-sm" x="765" y="171" text-anchor="start">performance, ROI</text>
+
+          <text class="lbl-accent" x="15" y="215" text-anchor="start">BREAKS WHEN</text>
+          <text class="lbl-sm" x="15" y="233" text-anchor="start">a second dev joins —</text>
+          <text class="lbl-sm" x="15" y="246" text-anchor="start">memory is one laptop</text>
+          <text class="lbl-sm" x="265" y="233" text-anchor="start">product asks "why"</text>
+          <text class="lbl-sm" x="265" y="246" text-anchor="start">and eng owns the answer</text>
+          <text class="lbl-sm" x="515" y="233" text-anchor="start">finance asks what it</text>
+          <text class="lbl-sm" x="515" y="246" text-anchor="start">cost, nobody can say</text>
+          <text class="lbl-sm" x="765" y="233" text-anchor="start">— the board finally</text>
+          <text class="lbl-sm" x="765" y="246" text-anchor="start">reads real numbers</text>
+
+          <text class="lbl-sm" x="15" y="290" text-anchor="start">CADENCE</text>
+          <text class="lbl-sm" x="15" y="308" text-anchor="start">per session</text>
+          <text class="lbl-sm" x="265" y="308" text-anchor="start">per sprint</text>
+          <text class="lbl-sm" x="515" y="308" text-anchor="start">per month</text>
+          <text class="lbl-sm" x="765" y="308" text-anchor="start">per quarter</text>
+
+          <text class="lbl-sm" x="15" y="345" text-anchor="start">TIER</text>
+          <text class="lbl-accent" x="15" y="363" text-anchor="start">$19 SOLO</text>
+          <text class="lbl-accent" x="265" y="363" text-anchor="start">$199 TEAM / REPO</text>
+          <text class="lbl-accent" x="515" y="363" text-anchor="start">$199 × N REPOS</text>
+          <text class="lbl-accent" x="765" y="363" text-anchor="start">ENTERPRISE CONTRACT</text>
+
+          <path class="node hub" d="M 15 442 L 1005 410 L 1005 452 L 15 462 Z"></path>
+          <text class="lbl-sm" x="500" y="440" text-anchor="middle">THE SUBSTRATE WIDENS — SAME CELL FORMAT, SAME RECALL, MORE CONTRIBUTORS</text>
+        </svg>
+        <figcaption>Each stage is entered by failure, not ambition: the solo brain breaks when a second engineer joins, the team brain breaks when product needs the rationale, the department brain breaks when finance asks what it cost. The format never changes across all four — only the number of contributors writing into it, which is why a stage can't be skipped.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 31 — THE WORK HIERARCHY -->
+<section class="slide" id="s31">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · THE WORK HIERARCHY, ENTITY BY ENTITY</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Individual → team → feature → product — one ledger underneath all four.</h2>
+    <p class="prose" style="margin-top:1rem;">No entity here is decorative. Each is a real rollup: an individual's activity cells belong to exactly one team; a team's cells roll into exactly one feature; a feature's cells roll into the product that ships it. The ledger doesn't roll up — everything else is a filtered view over it.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 780 470" role="img" aria-label="Three individuals — an engineer, a designer, and a product manager — write activity cells into a team brain; the team brain rolls into a feature brain; the feature brain rolls into a product brain. An activity ledger alongside all four tiers is the shared substrate every tier reads and writes.">
+          <defs>
+            <marker id="d4-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+            <marker id="d4-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node" x="20" y="382" width="190" height="48"></rect>
+          <text class="lbl" x="115" y="410" text-anchor="middle">INDIVIDUAL — ENGINEER</text>
+          <rect class="node" x="225" y="382" width="190" height="48"></rect>
+          <text class="lbl" x="320" y="410" text-anchor="middle">INDIVIDUAL — DESIGNER</text>
+          <rect class="node" x="430" y="382" width="190" height="48"></rect>
+          <text class="lbl" x="525" y="410" text-anchor="middle">INDIVIDUAL — PM</text>
+
+          <rect class="node" x="150" y="262" width="360" height="50"></rect>
+          <text class="lbl" x="330" y="283" text-anchor="middle">TEAM BRAIN</text>
+          <text class="lbl-sm" x="330" y="298" text-anchor="middle">one squad, shared scope</text>
+
+          <rect class="node" x="190" y="152" width="280" height="50"></rect>
+          <text class="lbl" x="330" y="173" text-anchor="middle">FEATURE BRAIN</text>
+          <text class="lbl-sm" x="330" y="188" text-anchor="middle">one deliverable</text>
+
+          <rect class="node" x="220" y="42" width="220" height="50"></rect>
+          <text class="lbl" x="330" y="63" text-anchor="middle">PRODUCT BRAIN</text>
+          <text class="lbl-sm" x="330" y="78" text-anchor="middle">all features, one roadmap</text>
+
+          <line class="edge" x1="115" y1="382" x2="235" y2="312" marker-end="url(#d4-arrow)"></line>
+          <line class="edge" x1="320" y1="382" x2="320" y2="312" marker-end="url(#d4-arrow)"></line>
+          <line class="edge" x1="525" y1="382" x2="410" y2="312" marker-end="url(#d4-arrow)"></line>
+          <text class="lbl-sm" x="330" y="345" text-anchor="middle">writes: cells — what shipped, why, hours spent</text>
+
+          <line class="edge" x1="330" y1="262" x2="330" y2="202" marker-end="url(#d4-arrow)"></line>
+          <text class="lbl-sm" x="330" y="234" text-anchor="middle">rolls up: shared feature scope</text>
+
+          <line class="edge" x1="330" y1="152" x2="330" y2="92" marker-end="url(#d4-arrow)"></line>
+          <text class="lbl-sm" x="330" y="124" text-anchor="middle">aggregates: N features</text>
+
+          <rect class="node hub" x="610" y="42" width="150" height="390"></rect>
+          <text class="lbl" x="685" y="228" text-anchor="middle">ACTIVITY</text>
+          <text class="lbl" x="685" y="244" text-anchor="middle">LEDGER</text>
+          <text class="lbl-sm" x="685" y="266" text-anchor="middle">append-only</text>
+          <text class="lbl-sm" x="685" y="280" text-anchor="middle">commits · deploys</text>
+          <text class="lbl-sm" x="685" y="294" text-anchor="middle">agent-hours</text>
+          <text class="lbl-sm" x="685" y="308" text-anchor="middle">human-hours</text>
+
+          <path class="edge accent dashed" d="M 510 287 L 608 240" fill="none" marker-end="url(#d4-arrow-accent)"></path>
+          <path class="edge accent dashed" d="M 440 67 L 608 150" fill="none" marker-end="url(#d4-arrow-accent)"></path>
+          <text class="lbl-accent" x="555" y="185" text-anchor="middle">every tier above is a view</text>
+          <text class="lbl-accent" x="555" y="199" text-anchor="middle">over this one ledger</text>
+        </svg>
+        <figcaption>The activity ledger is the raw substrate — every commit, deploy, and hour (agent or human) lands there once, tagged to an individual, a team, a feature. Individual/team/feature/product brains don't duplicate that data; they're recall views over it, scoped tighter at each tier.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 32 — ROI IN TOKEN TERMS -->
+<section class="slide" id="s32">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · ROI IN TOKEN TERMS</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Humans log hours. Agents log tokens. The ledger prices both the same way.</h2>
+    <p class="prose" style="margin-top:1rem;">The cost ledger from the last slide gets a second input line: agent-hours, priced in tokens, attributed to the specific agent that wrote each cell — on the same per-cycle rhythm, so an agent's contribution shows up in the P&amp;L exactly like a contractor's would.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 780 260" role="img" aria-label="Human hours priced by rate and agent tokens priced per million converge on the cost ledger, which reports to the CFO.">
+          <defs>
+            <marker id="dB-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+            <marker id="dB-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node" x="20" y="30" width="210" height="54"></rect>
+          <text class="lbl" x="125" y="62" text-anchor="middle">HUMAN HOURS × RATE</text>
+
+          <rect class="node hub" x="20" y="150" width="210" height="54"></rect>
+          <text class="lbl" x="125" y="182" text-anchor="middle">AGENT TOKENS × $/1M</text>
+
+          <rect class="node" x="310" y="90" width="200" height="54"></rect>
+          <text class="lbl" x="410" y="122" text-anchor="middle">COST LEDGER</text>
+
+          <rect class="node" x="600" y="90" width="150" height="54"></rect>
+          <text class="lbl" x="675" y="122" text-anchor="middle">CFO</text>
+
+          <line class="edge" x1="230" y1="57" x2="330" y2="105" marker-end="url(#dB-arrow)"></line>
+          <text class="lbl-sm" x="280" y="45" text-anchor="middle">hours × rate</text>
+
+          <line class="edge accent" x1="230" y1="177" x2="330" y2="130" marker-end="url(#dB-arrow-accent)"></line>
+          <text class="lbl-accent" x="280" y="215" text-anchor="middle">tokens × $/1M, per agent</text>
+
+          <line class="edge" x1="510" y1="117" x2="598" y2="117" marker-end="url(#dB-arrow)"></line>
+          <text class="lbl-sm" x="555" y="102" text-anchor="middle">reports</text>
+        </svg>
+        <figcaption>Same cost ledger as the previous slide, now itemized on two lines instead of one — a human's hours and an agent's tokens, converted to the same currency, on the same cadence.</figcaption>
+      </figure>
+    </div>
+    <div class="col-title" style="margin-top:2.2rem;">Per-agent attribution — one row per contributor, per cycle</div>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Agent</th><th>Cells written</th><th>Tokens spent</th><th>Cost</th><th>Attributed to</th></tr>
+        <tr><td>Claude — code review</td><td>41</td><td>2.1M</td><td>$18</td><td>6 features shipped</td></tr>
+        <tr><td>Claude — meeting summarizer</td><td>12</td><td>640K</td><td>$6</td><td>3 decisions captured</td></tr>
+        <tr><td>Ops agent — Slack triage</td><td>27</td><td>980K</td><td>$9</td><td>14 tickets resolved</td></tr>
+      </table>
+    </div>
+    <div class="footnote">Rows are illustrative — the shape of the ledger line, not a shipped v1 report. Same schema as the human-hours side: one row per contributor per cycle, human or agent, each traceable to what it produced.</div>
+  </div>
+</section>
+
+<!-- 33 — CFO CLOSES THE LOOP -->
+<section class="slide" id="s33">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · CFO CLOSES THE LOOP — ROI TO THE BOARD</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Cost meets revenue at the CFO. The board sees the ROI, not a slide about it.</h2>
+    <p class="prose" style="margin-top:1rem;">CFO is the only node fed by two entities from outside the org chart — the cost ledger and invoiced revenue — and the only one whose output is a number, not a narrative. That number blends with the other four functions into one CEO view, then cascades unchanged.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 880 640" role="img" aria-label="The cost ledger and invoiced revenue converge on the CFO, who computes ROI per product and feature; the CFO joins engineering leadership, the CDO, marketing, and sales in reporting to the CEO, who reports an audited performance record to the board, which reports real ROI to investors, alongside a faded crossed-out arrow marking the traditional top-down alternative this replaces.">
+          <defs>
+            <marker id="d7-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+            <marker id="d7-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node" x="250" y="480" width="190" height="54"></rect>
+          <text class="lbl" x="345" y="502" text-anchor="middle">COST LEDGER</text>
+          <text class="lbl-sm" x="345" y="518" text-anchor="middle">agent + human hours, infra</text>
+
+          <rect class="node" x="470" y="480" width="210" height="54"></rect>
+          <text class="lbl" x="575" y="502" text-anchor="middle">INVOICED REVENUE</text>
+          <text class="lbl-sm" x="575" y="518" text-anchor="middle">external stakeholders</text>
+
+          <rect class="node" x="20" y="350" width="150" height="54"></rect>
+          <text class="lbl" x="95" y="381" text-anchor="middle">ENG LEADERSHIP</text>
+          <rect class="node" x="190" y="350" width="130" height="54"></rect>
+          <text class="lbl" x="255" y="381" text-anchor="middle">CDO</text>
+          <rect class="node" x="340" y="350" width="150" height="54"></rect>
+          <text class="lbl" x="415" y="381" text-anchor="middle">MARKETING</text>
+          <rect class="node" x="510" y="350" width="120" height="54"></rect>
+          <text class="lbl" x="570" y="381" text-anchor="middle">SALES</text>
+          <rect class="node hub" x="650" y="350" width="200" height="54"></rect>
+          <text class="lbl" x="750" y="372" text-anchor="middle">CFO</text>
+          <text class="lbl-accent" x="750" y="388" text-anchor="middle">ROI = revenue − cost</text>
+
+          <line class="edge accent" x1="345" y1="480" x2="700" y2="404" marker-end="url(#d7-arrow-accent)"></line>
+          <text class="lbl-accent" x="500" y="450" text-anchor="middle">cost side, per cycle</text>
+
+          <line class="edge accent" x1="575" y1="480" x2="770" y2="404" marker-end="url(#d7-arrow-accent)"></line>
+          <text class="lbl-accent" x="700" y="450" text-anchor="middle">revenue side, per cycle</text>
+
+          <rect class="node" x="350" y="220" width="180" height="54"></rect>
+          <text class="lbl" x="440" y="252" text-anchor="middle">CEO</text>
+
+          <line class="edge" x1="95" y1="350" x2="390" y2="274" marker-end="url(#d7-arrow)"></line>
+          <line class="edge" x1="255" y1="350" x2="410" y2="274" marker-end="url(#d7-arrow)"></line>
+          <line class="edge" x1="415" y1="350" x2="440" y2="274" marker-end="url(#d7-arrow)"></line>
+          <line class="edge" x1="570" y1="350" x2="465" y2="274" marker-end="url(#d7-arrow)"></line>
+          <line class="edge accent" x1="750" y1="350" x2="490" y2="274" marker-end="url(#d7-arrow-accent)"></line>
+          <text class="lbl-accent" x="440" y="305" text-anchor="middle">blended signal, not a status deck</text>
+
+          <rect class="node" x="360" y="110" width="160" height="48"></rect>
+          <text class="lbl" x="440" y="139" text-anchor="middle">BOARD</text>
+          <line class="edge accent" x1="440" y1="220" x2="440" y2="158" marker-end="url(#d7-arrow-accent)"></line>
+          <text class="lbl-accent" x="440" y="190" text-anchor="middle">audited performance record</text>
+
+          <rect class="node" x="340" y="20" width="200" height="48"></rect>
+          <text class="lbl" x="440" y="49" text-anchor="middle">INVESTORS</text>
+          <line class="edge accent" x1="440" y1="110" x2="440" y2="68" marker-end="url(#d7-arrow-accent)"></line>
+          <text class="lbl-accent" x="440" y="94" text-anchor="middle">real ROI, not curated</text>
+
+          <path class="edge dashed" d="M 540 34 C 660 60, 700 140, 680 220" fill="none" marker-end="url(#d7-arrow)"></path>
+          <text class="lbl-sm" x="700" y="150" text-anchor="start">✕ traditional: a narrative</text>
+          <text class="lbl-sm" x="700" y="162" text-anchor="start">curated for the reader above</text>
+        </svg>
+        <figcaption>Cost (agent-hours, human-hours, infrastructure) and revenue (invoiced external stakeholders) converge only once, at the CFO, into a single ROI figure per product and feature. That figure joins delivery, governance, and go-to-market signal at the CEO, then reaches the board and investors as the same durable record — not a narrative rewritten for each audience up the chain.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 34 — ROADMAP + ASK -->
+<section class="slide" id="s34">
+  <div class="slide-inner">
+    <div class="eyebrow">CELL B-0024 · EVOLUTION</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">It starts as memory. It becomes the nervous system.</h2>
+    <div class="roadmap">
+      <span class="rm-node built">memory (v1)</span><span class="rm-arrow">→</span>
+      <span class="rm-node built">recall (v1)</span><span class="rm-arrow">→</span>
+      <span class="rm-node built">learn / consolidate</span><span class="rm-arrow">→</span>
+      <span class="rm-node">skills / orchestration</span><span class="rm-arrow">→</span>
+      <span class="rm-node">planning / reflection (v2+)</span><span class="rm-arrow">→</span>
+      <span class="rm-node">org-wide nervous system</span>
+    </div>
+    <p class="prose" style="margin-top:1.4rem; font-style:italic;">Say "memory" in the market. Keep the runtime — and the nervous system it grows into — in the architecture.</p>
+    <div class="notbuild">
+      <span class="lbl">Explicitly not building in v1</span>
+      <p>Multi-agent, knowledge-graph UI, RL dashboards, analytics, healthcare/compliance, marketplace, RBAC, billing portal, Kubernetes. Memory + recall + MCP, done exceptionally.</p>
+    </div>
+    <div class="cta-row">
+      <span class="cta primary">npm install -g get-entergram</span>
+      <span class="cta">Book a setup call</span>
+      <span class="cta">Star the repo</span>
+    </div>
+    <div class="footer-line">Entergram — MIT licensed · local-first · built on a memory architecture dogfooded on itself.</div>
+  </div>
+</section>
+
+<!-- 35 — APPENDIX DIVIDER -->
+<section class="slide" id="s35">
+  <div class="slide-inner">
+    <div class="eyebrow">APPENDIX</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Appendix — architecture, dogfooding record, and the long-range design.</h2>
+    <p class="prose" style="margin-top:1.2rem;">For a technical audience or a second meeting: how the engine actually works, the full dogfooding evidence, the organizational-cascade design, and the not-yet-built layers with an explicit line between shipped and owed.</p>
+  </div>
+</section>
+
+<!-- 36 — APX — HOW IT WORKS -->
+<section class="slide" id="s36">
+  <div class="slide-inner">
+    <div class="eyebrow">CELL B-0030 · HOW IT WORKS</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Three layers, not a database to babysit.</h2>
+    <div class="layers">
+      <div class="layer">
+        <div class="layer-idx">01</div>
+        <div class="layer-name">Cells</div>
+        <div class="layer-desc">One durable fact each — a decision, a gotcha, a convention — stored as plain Markdown you can <code class="code">git diff</code>.</div>
+      </div>
+      <div class="layer">
+        <div class="layer-idx">02</div>
+        <div class="layer-name">Index</div>
+        <div class="layer-desc">A tagged, full-text map (SQLite FTS5). Recall greps it and loads only what matches.</div>
+      </div>
+      <div class="layer">
+        <div class="layer-idx">03</div>
+        <div class="layer-name">Discipline</div>
+        <div class="layer-desc">Every write goes through extract → dedup → conflict-resolve, so you get one authoritative answer, not five contradicting notes.</div>
+      </div>
+    </div>
+    <div class="footnote">Markdown is the source of truth. The SQLite index is just a rebuildable cache.</div>
+  </div>
+</section>
+
+<!-- 37 — APX — INGESTION PIPELINE -->
+<section class="slide" id="s37">
+  <div class="slide-inner">
+    <div class="eyebrow">CELL B-0015 · THE MOAT</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Built from what already happened.</h2>
+    <div class="pipeline">
+      <span class="pipe-step">harvest</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">chunk</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">extract</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">dedup</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">reconcile</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">write-back</span><span class="pipe-arrow">→</span>
+      <span class="pipe-step">doctor</span>
+    </div>
+    <div class="source-list">
+      <div class="row"><span class="tag">git log</span><span>Incremental since the last watermark; skips merge / "fix typo" / "wip" noise heuristically.</span></div>
+      <div class="row"><span class="tag">PRs & issues</span><span>Harvested via <code class="code">gh api</code> — title, body, review comments, merge outcome.</span></div>
+      <div class="row"><span class="tag">docs</span><span>README, ADRs, CHANGELOG.</span></div>
+      <div class="row"><span class="tag">structure</span><span>Directory tree and entrypoints, collapsed into one architecture cell.</span></div>
+    </div>
+    <div class="footnote">Extraction runs on an Anthropic LLM (decision / reason / outcome) with a heuristic fallback — shipped and verified Day 6.</div>
+  </div>
+</section>
+
+<!-- 38 — APX — PRODUCT SURFACE -->
+<section class="slide" id="s38">
+  <div class="slide-inner">
+    <div class="eyebrow">CELL B-0031 / B-0017 · CLI + MCP</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Five minutes from clone to recall.</h2>
+    <div class="two-col">
+      <div>
+        <div class="col-title">CLI</div>
+        <div class="table-scroll">
+          <table>
+            <tr><th>Command</th><th>Does</th></tr>
+            <tr><td><code class="code">init</code></td><td>Scaffold memory in the repo</td></tr>
+            <tr><td><code class="code">learn</code></td><td>Ingest git history + docs</td></tr>
+            <tr><td><code class="code">recall</code></td><td>Test what the agent retrieves</td></tr>
+            <tr><td><code class="code">remember</code></td><td>Write a fact by hand</td></tr>
+            <tr><td><code class="code">review</code></td><td>Triage auto-extracted facts</td></tr>
+            <tr><td><code class="code">reindex</code></td><td>Rebuild the SQLite cache from cells</td></tr>
+            <tr><td><code class="code">doctor</code></td><td>Health + coverage check</td></tr>
+            <tr><td><code class="code">serve</code></td><td>Run the MCP server</td></tr>
+          </table>
+        </div>
+      </div>
+      <div>
+        <div class="col-title">MCP client config</div>
+        <p class="prose" style="font-size:.9rem;">Claude Code, Cursor, Windsurf, and Continue.dev all point at the same server.</p>
+        <div class="codeblock">{ "mcpServers": {
+    "entergram": {
+      "command": "entergram",
+      "args": ["serve"]
+    }
+  } }</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 39 — APX — LOCAL-FIRST -->
+<section class="slide" id="s39">
+  <div class="slide-inner">
+    <div class="eyebrow">CELL B-0019 · A SELLING POINT, NOT AN AFTERTHOUGHT</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Nothing leaves the machine by default.</h2>
+    <div class="principle-list">
+      <div class="principle"><span class="mark">→</span><p>Local-first is a sales feature, not just a policy — enterprises can't send proprietary code to mem0 or any cloud memory tool.</p></div>
+      <div class="principle"><span class="mark">→</span><p>Extraction runs against a local model or the user's own API key; the cell store is plain local files.</p></div>
+      <div class="principle"><span class="mark">→</span><p><code class="code">entergram.toml</code> declares what's in scope — never <code class="code">.env</code>, secrets, or <code class="code">node_modules</code>.</p></div>
+      <div class="principle"><span class="mark">→</span><p>The same redact-identity scanner runs before any sync push or team share.</p></div>
+      <div class="principle"><span class="mark">→</span><p>The rule doesn't relax as the architecture grows up. The RLM/MARL dispatch layer (v2, not yet built) runs against a local model or the user's own key, same as extraction does today — orchestration doesn't open a new door for code to leave the machine.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 40 — APX — ANATOMY / RLM / MARL -->
+<section class="slide" id="s40">
+  <div class="slide-inner">
+    <div class="eyebrow">PROVENANCE · FULL BRAIN ANATOMY, MAPPED</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Every structure has an address.</h2>
+    <p class="prose" style="margin-top:1.1rem;">The design traces back to Frank Rosenblatt's 1961 <em>Principles of Neurodynamics</em> — the original perceptron paper — read as three unit types: sensory, association, response. Mapped structure by structure, the metaphor stops being decorative and becomes a build spec — for one repo's memory today, and for a whole company's nervous system in the slides ahead.</p>
+    <div class="table-scroll">
+      <table>
+        <tr><th>Structure</th><th>Function</th><th>Entergram today</th><th>Entergram next</th></tr>
+        <tr><td>Hippocampus</td><td>Indexing / addressing</td><td><code class="code">index.db</code> (SQLite FTS5)</td><td>—</td></tr>
+        <tr><td>Association cortex</td><td>Fact storage + lateral links</td><td>Markdown cells + <code class="code">[[links]]</code></td><td>—</td></tr>
+        <tr><td>Amygdala</td><td>High-salience memory</td><td><code class="code">type: gotcha</code> cells</td><td>—</td></tr>
+        <tr><td>Occipital lobe</td><td>Signal classification</td><td><code class="code">recall()</code> query → tag/FTS routing</td><td>—</td></tr>
+        <tr><td>Cerebellum</td><td>Verify + fine-tune</td><td><code class="code">entergram doctor</code></td><td>—</td></tr>
+        <tr><td>Prefrontal cortex</td><td>Executive doctrine</td><td><code class="code">entergram.toml</code> scope</td><td>—</td></tr>
+        <tr><td>Corpus callosum</td><td>Cross-hemisphere sync</td><td>—</td><td><code class="code">entergram sync</code> push/pull</td></tr>
+        <tr><td>Primary motor cortex</td><td>Motor program</td><td>—</td><td>a citable procedure — an RLM: decomposes into sub-calls of itself</td></tr>
+        <tr><td>Basal ganglia</td><td>Action selection</td><td>—</td><td>MARL dispatcher: which procedure fires, not just which fact returns</td></tr>
+        <tr><td>Peripheral nervous system</td><td>The effector itself</td><td>—</td><td>the retained script a procedure runs — migration, runbook, checklist</td></tr>
+      </table>
+    </div>
+    <div class="footnote">Two established algorithm families ground the "next" column, not just the metaphor: the motor-program layer is a <strong>recursive language model (RLM)</strong> — a model that decomposes one task into sub-calls of itself, the same shape a coding agent's own multi-step tool-calling loop already takes. The basal-ganglia dispatcher is formally a <strong>multi-agent reinforcement learning (MARL)</strong> problem — many procedures, one shared action space, competing for which one fires. Full mapping + the recall-vs-dispatch design consequence: <code class="code">docs/cognitive-runtime.md</code> in the Entergram repo.</div>
+  </div>
+</section>
+
+<!-- 41 — APX — TEN WEEKS IN NUMBERS -->
+<section class="slide" id="s41">
+  <div class="slide-inner">
+    <div class="eyebrow">PROVENANCE · TEN WEEKS OF GROWTH</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">The memory grew the way real engineering memory grows.</h2>
+    <p class="prose" style="margin-top:1.1rem;">First cell written 2026-06-06. Two and a half months later: 198 cells, still growing, still passing its own <code class="code">doctor</code> health check on every write-back.</p>
+    <div class="col-title" style="margin-top:2rem;">Commits to the store, by month</div>
+    <div class="vchart">
+      <div class="vchart-col"><div class="vchart-val">172</div><div class="vchart-bar" style="height:45%;"></div></div>
+      <div class="vchart-col"><div class="vchart-val">380</div><div class="vchart-bar" style="height:100%;"></div></div>
+      <div class="vchart-col"><div class="vchart-val">98</div><div class="vchart-bar partial" style="height:26%;"></div></div>
+    </div>
+    <div class="vchart-labels">
+      <div>Jun 2026</div><div>Jul 2026</div><div>Aug 2026 (to date)</div>
+    </div>
+    <div class="col-title" style="margin-top:2.6rem;">What actually gets remembered (top tags, by cell count)</div>
+    <div class="hbars">
+      <div class="hbar-row"><span class="hbar-label">gotcha</span><div class="hbar-track"><div class="hbar-fill" style="width:100%;"></div></div><span class="hbar-val">116</span></div>
+      <div class="hbar-row"><span class="hbar-label">reference</span><div class="hbar-track"><div class="hbar-fill" style="width:97%;"></div></div><span class="hbar-val">112</span></div>
+      <div class="hbar-row"><span class="hbar-label">infra</span><div class="hbar-track"><div class="hbar-fill" style="width:64%;"></div></div><span class="hbar-val">74</span></div>
+      <div class="hbar-row"><span class="hbar-label">workflow</span><div class="hbar-track"><div class="hbar-fill" style="width:52%;"></div></div><span class="hbar-val">60</span></div>
+      <div class="hbar-row"><span class="hbar-label">code</span><div class="hbar-track"><div class="hbar-fill" style="width:44%;"></div></div><span class="hbar-val">51</span></div>
+      <div class="hbar-row"><span class="hbar-label">gateway</span><div class="hbar-track"><div class="hbar-fill" style="width:31%;"></div></div><span class="hbar-val">36</span></div>
+      <div class="hbar-row"><span class="hbar-label">config</span><div class="hbar-track"><div class="hbar-fill" style="width:29%;"></div></div><span class="hbar-val">34</span></div>
+      <div class="hbar-row"><span class="hbar-label">auth</span><div class="hbar-track"><div class="hbar-fill" style="width:20%;"></div></div><span class="hbar-val">23</span></div>
+    </div>
+    <div class="footnote">The single biggest category is <code class="code">gotcha</code> — a mistake caught once, written down, never repeated. That's the product's entire thesis, one tag at a time.</div>
+  </div>
+</section>
+
+<!-- 42 — APX — WHAT IT CARRIED -->
+<section class="slide" id="s42">
+  <div class="slide-inner">
+    <div class="eyebrow">PROVENANCE · WHAT IT ACTUALLY CARRIED</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">Two and a half months. Here's what it carried.</h2>
+    <div class="story prose" style="margin-top:1.3rem;">
+      <p>Across those same ten weeks, the identical cells → index → recall loop was carrying real engineering weight, not toy examples. A multi-cloud infrastructure gateway shipped a rewrite that passed <span class="scalar">137/137</span> tests in one pass, then landed a twelve-unit release — event validation, idempotency, quota enforcement, streaming — in a single tranche. Its automated harness now stands at <span class="scalar">104/104</span> tests passing, with infrastructure-as-code coverage at <span class="scalar">100%</span> on one cloud, <span class="scalar">~85%</span> on a second, <span class="scalar">~75%</span> on a third.</p>
+      <p>A regulated workflow engine running underneath it went from a blended readiness score of <span class="scalar">72.5</span> to <span class="scalar">89.1</span> after a single contract rewrite, and now runs a live pool of <span class="scalar">9</span> state machines, <span class="scalar">24</span> execution units, and <span class="scalar">5</span> data-sync rules across <span class="scalar">18</span> live schemas.</p>
+      <p>Not every cell is a win, and that's the point. One of the oldest entries in the store is an honest negative: a health-signal mobile app's camera-based heart-rate model, validated against real people instead of a synthetic benchmark, came back <span class="scalar">~33 BPM</span> off a <span class="scalar">&lt;5 BPM</span> target. That uncomfortable number got written down, not buried — and it reshaped the entire product's direction. A live-streaming platform redeployed clean end-to-end under the same discipline.</p>
+    </div>
+    <div class="pull">A memory that only keeps the wins isn't a memory. It's a highlight reel.</div>
+  </div>
+</section>
+
+<!-- 43 — APX — SELF-AUTHORING RUNTIME -->
+<section class="slide" id="s43">
+  <div class="slide-inner">
+    <div class="eyebrow">PROVENANCE · THE SELF-AUTHORING RUNTIME</div>
+    <h2 style="font-size:clamp(2rem,4.5vw,3.2rem);">The same loop is building this deck, right now.</h2>
+    <div class="story prose" style="margin-top:1.3rem;">
+      <p>Cell B-0024 names the layer after recall <em>skills/orchestration</em> — "already exist as effectors." That isn't aspirational language. Every time a repeatable procedure gets used twice, it gets promoted: a thin motor program names exactly when it fires, cites the facts it needs, and binds to an effector — retained, runnable code, not prose. A hard-fail health check refuses to pass if a procedure claims it can execute something it can't.</p>
+    </div>
+    <div class="stat-grid" style="max-width:36rem;">
+      <div class="stat-card"><div class="stat-num">24</div><div class="stat-lbl">Skills installed</div></div>
+      <div class="stat-card"><div class="stat-num">1:1</div><div class="stat-lbl">Skill → effector rule</div></div>
+    </div>
+    <div class="story prose" style="margin-top:1.8rem;">
+      <p>This deck is an instance of it. Entergram's own <code class="code">.entergram/cells/</code> were harvested from this repo's own git history and docs; the artifact you're reading was assembled by recalling those cells — plus this personal brain's provenance — through the identical recall → synthesize → write-back loop the product sells. The system authored a description of itself.</p>
+    </div>
+    <div class="pull">It isn't just remembering the codebase anymore. It's writing the next procedure that will act on it.</div>
+  </div>
+</section>
+
+<!-- 44 — APX — EVERY CHANNEL / LEDGER -->
+<section class="slide" id="s44">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · EVERY CHANNEL IS A SENSE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Code isn't the only signal. Slack, meetings, and chat are inputs too.</h2>
+    <p class="prose" style="margin-top:1rem;">A nervous system doesn't sense through one channel. The activity ledger from the last slide already scoped to git and docs — extend the harvest, not the schema: a decision resolved in a Slack thread or assigned in a stand-up is the same shape of fact as one resolved in a merged PR, tagged by channel instead of by repo path.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 820 460" role="img" aria-label="Git and docs, Slack threads, Google Meet transcripts, and other chat tools all write into the same activity ledger, each tagged by channel instead of by repo path.">
+          <defs>
+            <marker id="dA-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+            <marker id="dA-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node hub" x="310" y="190" width="200" height="70"></rect>
+          <text class="lbl" x="410" y="218" text-anchor="middle">ACTIVITY</text>
+          <text class="lbl" x="410" y="234" text-anchor="middle">LEDGER</text>
+          <text class="lbl-sm" x="410" y="250" text-anchor="middle">{who, what, why, channel, cost}</text>
+
+          <rect class="node" x="20" y="30" width="200" height="54"></rect>
+          <text class="lbl" x="120" y="62" text-anchor="middle">GIT &amp; DOCS</text>
+
+          <rect class="node" x="600" y="30" width="200" height="54"></rect>
+          <text class="lbl" x="700" y="62" text-anchor="middle">SLACK THREADS</text>
+
+          <rect class="node" x="20" y="370" width="200" height="54"></rect>
+          <text class="lbl" x="120" y="402" text-anchor="middle">GOOGLE MEET</text>
+
+          <rect class="node" x="600" y="370" width="200" height="54"></rect>
+          <text class="lbl" x="700" y="402" text-anchor="middle">CHAT &amp; TICKETS</text>
+
+          <line class="edge" x1="150" y1="84" x2="350" y2="205" marker-end="url(#dA-arrow)"></line>
+          <text class="lbl-sm" x="220" y="140" text-anchor="middle">commits, PRs,</text>
+          <text class="lbl-sm" x="220" y="154" text-anchor="middle">issues, docs</text>
+
+          <line class="edge accent" x1="670" y1="84" x2="470" y2="205" marker-end="url(#dA-arrow-accent)"></line>
+          <text class="lbl-accent" x="600" y="140" text-anchor="middle">decisions resolved</text>
+          <text class="lbl-accent" x="600" y="154" text-anchor="middle">in-thread</text>
+
+          <line class="edge accent" x1="150" y1="370" x2="350" y2="248" marker-end="url(#dA-arrow-accent)"></line>
+          <text class="lbl-accent" x="220" y="320" text-anchor="middle">meeting decisions,</text>
+          <text class="lbl-accent" x="220" y="334" text-anchor="middle">action items</text>
+
+          <line class="edge accent" x1="670" y1="370" x2="470" y2="248" marker-end="url(#dA-arrow-accent)"></line>
+          <text class="lbl-accent" x="600" y="320" text-anchor="middle">ticket + comment</text>
+          <text class="lbl-accent" x="600" y="334" text-anchor="middle">decisions</text>
+        </svg>
+        <figcaption>The ledger's schema doesn't change — who, what, why, channel, cost. Only the harvest surface grows: git and docs are the v1 sources already shipped; Slack, Meet, and chat/ticket tools are the same shape of extraction, not a different architecture.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 45 — APX — RHYTHM OF INVESTMENT -->
+<section class="slide" id="s45">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · THE RHYTHM OF INVESTMENT</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Activity becomes cost on a fixed cadence, not a guess at quarter-end.</h2>
+    <p class="prose" style="margin-top:1rem;">"Investment rhythm" is a real entity, not a metaphor: a recurring job that reads the activity ledger on a fixed schedule and closes it into a dollar figure, per feature, per product, every time.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 820 300" role="img" aria-label="The activity ledger feeds a recurring investment-rhythm cycle, which meters agent-hours, human-hours, and infrastructure spend into a cost ledger per feature and product, which reports to the CFO.">
+          <defs>
+            <marker id="d5-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+            <marker id="d5-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node" x="20" y="125" width="150" height="60"></rect>
+          <text class="lbl" x="95" y="152" text-anchor="middle">ACTIVITY</text>
+          <text class="lbl" x="95" y="167" text-anchor="middle">LEDGER</text>
+
+          <circle class="node hub" cx="300" cy="155" r="55"></circle>
+          <text class="lbl" x="300" y="150" text-anchor="middle">INVESTMENT</text>
+          <text class="lbl" x="300" y="165" text-anchor="middle">RHYTHM</text>
+          <path class="edge accent" d="M 300 101 A 55 55 0 1 1 253 128" fill="none" marker-end="url(#d5-arrow-accent)"></path>
+          <text class="lbl-sm" x="300" y="228" text-anchor="middle">sprint → month → quarter, every cycle</text>
+
+          <rect class="node" x="440" y="125" width="200" height="60"></rect>
+          <text class="lbl" x="540" y="150" text-anchor="middle">COST LEDGER</text>
+          <text class="lbl-sm" x="540" y="166" text-anchor="middle">per feature · per product</text>
+
+          <rect class="node" x="710" y="125" width="90" height="60"></rect>
+          <text class="lbl" x="755" y="159" text-anchor="middle">CFO</text>
+
+          <line class="edge" x1="170" y1="155" x2="244" y2="155" marker-end="url(#d5-arrow)"></line>
+          <text class="lbl-sm" x="207" y="140" text-anchor="middle">meters</text>
+          <text class="lbl-sm" x="207" y="112" text-anchor="middle">hours × rate + infra</text>
+
+          <line class="edge accent" x1="355" y1="155" x2="438" y2="155" marker-end="url(#d5-arrow-accent)"></line>
+          <text class="lbl-accent" x="396" y="140" text-anchor="middle">closes each cycle</text>
+
+          <line class="edge" x1="640" y1="155" x2="708" y2="155" marker-end="url(#d5-arrow)"></line>
+          <text class="lbl-sm" x="674" y="140" text-anchor="middle">reports</text>
+        </svg>
+        <figcaption>Every cycle — sprint, month, quarter — the same ledger that recorded activity gets priced: agent-hours and human-hours times a rate, plus infrastructure, rolled up per feature and per product. That is the number the CFO actually receives, not a retrofit assembled at quarter close.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 46 — APX — FOUR CONSUMERS -->
+<section class="slide" id="s46">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · ONE BRAIN, FOUR CONSUMERS — THEN THE INVOICE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Engineering leadership, the CDO, marketing, and sales read the same brain for four different questions.</h2>
+    <p class="prose" style="margin-top:1rem;">Sales is the one consumer that terminates outside the company: closing a deal means invoicing an external stakeholder, on the same cadence engineering ships on. That invoice is the revenue side of the ledger in the next slide.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 860 540" role="img" aria-label="The product and feature brain feeds engineering leadership with a delivery signal, the CDO with a governance signal, marketing with proof points, and sales with pitch material; sales invoices an external stakeholder, closing the loop into revenue.">
+          <defs>
+            <marker id="d6-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+            <marker id="d6-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node hub" x="340" y="205" width="180" height="60"></rect>
+          <text class="lbl" x="430" y="230" text-anchor="middle">PRODUCT /</text>
+          <text class="lbl" x="430" y="245" text-anchor="middle">FEATURE BRAIN</text>
+
+          <rect class="node" x="30" y="30" width="230" height="56"></rect>
+          <text class="lbl" x="145" y="54" text-anchor="middle">ENGINEERING LEADERSHIP</text>
+          <text class="lbl-sm" x="145" y="70" text-anchor="middle">VP ENG / CTO</text>
+
+          <rect class="node" x="610" y="30" width="200" height="56"></rect>
+          <text class="lbl" x="710" y="62" text-anchor="middle">CDO</text>
+
+          <rect class="node" x="30" y="360" width="190" height="56"></rect>
+          <text class="lbl" x="125" y="392" text-anchor="middle">MARKETING</text>
+
+          <rect class="node" x="610" y="360" width="190" height="56"></rect>
+          <text class="lbl" x="705" y="392" text-anchor="middle">SALES</text>
+
+          <rect class="node hub" x="590" y="460" width="240" height="56"></rect>
+          <text class="lbl" x="710" y="484" text-anchor="middle">EXTERNAL STAKEHOLDERS</text>
+          <text class="lbl-sm" x="710" y="500" text-anchor="middle">customers, being invoiced</text>
+
+          <line class="edge" x1="390" y1="205" x2="200" y2="88" marker-end="url(#d6-arrow)"></line>
+          <text class="lbl-sm" x="270" y="130" text-anchor="middle">delivery signal:</text>
+          <text class="lbl-sm" x="270" y="144" text-anchor="middle">shipped, blocked, defect rate</text>
+
+          <line class="edge" x1="470" y1="205" x2="660" y2="88" marker-end="url(#d6-arrow)"></line>
+          <text class="lbl-sm" x="590" y="130" text-anchor="middle">governance signal:</text>
+          <text class="lbl-sm" x="590" y="144" text-anchor="middle">agents run, lineage, compliance</text>
+
+          <line class="edge" x1="390" y1="265" x2="150" y2="358" marker-end="url(#d6-arrow)"></line>
+          <text class="lbl-sm" x="270" y="330" text-anchor="middle">proof points:</text>
+          <text class="lbl-sm" x="270" y="344" text-anchor="middle">shipped, tested, differentiated</text>
+
+          <line class="edge" x1="470" y1="265" x2="680" y2="358" marker-end="url(#d6-arrow)"></line>
+          <text class="lbl-sm" x="590" y="330" text-anchor="middle">pitch material:</text>
+          <text class="lbl-sm" x="590" y="344" text-anchor="middle">proof + pricing rationale</text>
+
+          <line class="edge accent" x1="705" y1="416" x2="710" y2="458" marker-end="url(#d6-arrow-accent)"></line>
+          <text class="lbl-accent" x="790" y="440" text-anchor="end">invoices: contract value,</text>
+          <text class="lbl-accent" x="790" y="452" text-anchor="end">same cadence as delivery</text>
+        </svg>
+        <figcaption>Four functions read the identical product brain for four different questions — is it built, is it governed, is it differentiated, is it sellable. Sales is the one that reaches outside the org chart: a closed deal becomes an invoice to an external stakeholder, on the same cadence engineering ships on.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 47 — APX — LEADERSHIP LADDER -->
+<section class="slide" id="s47">
+  <div class="slide-inner">
+    <div class="eyebrow">THE NERVOUS SYSTEM, ORG-WIDE · THE LEADERSHIP LADDER AND ITS CADENCE</div>
+    <h2 style="font-size:clamp(1.9rem,4.2vw,3rem);">Individual to enterprise isn't one hop. Each rung has its own rhythm.</h2>
+    <p class="prose" style="margin-top:1rem;">"Engineering leadership" on the last slide was one box standing in for a real ladder: a contributor reports to a lead, a lead to a manager, a manager to a VP or CDO, a VP to the COO, the COO to the CEO. Each rung meets at a different cadence — but every one of them is reading the same activity ledger, not preparing a separate status report for the level above.</p>
+    <div class="diagram-wrap">
+      <figure class="diagram-fig">
+        <svg viewBox="0 0 1000 380" role="img" aria-label="A six-rung leadership ladder read left to right — individual contributor, team lead, engineering manager, VP engineering or CDO, COO, CEO — each connected by an arrow labeled with its reporting cadence, from daily standup at the left to a quarterly board-ready record at the right, all reading one shared activity ledger drawn beneath them.">
+          <defs>
+            <marker id="dC-arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead accent"></polygon>
+            </marker>
+            <marker id="dC-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,5 0,10" class="arrowhead"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="node" x="10" y="120" width="140" height="52"></rect>
+          <text class="lbl-sm" x="80" y="142" text-anchor="middle">INDIVIDUAL</text>
+          <text class="lbl-sm" x="80" y="156" text-anchor="middle">CONTRIBUTOR</text>
+
+          <rect class="node" x="180" y="120" width="130" height="52"></rect>
+          <text class="lbl-sm" x="245" y="150" text-anchor="middle">TEAM LEAD</text>
+
+          <rect class="node" x="340" y="120" width="140" height="52"></rect>
+          <text class="lbl-sm" x="410" y="142" text-anchor="middle">ENGINEERING</text>
+          <text class="lbl-sm" x="410" y="156" text-anchor="middle">MANAGER</text>
+
+          <rect class="node" x="510" y="120" width="150" height="52"></rect>
+          <text class="lbl-sm" x="585" y="142" text-anchor="middle">VP ENGINEERING</text>
+          <text class="lbl-sm" x="585" y="156" text-anchor="middle">/ CDO</text>
+
+          <rect class="node" x="690" y="120" width="120" height="52"></rect>
+          <text class="lbl-sm" x="750" y="150" text-anchor="middle">COO</text>
+
+          <rect class="node hub" x="840" y="120" width="150" height="52"></rect>
+          <text class="lbl-sm" x="915" y="150" text-anchor="middle">CEO</text>
+
+          <line class="edge accent" x1="150" y1="146" x2="176" y2="146" marker-end="url(#dC-arrow-accent)"></line>
+          <line class="edge accent" x1="310" y1="146" x2="336" y2="146" marker-end="url(#dC-arrow-accent)"></line>
+          <line class="edge accent" x1="480" y1="146" x2="506" y2="146" marker-end="url(#dC-arrow-accent)"></line>
+          <line class="edge accent" x1="660" y1="146" x2="686" y2="146" marker-end="url(#dC-arrow-accent)"></line>
+          <line class="edge accent" x1="810" y1="146" x2="836" y2="146" marker-end="url(#dC-arrow-accent)"></line>
+
+          <text class="lbl-accent" x="80" y="96" text-anchor="middle">DAILY</text>
+          <text class="lbl-sm" x="80" y="82" text-anchor="middle">standup</text>
+
+          <text class="lbl-accent" x="245" y="96" text-anchor="middle">WEEKLY</text>
+          <text class="lbl-sm" x="245" y="82" text-anchor="middle">1:1 + sprint review</text>
+
+          <text class="lbl-accent" x="410" y="96" text-anchor="middle">MONTHLY</text>
+          <text class="lbl-sm" x="410" y="82" text-anchor="middle">business review</text>
+
+          <text class="lbl-accent" x="585" y="96" text-anchor="middle">QUARTERLY</text>
+          <text class="lbl-sm" x="585" y="82" text-anchor="middle">operating review</text>
+
+          <text class="lbl-accent" x="750" y="96" text-anchor="middle">QUARTERLY</text>
+          <text class="lbl-sm" x="750" y="82" text-anchor="middle">+ as-needed</text>
+
+          <text class="lbl-accent" x="915" y="96" text-anchor="middle">BOARD-READY</text>
+          <text class="lbl-sm" x="915" y="82" text-anchor="middle">audited record</text>
+
+          <text class="lbl-sm" x="80" y="196" text-anchor="middle">what shipped,</text>
+          <text class="lbl-sm" x="80" y="209" text-anchor="middle">what's blocked</text>
+          <text class="lbl-sm" x="245" y="196" text-anchor="middle">velocity, risk</text>
+          <text class="lbl-sm" x="410" y="196" text-anchor="middle">roadmap,</text>
+          <text class="lbl-sm" x="410" y="209" text-anchor="middle">defect rate</text>
+          <text class="lbl-sm" x="585" y="196" text-anchor="middle">delivery + spend</text>
+          <text class="lbl-sm" x="750" y="196" text-anchor="middle">blended signal</text>
+          <text class="lbl-sm" x="915" y="196" text-anchor="middle">ROI, unedited</text>
+
+          <rect class="node hub" x="10" y="280" width="980" height="56"></rect>
+          <text class="lbl" x="500" y="304" text-anchor="middle">ONE ACTIVITY LEDGER</text>
+          <text class="lbl-sm" x="500" y="322" text-anchor="middle">every rung above queries this — the cadence changes, the source never does</text>
+
+          <line class="edge dashed" x1="80" y1="276" x2="80" y2="225" marker-end="url(#dC-arrow)"></line>
+          <line class="edge dashed" x1="245" y1="276" x2="245" y2="212" marker-end="url(#dC-arrow)"></line>
+          <line class="edge dashed" x1="410" y1="276" x2="410" y2="225" marker-end="url(#dC-arrow)"></line>
+          <line class="edge dashed" x1="585" y1="276" x2="585" y2="212" marker-end="url(#dC-arrow)"></line>
+          <line class="edge dashed" x1="750" y1="276" x2="750" y2="212" marker-end="url(#dC-arrow)"></line>
+          <line class="edge dashed" x1="915" y1="276" x2="915" y2="212" marker-end="url(#dC-arrow)"></line>
+        </svg>
+        <figcaption>The standup and the quarterly board review aren't different kinds of report — they're the same query against the same activity ledger, run at a different frequency and rolled up one tier further each time. Nobody drafts a deck to brief the level above; the cadence changes, the source never does.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var dots = Array.prototype.slice.call(document.querySelectorAll('.rail button'));
+  var counter = document.getElementById('counter');
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  dots.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var el = document.getElementById(btn.getAttribute('data-target'));
+      if(el) el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+    });
+  });
+
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        var idx = slides.indexOf(entry.target);
+        dots.forEach(function(d,i){ d.classList.toggle('active', i === idx); });
+        if(counter){
+          counter.textContent = String(idx+1).padStart(2,'0') + ' / ' + String(slides.length).padStart(2,'0');
+        }
+      }
+    });
+  }, { threshold: 0.5 });
+  slides.forEach(function(s){ io.observe(s); });
+
+  // core-memory grid canvas on cover
+  var canvas = document.getElementById('memcanvas');
+  if(canvas && canvas.getContext){
+    var ctx = canvas.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#B5622A';
+    var rule = getComputedStyle(document.documentElement).getPropertyValue('--rule').trim() || '#C7CFC2';
+
+    function hexToRgb(hex){
+      hex = hex.replace('#','');
+      var bigint = parseInt(hex,16);
+      return [(bigint>>16)&255, (bigint>>8)&255, bigint&255];
+    }
+    var accRgb = hexToRgb(accent);
+
+    var cols, rows, spacing, points = [];
+    function layout(){
+      var rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      spacing = 34;
+      cols = Math.max(4, Math.floor(rect.width / spacing));
+      rows = Math.max(2, Math.floor(rect.height / spacing));
+      points = [];
+      var offX = (rect.width - (cols-1)*spacing) / 2;
+      var offY = (rect.height - (rows-1)*spacing) / 2;
+      for(var r=0;r<rows;r++){
+        for(var c=0;c<cols;c++){
+          points.push({ x: offX + c*spacing, y: offY + r*spacing, phase: Math.random()*Math.PI*2 });
+        }
+      }
+    }
+    layout();
+    window.addEventListener('resize', layout);
+
+    var t = 0;
+    function draw(){
+      var rect = canvas.getBoundingClientRect();
+      ctx.clearRect(0,0,rect.width, rect.height);
+      // wires
+      ctx.strokeStyle = rule;
+      ctx.lineWidth = 1;
+      for(var r=0;r<rows;r++){
+        ctx.beginPath();
+        for(var c=0;c<cols;c++){
+          var p = points[r*cols+c];
+          if(c===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+        }
+        ctx.stroke();
+      }
+      for(var c=0;c<cols;c++){
+        ctx.beginPath();
+        for(var r2=0;r2<rows;r2++){
+          var p2 = points[r2*cols+c];
+          if(r2===0) ctx.moveTo(p2.x,p2.y); else ctx.lineTo(p2.x,p2.y);
+        }
+        ctx.stroke();
+      }
+      // rings
+      points.forEach(function(p){
+        var pulse = reduced ? 0.55 : 0.4 + 0.35*Math.sin(t*0.6 + p.phase);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(' + accRgb.join(',') + ',' + Math.max(0.12,pulse).toFixed(3) + ')';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+      });
+      if(!reduced){
+        t += 0.02;
+        requestAnimationFrame(draw);
+      }
+    }
+    draw();
+  }
+})();
+</script>
+
+</body>
+</html>

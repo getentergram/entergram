@@ -1,2 +1,5 @@
 User-agent: *
 Allow: /
+
+# The pitch deck is share-by-link only — not for search indexing.
+Disallow: /pitch.html

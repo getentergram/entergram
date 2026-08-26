@@ -1,0 +1,90 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * COLOR SYSTEM — derived by the dataviz method, validated with its script against
+ * THIS app's surface (#0a0a0f), not the reference surface. Do not hand-tune these.
+ *
+ * The governing constraint: this brain has 17 detected communities. Categorical hues
+ * are never cycled and never generated, and a node-link canvas is an all-pairs case
+ * (any node can land beside any other), where only three slots clear the floors. So
+ * community identity is NOT encoded as color. It is carried by:
+ *   - spatial grouping (fcose pulls a community together),
+ *   - a labeled hull + legend in Cluster View,
+ *   - faceting (small multiples), which the method prescribes past three series.
+ *
+ * What color DOES encode here:
+ *   magnitude (importance / heat / recency)  -> sequential blue ramp, one hue
+ *   <=3 coexisting identities                -> categorical slots 1-3
+ *   state (orphan / stale / draft)           -> status palette, always with icon+label
+ *   edge semantics (7 types)                 -> NOT color: dash pattern + width
+ *
+ * Validator results on surface #0a0a0f (dark):
+ *   categorical 1-3, --pairs all : PASS (worst CVD dE 9.4, normal-vision 20.9)
+ *   sequential 6-step, --ordinal : PASS (monotone, gaps >=0.06, light end 2.44:1)
+ */
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --surface-0: #0a0a0f;   /* page plane / canvas */
+  --surface-1: #12121a;   /* panels */
+  --surface-2: #191924;   /* raised controls */
+  --hairline:  #262633;
+
+  /* ink */
+  --ink-primary:   #ffffff;
+  --ink-secondary: #c3c2b7;
+  --ink-muted:     #898781;
+
+  /* sequential (magnitude), low -> high on a dark surface */
+  --seq-1: #184f95;
+  --seq-2: #256abf;
+  --seq-3: #3987e5;
+  --seq-4: #6da7ec;
+  --seq-5: #9ec5f4;
+  --seq-6: #cde2fb;
+
+  /* categorical slots 1-3 — the only three that clear all-pairs here */
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+
+  /* status — fixed, never themed, never color-alone */
+  --status-good:     #0ca30c;
+  --status-warning:  #fab219;
+  --status-serious:  #ec835a;
+  --status-critical: #d03b3b;
+
+  --accent: #7c6cff;
+}
+
+html, body {
+  background: var(--surface-0);
+  color: var(--ink-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+/* Panels read as glass over the canvas without washing out the graph beneath. */
+.glass {
+  background: color-mix(in srgb, var(--surface-1) 82%, transparent);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border: 1px solid var(--hairline);
+}
+
+.hairline { border-color: var(--hairline); }
+
+/* Axis/tick figures align vertically; hero numbers use proportional figures. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #35354a; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

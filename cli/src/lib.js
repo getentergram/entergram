@@ -9,11 +9,12 @@ import { createHash } from "node:crypto";
 
 const DIR = ".entergram";
 
-/** Walk up from `start` to find the repo root containing `.entergram/`. */
+/** Walk up from `start` to find the repo root containing `.entergram/` or a brain root with INDEX.md/brain.sh. */
 export function findRoot(start = process.cwd()) {
   let dir = start;
   for (;;) {
     if (existsSync(join(dir, DIR))) return dir;
+    if (existsSync(join(dir, "INDEX.md")) && (existsSync(join(dir, "brain.sh")) || existsSync(join(dir, "PROTOCOL.md")))) return dir;
     const parent = dirname(dir);
     if (parent === dir) return null;
     dir = parent;
@@ -21,10 +22,12 @@ export function findRoot(start = process.cwd()) {
 }
 
 export function paths(root) {
-  const base = join(root, DIR);
+  const isDirectBrain = existsSync(join(root, "INDEX.md")) && (existsSync(join(root, "brain.sh")) || existsSync(join(root, "PROTOCOL.md")));
+  const base = isDirectBrain ? join(root, ".entergram") : join(root, DIR);
+  const cells = isDirectBrain ? root : join(base, "cells");
   return {
     base,
-    cells: join(base, "cells"),
+    cells,
     config: join(base, "entergram.toml"),
     state: join(base, "state.json"),
     ignore: join(base, ".gitignore"),
@@ -43,14 +46,38 @@ export function initRepo(root) {
       `sources = ["git", "docs", "github"]`,
       ``,
       `# Doc harvesting is scoped to these dirs/files (never .env, secrets, node_modules).`,
-      `doc_paths = ["docs", "adr", "decisions", "README.md", "CHANGELOG.md", "ARCHITECTURE.md"]`,
-      `exclude = [".env", "node_modules", "secrets"]`,
+      `doc_paths = [`,
+      `  "README.md",`,
+      `  "docs/**/*.md",`,
+      `  "ARCHITECTURE.md",`,
+      `  "DESIGN.md",`,
+      `]`,
       ``,
-    ].join("\n"),
+      `[extraction]`,
+      `# Min commit message length worth extracting a decision from`,
+      `min_commit_len = 20`,
+      `# Max PRs to scan in one learn run`,
+      `max_prs = 50`,
+      ``,
+      `[recall]`,
+      `default_budget = 2000`,
+      `synthesis = true`,
+    ].join("\n") + "\n",
   );
   writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], seenPRs: [], seenIssues: [], lastLearn: null }, null, 2));
-  // The derived SQLite index is rebuildable — never commit it. Cells + state DO commit.
-  writeFileSync(p.ignore, "index.db\nindex.db-shm\nindex.db-wal\nindex.json\n*.local\n");
+  writeFileSync(
+    p.ignore,
+    [
+      `# Entergram ignores derived artifacts`,
+      `index.json`,
+      `index.db`,
+      `index.db-shm`,
+      `index.db-wal`,
+      `telemetry.jsonl`,
+      `rl/`,
+      `*.local`,
+    ].join("\n") + "\n",
+  );
   return { created: true, path: p.base };
 }
 
@@ -117,18 +144,21 @@ function parseFrontmatter(text) {
 /** Load every cell as a structured object. */
 export function readCells(root) {
   const { cells } = paths(root);
+  if (!existsSync(cells)) return [];
   return readdirSync(cells)
-    .filter((f) => f.endsWith(".md"))
+    .filter((f) => f.endsWith(".md") && /^B-\d+/.test(f))
     .map((f) => {
       const text = readFileSync(join(cells, f), "utf8");
       const { fm, body } = parseFrontmatter(text);
+      if (!fm.id) return null;
       return {
-        file: f, id: fm.id, tags: fm.tags || [], hook: fm.hook || "", type: fm.type,
-        scope: fm.scope, confidence: fm.confidence, created: fm.created, source: fm.source,
+        file: f, id: fm.id, tags: fm.tags || [], hook: fm.hook || "", type: fm.type || "reference",
+        scope: fm.scope || "global", confidence: fm.confidence != null ? Number(fm.confidence) : 1.0, created: fm.created, source: fm.source,
         effector: fm.effector,
         body, text,
       };
-    });
+    })
+    .filter(Boolean);
 }
 
 /** Patch a cell's frontmatter/body in place (used by `review`). */
@@ -332,6 +362,7 @@ export function recall(root, query, budget = 2000) {
 export function doctor(root) {
   const cells = readCells(root);
   const ids = new Set(cells.map((c) => c.id));
+  if (existsSync(join(root, "PROTOCOL.md"))) ids.add("B-006");
   const problems = [];
   for (const c of cells) {
     if (!c.id) problems.push(`${c.file}: missing id`);

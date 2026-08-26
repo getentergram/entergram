@@ -5,8 +5,11 @@ import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mc
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { findRoot, writeCell, learnGit, learnDocs, doctor, readCells } from "./lib.js";
-import { ensureIndex, reindex, search, dispatch, indexStats } from "./db.js";
+import { ensureIndex, reindex, search, dispatch, indexStats, traceDecision } from "./db.js";
 import { learnPRs } from "./learn.js";
+import { formatProvenance } from "./output.js";
+import { recordFeedback } from "./rl/rewards.js";
+import { SynapticNetwork } from "./runtime/synaptic_network.js";
 
 const textResult = (text) => ({ content: [{ type: "text", text }] });
 
@@ -24,7 +27,7 @@ export async function serve() {
     {
       title: "Recall engineering memory",
       description:
-        "Retrieve the decisions, rationale, and facts most relevant to a query, packed under a token budget. Call this BEFORE answering questions about the codebase's architecture, past decisions, or history — it's cheaper than re-deriving.",
+        "Retrieve the decisions, rationale, and facts most relevant to a query, ranked using RL hybrid retrieval (BM25 + vector + temporal validity), packed under a token budget. Call this BEFORE answering questions about the codebase's architecture, past decisions, or history — it's cheaper than re-deriving.",
       inputSchema: {
         query: z.string().describe("what you're looking for"),
         budget: z.number().optional().describe("token budget (default 2000)"),
@@ -74,6 +77,65 @@ export async function serve() {
   );
 
   server.registerTool(
+    "trace",
+    {
+      title: "Trace decision provenance",
+      description: "Trace the full causal provenance tree for a decision: alternatives considered, why options were rejected, governing constraints, and superseding chains.",
+      inputSchema: {
+        id: z.string().describe("Cell ID (e.g. B-0012)"),
+      },
+    },
+    async ({ id }) => {
+      ensureIndex(root);
+      const trace = traceDecision(root, id);
+      return textResult(formatProvenance(trace));
+    },
+  );
+
+  server.registerTool(
+    "stimulate",
+    {
+      title: "Stimulate synaptic network",
+      description: "Evaluate raw activation potentials across all living brain cells in the cognitive network in sub-millisecond execution time.",
+      inputSchema: {
+        query: z.string().describe("Context or intent to stimulate with"),
+      },
+    },
+    async ({ query }) => {
+      ensureIndex(root);
+      const network = SynapticNetwork.load(root);
+      const activations = network.stimulate(query);
+      if (!activations.length) return textResult(`No cells stimulated for "${query}".`);
+      const lines = activations.slice(0, 6).map((a) => `- ${a.cell.id} (${(a.potential * 100).toFixed(0)}% potential, ${a.cell.type}): ${a.cell.hook}`);
+      return textResult(`Active cellular assembly for "${query}":\n${lines.join("\n")}`);
+    },
+  );
+
+  server.registerTool(
+    "feedback",
+    {
+      title: "Report memory outcome feedback",
+      description: "Report whether a recalled memory was useful, cited, or led to a successful code change. Updates the RL contextual bandit and Hebbian weights.",
+      inputSchema: {
+        cell_id: z.string().describe("Cell ID that received feedback"),
+        outcome: z.enum(["cited", "commit_landed", "pr_merged", "dismissed", "prevented_bug"]).describe("Outcome type"),
+      },
+    },
+    async ({ cell_id, outcome }) => {
+      const signals = {
+        cited: outcome === "cited",
+        commitLanded: outcome === "commit_landed",
+        prMerged: outcome === "pr_merged",
+        dismissed: outcome === "dismissed",
+        preventedRegression: outcome === "prevented_bug",
+      };
+      const cell = readCells(root).find((c) => c.id === cell_id);
+      const res = recordFeedback(root, `mcp-fb-${Date.now()}`, signals, cell);
+      return textResult(`Feedback recorded for ${cell_id} (reward: ${res.reward}).`);
+    },
+  );
+
+  server.registerTool(
     "remember",
     {
       title: "Remember a fact",
@@ -84,7 +146,7 @@ export async function serve() {
         why: z.string().optional().describe("rationale"),
         tags: z.array(z.string()).optional(),
         scope: z.string().optional(),
-        type: z.enum(["decision", "gotcha", "convention", "reference", "architecture"]).optional(),
+        type: z.enum(["decision", "gotcha", "convention", "reference", "architecture", "procedure"]).optional(),
       },
     },
     async ({ what, why, tags, scope, type }) => {
@@ -117,11 +179,12 @@ export async function serve() {
 
   server.registerTool(
     "doctor",
-    { title: "Memory health", description: "Report memory health and index coverage.", inputSchema: {} },
+    { title: "Memory health", description: "Report memory health, index coverage, and stale decisions.", inputSchema: {} },
     async () => {
       const { count, problems } = doctor(root);
       const stats = indexStats(root);
-      return textResult(`Cells ${count}, indexed ${stats.total}. ${problems.length ? problems.length + " problem(s)." : "Consistent."}`);
+      const staleStr = stats.staleDecisions?.length ? ` ${stats.staleDecisions.length} stale decision(s).` : "";
+      return textResult(`Cells ${count}, indexed ${stats.total}.${staleStr} ${problems.length ? problems.length + " problem(s)." : "Consistent."}`);
     },
   );
 
