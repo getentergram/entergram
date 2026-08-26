@@ -230,6 +230,70 @@ export function shortestPath(adj, fromId, toId) {
   return path.reverse();
 }
 
+/**
+ * Rich chronological journey analysis between two cells.
+ * Computes step-by-step metadata, edge semantics, and timeline monotonicity.
+ */
+export function findJourney(adj, fromId, toId, nodes = [], edges = []) {
+  const pathIds = shortestPath(adj, fromId, toId);
+  if (!pathIds) return null;
+
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const edgeMap = new Map();
+  for (const e of edges) {
+    edgeMap.set(`${e.from}->${e.to}`, { ...e, direction: "forward" });
+    edgeMap.set(`${e.to}->${e.from}`, { ...e, direction: "reverse" });
+  }
+
+  const steps = pathIds.map((id, idx) => {
+    const node = byId.get(id) || { id, hook: "", type: "reference", created: null };
+    const prevId = idx > 0 ? pathIds[idx - 1] : null;
+    const edge = prevId ? edgeMap.get(`${prevId}->${id}`) || { type: "cites", direction: "forward" } : null;
+    
+    // Parse date
+    const dateStr = node.created || node.updated || "2026-06-01";
+    const ts = new Date(dateStr).getTime() || 0;
+
+    return {
+      index: idx + 1,
+      id,
+      hook: node.hook || "",
+      type: node.type || "reference",
+      scope: node.scope || "global",
+      date: dateStr.slice(0, 10),
+      timestamp: ts,
+      importance: node.importance ?? 0.5,
+      heat: node.heat ?? 0,
+      recency: node.recency ?? 1,
+      edge: edge ? { type: edge.type, direction: edge.direction } : null,
+      node,
+    };
+  });
+
+  // Check if steps are monotonically non-decreasing in time
+  let isChronological = true;
+  for (let i = 1; i < steps.length; i++) {
+    if (steps[i].timestamp < steps[i - 1].timestamp) {
+      isChronological = false;
+      break;
+    }
+  }
+
+  const sortedSteps = [...steps].sort((a, b) => a.timestamp - b.timestamp);
+  const dates = steps.map((s) => s.timestamp).filter(Boolean);
+  const minDate = dates.length ? new Date(Math.min(...dates)).toISOString().slice(0, 10) : null;
+  const maxDate = dates.length ? new Date(Math.max(...dates)).toISOString().slice(0, 10) : null;
+  const spanDays = dates.length ? Math.round((Math.max(...dates) - Math.min(...dates)) / (1000 * 60 * 60 * 24)) : 0;
+
+  return {
+    path: pathIds,
+    steps,
+    chronologicalSteps: sortedSteps,
+    isChronological,
+    timeSpan: { start: minDate, end: maxDate, days: spanDays },
+  };
+}
+
 /** Cosine similarity between two dense vectors; 0 when either has no magnitude. */
 export function cosine(a, b) {
   if (!a || !b || a.length !== b.length) return 0;

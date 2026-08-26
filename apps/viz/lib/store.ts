@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { create } from "zustand";
 import { api } from "./api";
-import type { CellNode, Graph, Meta, Suggestion, TimelineEvent, ViewId } from "./types";
+import type { CellNode, Graph, Meta, Suggestion, TimelineEvent, ViewId, JourneyResponse } from "./types";
 
 interface BrainState {
   meta: Meta | null;
@@ -27,6 +27,7 @@ interface BrainState {
   journeyFrom: string | null;
   journeyTo: string | null;
   journeyPath: string[] | null;
+  journeyData: JourneyResponse | null;
   journeyError: string | null;
 
   // timeline scrubbing — nodes after this instant are hidden, so the graph
@@ -69,6 +70,7 @@ export const useBrain = create<BrainState>((set, get) => ({
   journeyFrom: null,
   journeyTo: null,
   journeyPath: null,
+  journeyData: null,
   journeyError: null,
 
   scrubAt: null,
@@ -127,13 +129,13 @@ export const useBrain = create<BrainState>((set, get) => ({
 
   async setJourney(journeyFrom, journeyTo) {
     set({ journeyFrom, journeyTo, journeyError: null });
-    if (!journeyFrom || !journeyTo) return set({ journeyPath: null });
+    if (!journeyFrom || !journeyTo) return set({ journeyPath: null, journeyData: null });
     try {
-      const { path } = await api.path(journeyFrom, journeyTo);
-      set({ journeyPath: path });
+      const data = await api.path(journeyFrom, journeyTo);
+      set({ journeyPath: data.path, journeyData: data });
     } catch (e) {
       // "no path" is a real answer about the brain's shape, not a failure.
-      set({ journeyPath: null, journeyError: e instanceof Error ? e.message : String(e) });
+      set({ journeyPath: null, journeyData: null, journeyError: e instanceof Error ? e.message : String(e) });
     }
   },
 

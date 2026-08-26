@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { Core, EventObject } from "cytoscape";
 import { useBrain, useVisibleNodes } from "@/lib/store";
-import { layoutOptions, stylesheet, toElements, type EmphasisKey } from "@/lib/viz";
+import { getLayoutOptions, stylesheet, toElements, type EmphasisKey } from "@/lib/viz";
 
 /**
  * The primary canvas.
@@ -17,6 +17,7 @@ export default function BrainMap() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
   const layoutSigRef = useRef<string | null>(null); // node-set signature of the last layout run
+  const [spread, setSpread] = useState<number>(1.35);
 
   const graph = useBrain((s) => s.graph);
   const nodes = useVisibleNodes();
@@ -28,6 +29,15 @@ export default function BrainMap() {
 
   const emphasis = (meta?.personas.find((p) => p.id === persona)?.emphasis ||
     "importance") as EmphasisKey;
+
+  const triggerLayout = useCallback((spreadFactor: number = spread) => {
+    const cy = cyRef.current;
+    if (!cy || !nodes.length) return;
+    const opts = getLayoutOptions(spreadFactor, nodes.length);
+    const layout = cy.layout(opts as never);
+    layout.one("layoutstop", () => cy.fit(undefined, 50));
+    layout.run();
+  }, [spread, nodes.length]);
 
   // --- create once ---------------------------------------------------------
   useEffect(() => {
@@ -44,25 +54,24 @@ export default function BrainMap() {
         container: containerRef.current,
         style: stylesheet as never,
         elements: [],
-        minZoom: 0.08,
-        maxZoom: 4,
+        minZoom: 0.05,
+        maxZoom: 5,
         wheelSensitivity: 0.22,
-        pixelRatio: 1, // a 208-node canvas doesn't need retina fills; this keeps pans at 60fps
+        pixelRatio: 1,
       });
       cyRef.current = cy;
 
       cy.on("tap", "node", (e: EventObject) => select(e.target.id()));
       cy.on("tap", (e: EventObject) => { if (e.target === cy) select(null); });
 
-      // Labels are noise at low zoom and essential at high zoom.
       cy.on("zoom", () => {
-        const on = cy.zoom() > 1.15;
+        const on = cy.zoom() > 0.95;
         cy.batch(() => { on ? cy.nodes().addClass("labelled") : cy.nodes().removeClass("labelled"); });
       });
 
       cy.on("mouseover", "node", (e: EventObject) => e.target.addClass("labelled"));
       cy.on("mouseout", "node", (e: EventObject) => {
-        if (cy.zoom() <= 1.15) e.target.removeClass("labelled");
+        if (cy.zoom() <= 0.95) e.target.removeClass("labelled");
       });
     })();
 
@@ -90,18 +99,14 @@ export default function BrainMap() {
       cy.add(els as never);
     });
 
-    // Only lay out when the node SET changes. Re-running fcose because a colour
-    // changed would scramble positions the reader has already learned.
-    const signature = nodes.map((n) => n.id).join(",");
+    const signature = `${nodes.map((n) => n.id).join(",")}_s${spread}`;
     if (signature !== layoutSigRef.current) {
       layoutSigRef.current = signature;
-      // Bind on the layout object, not the core: `layoutstop` belongs to the run,
-      // and cytoscape's Core exposes `one`, not `once`.
-      const layout = cy.layout(layoutOptions as never);
-      layout.one("layoutstop", () => cy.fit(undefined, 60));
+      const layout = cy.layout(getLayoutOptions(spread, nodes.length) as never);
+      layout.one("layoutstop", () => cy.fit(undefined, 50));
       layout.run();
     }
-  }, [graph, nodes, emphasis]);
+  }, [graph, nodes, emphasis, spread]);
 
   // --- selection highlighting ---------------------------------------------
   useEffect(() => {
@@ -130,7 +135,6 @@ export default function BrainMap() {
       journeyPath.forEach((id, i) => {
         cy.getElementById(id).addClass("pathNode");
         if (i > 0) {
-          // The path is undirected, so light whichever direction actually exists.
           const a = journeyPath[i - 1];
           cy.edges().filter((e) => {
             const s = e.source().id(), t = e.target().id();
@@ -143,6 +147,50 @@ export default function BrainMap() {
 
   return (
     <div className="relative h-full w-full">
+      {/* Top Floating Graph Spread & View Controls */}
+      <div className="glass absolute right-4 top-4 z-20 flex items-center gap-1.5 rounded-lg border border-[var(--hairline)] px-2.5 py-1.5 text-[11px] shadow-lg backdrop-blur-md">
+        <span className="font-mono text-[10px] text-[var(--ink-muted)] uppercase tracking-wider mr-1">Spread:</span>
+        {[
+          { label: "1.0×", val: 1.0 },
+          { label: "1.35×", val: 1.35 },
+          { label: "1.75×", val: 1.75 },
+          { label: "2.2×", val: 2.2 },
+        ].map((s) => (
+          <button
+            key={s.val}
+            onClick={() => {
+              setSpread(s.val);
+              triggerLayout(s.val);
+            }}
+            className={`rounded px-2 py-0.5 font-mono text-[10px] transition-colors ${
+              Math.abs(spread - s.val) < 0.05
+                ? "bg-[var(--accent)] text-white font-medium shadow-sm"
+                : "bg-[var(--surface-2)] text-[var(--ink-secondary)] hover:text-white hover:bg-[var(--surface-3)]"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+
+        <div className="mx-1 h-3.5 w-[1px] bg-[var(--hairline)]" />
+
+        <button
+          onClick={() => triggerLayout(spread)}
+          title="Re-run repulsion force layout to untangle clusters"
+          className="flex items-center gap-1 rounded bg-[var(--surface-2)] px-2 py-0.5 text-[10px] text-[var(--ink-secondary)] hover:text-white hover:bg-[var(--surface-3)] transition-colors"
+        >
+          <span>⚡ Relax</span>
+        </button>
+
+        <button
+          onClick={() => cyRef.current?.fit(undefined, 50)}
+          title="Fit and center full graph in view"
+          className="flex items-center gap-1 rounded bg-[var(--surface-2)] px-2 py-0.5 text-[10px] text-[var(--ink-secondary)] hover:text-white hover:bg-[var(--surface-3)] transition-colors"
+        >
+          <span>⤢ Center</span>
+        </button>
+      </div>
+
       <div ref={containerRef} className="h-full w-full" />
       <MapLegend />
     </div>

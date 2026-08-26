@@ -4,6 +4,7 @@
 import Database from "better-sqlite3";
 import { join } from "node:path";
 import { existsSync, readFileSync, mkdirSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { readCells, paths } from "./lib.js";
 import { embedQuery, embedCell, serializeVector, deserializeVector, cosineSimilarity } from "./embeddings.js";
 import { computeDynamicConfidence, checkStaleness } from "./temporal.js";
@@ -106,11 +107,84 @@ export function reindex(root) {
 
     const wm = db.prepare("INSERT INTO ingest_watermark(source_kind,count,last_run) VALUES (@source_kind,@count,@last_run)");
     for (const row of loadWatermarks(root)) wm.run(row);
+
+    // Bootstrap historical citations from git commit mentions and markdown connectome
+    seedHistoricalCitations(root, db, cells);
   });
 
   wipe();
   db.close();
   return cells.length;
+}
+
+/** Seed historical citations from Git commit history and markdown text so the connectome has activity. */
+export function seedHistoricalCitations(root, db, cells, force = false) {
+  const citeCount = db.prepare("SELECT COUNT(*) n FROM cell_citations").get().n;
+  if (!force && citeCount >= cells.length) return citeCount;
+
+  const citeStmt = db.prepare("INSERT INTO cell_citations(cell_id, query, timestamp, success) VALUES (?, ?, ?, 1)");
+  
+  // Build a numeric map so B-0041, B-041, B-41 all map to the actual cell ID
+  const idNumMap = new Map();
+  const knownIds = new Set();
+  for (const c of cells) {
+    knownIds.add(c.id);
+    const m = c.id.match(/^B-(\d+)$/);
+    if (m) idNumMap.set(parseInt(m[1], 10), c.id);
+  }
+
+  let seeded = 0;
+
+  // 1. Mine Git commit history for B-NNN mentions
+  try {
+    const raw = execSync(
+      `git -C "${root}" log --no-merges -n 500 --date=iso --pretty=format:%ad%x1f%s%x1f%b%x1e`,
+      { encoding: "utf8", maxBuffer: 1 << 24, stdio: ["ignore", "pipe", "ignore"] },
+    );
+    const RS = "\x1e", US = "\x1f";
+    for (const entry of raw.split(RS)) {
+      if (!entry.trim()) continue;
+      const [date, subject, body = ""] = entry.split(US);
+      const text = `${subject} ${body}`;
+      for (const m of text.matchAll(/\bB-(\d{1,4})\b/g)) {
+        const num = parseInt(m[1], 10);
+        const cellId = idNumMap.get(num) || `B-${m[1]}`;
+        if (knownIds.has(cellId)) {
+          citeStmt.run(cellId, (subject || "").slice(0, 80), new Date(date).toISOString());
+          seeded++;
+        }
+      }
+    }
+  } catch { /* not a git repo or git log failed */ }
+
+  // 2. Ingest connectome citations from markdown references
+  const nowIso = new Date().toISOString();
+  for (const c of cells) {
+    const time = c.created ? new Date(c.created).toISOString() : nowIso;
+    for (const m of (c.text || "").matchAll(/\[\[(B-\d+)\]\]/g)) {
+      const numMatch = m[1].match(/^B-(\d+)$/);
+      const num = numMatch ? parseInt(numMatch[1], 10) : null;
+      const targetId = num ? (idNumMap.get(num) || m[1]) : m[1];
+      if (knownIds.has(targetId)) {
+        citeStmt.run(targetId, `Referenced in ${c.id}`, time);
+        seeded++;
+      }
+    }
+  }
+
+  // 3. For any cell still at 0 citations, record an initial touch so all active nodes have heat
+  const citedCells = new Set(
+    db.prepare("SELECT DISTINCT cell_id FROM cell_citations").all().map((r) => r.cell_id),
+  );
+  for (const c of cells) {
+    if (!citedCells.has(c.id)) {
+      const time = c.created ? new Date(c.created).toISOString() : nowIso;
+      citeStmt.run(c.id, `Ingested into memory (${c.type})`, time);
+      seeded++;
+    }
+  }
+
+  return seeded;
 }
 
 /** Keep the index in step with the cells if it's stale (cheap count check). */
@@ -294,6 +368,13 @@ export function dispatch(root, query, budget = 2000) {
         cells_returned: res.hits.map((h) => h.id),
         tokens_used: res.tokens,
       });
+      if (res.hits && res.hits.length > 0) {
+        const citeStmt = db.prepare("INSERT INTO cell_citations(cell_id, query, timestamp, success) VALUES (?, ?, ?, 1)");
+        const nowIso = new Date().toISOString();
+        for (const h of res.hits) {
+          citeStmt.run(h.id, query, nowIso);
+        }
+      }
       return res;
     };
 
@@ -336,6 +417,9 @@ export function dispatch(root, query, budget = 2000) {
       cells_returned: [bestProc.id],
       tokens_used: est(bestProc.hook + bestProc.body),
     });
+
+    const citeStmt = db.prepare("INSERT INTO cell_citations(cell_id, query, timestamp, success) VALUES (?, ?, ?, 1)");
+    citeStmt.run(bestProc.id, query, new Date().toISOString());
 
     return result;
   } finally {

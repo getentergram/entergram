@@ -1,4 +1,4 @@
-import type { Graph, Meta, SearchHit, TimelineEvent, Suggestion, CellNode } from "./types";
+import type { Graph, Meta, SearchHit, TimelineEvent, Suggestion, CellNode, JourneyResponse } from "./types";
 
 // In production the UI is served by the viz server itself, so the API is same-origin.
 // Under `next dev` the UI runs on 4701 and must reach the server on 4700.
@@ -25,9 +25,14 @@ export const api = {
       `/api/search?q=${encodeURIComponent(q)}`,
     ),
   path: (from: string, to: string) =>
-    get<{ path: string[]; nodes: CellNode[] }>(
+    get<JourneyResponse>(
       `/api/path?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
     ),
+  seedActivity: async () => {
+    const res = await fetch(`${BASE}/api/seed-activity`, { method: "POST" });
+    if (!res.ok) throw new Error("failed to seed activity");
+    return res.json();
+  },
   cell: (id: string) => get<CellNode & { metrics: CellNode }>(`/api/cell/${encodeURIComponent(id)}`),
 
   async patchCell(id: string, patch: { confidence?: number; tags?: string[]; why?: string }) {

@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 import { buildGraph } from "../graph/build.js";
 import { applyPersona, resolvePersonas } from "../graph/personas.js";
-import { buildAdjacency, shortestPath } from "../graph/metrics.js";
+import { buildAdjacency, shortestPath, findJourney } from "../graph/metrics.js";
 import { cellHistory, timelineStream } from "../graph/timeline.js";
 import { paths, readCells, updateCell, writeCell, deleteCell, readConfig } from "../lib.js";
 import { search } from "../db.js";
@@ -171,20 +171,13 @@ async function handleApi(path, method, url, body, ctx) {
   if (path === "/api/search" && method === "GET") {
     const q = url.searchParams.get("q") || "";
     if (!q.trim()) return [];
-    // Reuse the store's own FTS5 + embedding recall so the palette ranks results the
-    // same way the agent's `recall` does. One retrieval implementation, not two.
-    // `search` takes a TOKEN budget (not a row limit) and returns {hits, total, ...}.
     try {
       const limit = Number(url.searchParams.get("limit")) || 20;
-      // The budget exists to cap what an AGENT pulls into context; a palette has no
-      // such constraint. Pass an effectively-infinite budget so ranking is preserved
-      // but packing never truncates (a real budget returned 1 hit of 29 here, because
-      // one 4KB cell exhausted it), then cut to the row limit.
       const { hits, total } = search(root, q, Number.MAX_SAFE_INTEGER);
+      cache.invalidate();
+      broadcast(clients, "graph:changed", { generation: cache.generation });
       return { total, hits: (hits || []).slice(0, limit) };
     } catch {
-      // FTS unavailable (index not built, or a query it can't tokenize) — degrade to
-      // a substring scan rather than failing the palette outright.
       const graph = await cache.get();
       const needle = q.toLowerCase();
       const hits = graph.nodes
@@ -199,10 +192,24 @@ async function handleApi(path, method, url, body, ctx) {
     const adj = buildAdjacency(graph.nodes, graph.edges);
     const from = url.searchParams.get("from");
     const to = url.searchParams.get("to");
-    const ids = shortestPath(adj, from, to);
-    if (!ids) return httpError(404, { error: "no path", from, to });
+    const journey = findJourney(adj, from, to, graph.nodes, graph.edges);
+    if (!journey) return httpError(404, { error: "no path", from, to });
     const byId = new Map(graph.nodes.map((n) => [n.id, n]));
-    return { path: ids, nodes: ids.map((id) => byId.get(id)) };
+    return {
+      ...journey,
+      nodes: journey.path.map((id) => byId.get(id)),
+    };
+  }
+
+  if (path === "/api/seed-activity" && method === "POST") {
+    const { openDb, seedHistoricalCitations } = await import("../db.js");
+    const db = openDb(root);
+    const cells = readCells(root);
+    const seeded = seedHistoricalCitations(root, db, cells);
+    db.close();
+    cache.invalidate();
+    broadcast(clients, "graph:changed", { generation: cache.generation });
+    return { ok: true, seeded };
   }
 
   const cellMatch = path.match(/^\/api\/cell\/([^/]+)$/);

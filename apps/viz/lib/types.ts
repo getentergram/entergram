@@ -142,4 +142,28 @@ export interface Meta {
   config: { name: string | null };
 }
 
+export interface JourneyStep {
+  index: number;
+  id: string;
+  hook: string;
+  type: string;
+  scope: string;
+  date: string;
+  timestamp: number;
+  importance: number;
+  heat: number;
+  recency: number;
+  edge: { type: string; direction: "forward" | "reverse" } | null;
+  node: CellNode;
+}
+
+export interface JourneyResponse {
+  path: string[];
+  steps?: JourneyStep[];
+  chronologicalSteps?: JourneyStep[];
+  isChronological?: boolean;
+  timeSpan?: { start: string | null; end: string | null; days: number };
+  nodes: CellNode[];
+}
+
 export type ViewId = "map" | "timeline" | "journey" | "cluster" | "heatmap";

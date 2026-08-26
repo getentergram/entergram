@@ -209,18 +209,30 @@ export const stylesheet = [
   { selector: ".labelled", style: { "text-opacity": 1 } },
 ];
 
-/** fcose settings: cluster-aware, deterministic enough to be re-runnable. */
-export const layoutOptions = {
-  name: "fcose",
-  quality: "proof",
-  animate: true,
-  animationDuration: 600,
-  randomize: false,
-  nodeSeparation: 90,
-  idealEdgeLength: 95,
-  nodeRepulsion: 7000,
-  gravity: 0.28,
-  gravityRange: 3.2,
-  packComponents: true, // keeps the 7 orphans from being flung off-canvas
-  padding: 40,
-};
+/** fcose settings: cluster-aware, deterministic, spacious repulsion for clean graph readability. */
+export function getLayoutOptions(spread: number = 1.0, nodeCount: number = 200) {
+  const baseRepulsion = Math.max(75000, nodeCount * 400);
+  return {
+    name: "fcose",
+    quality: "proof",
+    animate: true,
+    animationDuration: 700,
+    randomize: false,
+    nodeSeparation: Math.round(160 * spread),
+    idealEdgeLength: Math.round(190 * spread),
+    nodeRepulsion: Math.round(baseRepulsion * spread),
+    edgeElasticity: 0.35,
+    gravity: 0.10 / Math.max(0.5, spread),
+    gravityRange: 1.8,
+    gravityCompound: 0.8,
+    gravityRangeCompound: 1.5,
+    packComponents: true,
+    padding: Math.round(60 * spread),
+    nodeDimensionsIncludeLabels: true,
+    tile: true,
+    tilingPaddingVertical: 45,
+    tilingPaddingHorizontal: 45,
+  };
+}
+
+export const layoutOptions = getLayoutOptions(1.0);

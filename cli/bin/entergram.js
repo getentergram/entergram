@@ -18,9 +18,9 @@ import { applySupervisorMutation } from "../src/runtime/mutation_tracker.js";
 const program = new Command();
 program.name("get-entergram").description("Persistent engineering memory for AI coding agents.").version("0.1.0");
 
-function requireRoot() {
-  const root = findRoot();
-  if (!root) { console.error(formatError("No memory store found. Run `get-entergram init` first.")); process.exit(1); }
+function requireRoot(dir) {
+  const root = findRoot(dir || process.cwd());
+  if (!root) { console.error(formatError(`No memory store found in ${dir || process.cwd()}. Run \`get-entergram init\` first.`)); process.exit(1); }
   return root;
 }
 
@@ -202,14 +202,14 @@ program.command("review").description("Review low-confidence memory cells")
     console.log("\nActions: --accept <id> | --reject <id> | --tag <id> --to a,b | --why <id> --to \"…\"");
   });
 
-program.command("reindex").description("Rebuild the search index from memory cells").action(() => {
-  const root = requireRoot();
+program.command("reindex [dir]").description("Rebuild the search index from memory cells").action((dir) => {
+  const root = requireRoot(dir);
   const n = reindex(root);
   console.log(formatSuccess(`Reindexed ${n} memory cell(s).`));
 });
 
-program.command("doctor").description("Check memory health").action(() => {
-  const root = requireRoot();
+program.command("doctor [dir]").description("Check memory health").action((dir) => {
+  const root = requireRoot(dir);
   const { count, problems } = doctor(root);
   const stats = indexStats(root);
   console.log(`Memory cells: ${count} | indexed: ${stats.total}`);
@@ -235,14 +235,16 @@ program.command("serve").description("Run the MCP server (stdio) for your agent"
   await serve();
 });
 
-program.command("viz").description("Open the visual brain — explore memory as a living knowledge graph")
+program.command("viz [dir]").description("Open the visual brain — explore memory as a living knowledge graph")
   .option("-p, --port <port>", "port to listen on", "4700")
   .option("--host <host>", "interface to bind (loopback only unless you know why)", "127.0.0.1")
   .option("--no-open", "don't open a browser")
-  .action(async (opts) => {
-    const root = requireRoot();
+  .action(async (dir, opts) => {
+    const storeDir = typeof dir === "string" ? dir : undefined;
+    const options = typeof dir === "object" && dir !== null ? dir : opts;
+    const root = requireRoot(storeDir);
     const { startVizServer } = await import("../src/viz/server.js");
-    const server = await startVizServer(root, { port: Number(opts.port), host: opts.host });
+    const server = await startVizServer(root, { port: Number(options.port || 4700), host: options.host || "127.0.0.1" });
 
     if (!server.uiDir) {
       console.log(formatError("UI bundle missing — the API is up but there's nothing to render."));
@@ -251,11 +253,11 @@ program.command("viz").description("Open the visual brain — explore memory as 
     console.log(formatSuccess(`Brain OS running at ${server.url}`));
     console.log(formatInfo(`Store: ${root}`));
     if (server.plugins.length) console.log(formatInfo(`Plugins: ${server.plugins.join(", ")}`));
-    if (opts.host !== "127.0.0.1" && opts.host !== "localhost") {
-      console.log(formatError(`Bound to ${opts.host} — this serves your full memory text to the network.`));
+    if (options.host && options.host !== "127.0.0.1" && options.host !== "localhost") {
+      console.log(formatError(`Bound to ${options.host} — this serves your full memory text to the network.`));
     }
 
-    if (opts.open) {
+    if (options.open) {
       const opener = process.platform === "darwin" ? "open" : process.platform === "win32" ? "start" : "xdg-open";
       const { spawn } = await import("node:child_process");
       spawn(opener, [server.url], { stdio: "ignore", detached: true, shell: process.platform === "win32" }).unref();

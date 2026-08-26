@@ -33,35 +33,67 @@ export default function HeatmapView() {
   );
 
   const noActivity = mode === "heat" && (graph?.stats.activations ?? 0) === 0;
+  const [seeding, setSeeding] = useState(false);
+  const refresh = useBrain((s) => s.refresh);
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      const { api } = await import("@/lib/api");
+      await api.seedActivity();
+      await refresh();
+    } catch {
+      /* ignore */
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden p-5">
       <header className="mb-3">
-        <div className="flex items-baseline gap-3">
-          <h2 className="text-sm font-medium">Heat</h2>
-          <div className="flex gap-1">
-            {MODES.map((m) => (
-              <button
-                key={m.id}
-                onClick={() => setMode(m.id)}
-                className={`rounded px-2 py-1 text-[11px] transition-colors ${
-                  mode === m.id
-                    ? "bg-[var(--surface-2)] text-[var(--ink-primary)]"
-                    : "text-[var(--ink-muted)] hover:text-[var(--ink-secondary)]"
-                }`}
-              >
-                {m.label}
-              </button>
-            ))}
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-sm font-medium">Heat</h2>
+            <div className="flex gap-1">
+              {MODES.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setMode(m.id)}
+                  className={`rounded px-2 py-1 text-[11px] transition-colors ${
+                    mode === m.id
+                      ? "bg-[var(--surface-2)] text-[var(--ink-primary)]"
+                      : "text-[var(--ink-muted)] hover:text-[var(--ink-secondary)]"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
           </div>
+
+          <button
+            onClick={handleSeed}
+            disabled={seeding}
+            title="Harvest citations and commit touches from Git history to seed baseline recall heat"
+            className="flex items-center gap-1 rounded bg-[var(--surface-2)] px-2.5 py-1 text-[10px] text-[var(--ink-secondary)] hover:bg-[var(--surface-3)] hover:text-white transition-colors"
+          >
+            <span>{seeding ? "⚡ Ingesting..." : "⚡ Seed History Activity"}</span>
+          </button>
         </div>
         <p className="mt-1 text-[11px] text-[var(--ink-muted)]">{spec.blurb}</p>
       </header>
 
       {noActivity && (
-        <div className="mb-3 rounded-md border border-[var(--hairline)] bg-[var(--surface-1)] px-3 py-2 text-[11px] text-[var(--status-warning)]">
-          ⚠ No recall activity recorded yet. This store has never answered a query, so
-          every cell reads zero — try “Most central” instead.
+        <div className="mb-3 flex items-center justify-between rounded-md border border-amber-800/40 bg-amber-950/30 px-3.5 py-2 text-[11px] text-[var(--status-warning)]">
+          <span>⚠ No runtime recall activity recorded yet. Click "Seed History Activity" to bootstrap historical telemetry.</span>
+          <button
+            onClick={handleSeed}
+            disabled={seeding}
+            className="ml-2 rounded bg-amber-800/60 px-2 py-0.5 text-[10px] font-medium text-amber-100 hover:bg-amber-700"
+          >
+            {seeding ? "Seeding..." : "Seed Now"}
+          </button>
         </div>
       )}
 
