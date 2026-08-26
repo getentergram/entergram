@@ -3,7 +3,7 @@
 
 import Database from "better-sqlite3";
 import { join } from "node:path";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, mkdirSync } from "node:fs";
 import { readCells, paths } from "./lib.js";
 import { embedQuery, embedCell, serializeVector, deserializeVector, cosineSimilarity } from "./embeddings.js";
 import { computeDynamicConfidence, checkStaleness } from "./temporal.js";
@@ -13,7 +13,9 @@ import { LinUCBBandit, extractFeatures } from "./rl/bandit.js";
 import { logTelemetryEvent } from "./rl/telemetry.js";
 
 export function openDb(root) {
-  const db = new Database(join(paths(root).base, "index.db"));
+  const p = paths(root);
+  if (!existsSync(p.base)) mkdirSync(p.base, { recursive: true });
+  const db = new Database(join(p.base, "index.db"));
   db.pragma("journal_mode = WAL");
   db.exec(`
     CREATE TABLE IF NOT EXISTS cells(
@@ -221,8 +223,8 @@ function packHits(rows, query, budget) {
   const hits = [];
   let used = 0;
   for (const r of rows) {
-    const cost = est(r.hook + r.body);
-    if (used + cost > budget && hits.length) break;
+    const cost = est(r.hook);
+    if (used + cost > budget) continue;
     hits.push({
       id: r.id,
       hook: r.hook,
