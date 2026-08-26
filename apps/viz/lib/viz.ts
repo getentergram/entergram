@@ -180,31 +180,43 @@ export const stylesheet = [
   // --- interaction states -------------------------------------------------
   {
     selector: ".dim",
-    style: { "background-opacity": 0.1, "line-color": "#1c1c26", opacity: 0.12, "text-opacity": 0 },
+    style: { "background-opacity": 0.08, "line-color": "#111827", opacity: 0.10, "text-opacity": 0 },
   },
   {
     selector: ".focus",
     style: {
-      "border-width": 3,
-      "border-color": "#ffffff",
+      "border-width": 4,
+      "border-color": "#38bdf8",
       "border-opacity": 1,
       "text-opacity": 1,
-      "font-size": 11,
+      "font-size": 13,
+      "font-weight": "bold",
       color: "#ffffff",
       "z-index": 99,
     },
   },
   {
     selector: ".neighbor",
-    style: { "text-opacity": 1, "border-width": 2, "border-color": "#6da7ec", "border-opacity": 0.9 },
+    style: { "text-opacity": 1, "border-width": 2.5, "border-color": "#60a5fa", "border-opacity": 0.95 },
   },
   {
     selector: "edge.pathEdge",
-    style: { "line-color": "#cde2fb", opacity: 1, width: 3, "z-index": 98 },
+    style: { "line-color": "#38bdf8", opacity: 1, width: 4.5, "z-index": 98 },
   },
   {
     selector: "node.pathNode",
-    style: { "border-width": 3, "border-color": "#cde2fb", "border-opacity": 1, "text-opacity": 1, "z-index": 99 },
+    style: {
+      "border-width": 4,
+      "border-color": "#38bdf8",
+      "border-opacity": 1,
+      "background-color": "#0369a1",
+      "background-opacity": 1,
+      "text-opacity": 1,
+      "font-size": 13,
+      "font-weight": "bold",
+      color: "#38bdf8",
+      "z-index": 99,
+    },
   },
   { selector: ".labelled", style: { "text-opacity": 1 } },
 ];
@@ -217,7 +229,10 @@ export function getLayoutOptions(spread: number = 1.0, nodeCount: number = 200) 
     quality: "proof",
     animate: true,
     animationDuration: 700,
-    randomize: false,
+    // MUST be true. Elements are added fresh each time the node set changes, so every
+    // node sits at the origin; with randomize:false fcose seeds from those identical
+    // positions and collapses the whole graph into one corner instead of spreading it.
+    randomize: true,
     nodeSeparation: Math.round(160 * spread),
     idealEdgeLength: Math.round(190 * spread),
     nodeRepulsion: Math.round(baseRepulsion * spread),
