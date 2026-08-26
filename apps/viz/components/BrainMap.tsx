@@ -18,6 +18,7 @@ export default function BrainMap() {
   const cyRef = useRef<Core | null>(null);
   const layoutSigRef = useRef<string | null>(null); // node-set signature of the last layout run
   const [spread, setSpread] = useState<number>(1.35);
+  const [cyReady, setCyReady] = useState<number>(0);
 
   const graph = useBrain((s) => s.graph);
   const nodes = useVisibleNodes();
@@ -60,6 +61,7 @@ export default function BrainMap() {
         pixelRatio: 1,
       });
       cyRef.current = cy;
+      setCyReady((c) => c + 1);
 
       cy.on("tap", "node", (e: EventObject) => select(e.target.id()));
       cy.on("tap", (e: EventObject) => { if (e.target === cy) select(null); });
@@ -106,7 +108,7 @@ export default function BrainMap() {
       layout.one("layoutstop", () => cy.fit(undefined, 50));
       layout.run();
     }
-  }, [graph, nodes, emphasis, spread]);
+  }, [graph, nodes, emphasis, spread, cyReady]);
 
   // --- selection highlighting ---------------------------------------------
   useEffect(() => {
