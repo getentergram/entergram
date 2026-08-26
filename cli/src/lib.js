@@ -50,7 +50,7 @@ export function initRepo(root) {
   );
   writeFileSync(p.state, JSON.stringify({ seenShas: [], seenDocs: [], seenPRs: [], seenIssues: [], lastLearn: null }, null, 2));
   // The derived SQLite index is rebuildable — never commit it. Cells + state DO commit.
-  writeFileSync(p.ignore, "index.db\nindex.db-shm\nindex.db-wal\nindex.json\n*.local\n");
+  writeFileSync(p.ignore, "index.db\nindex.db-shm\nindex.db-wal\nindex.json\ntelemetry.jsonl\nrl/\n*.local\n");
   return { created: true, path: p.base };
 }
 

@@ -1,9 +1,14 @@
 # deps / build
 node_modules/
 dist/
+.next/
+out/
 *.tsbuildinfo
 # entergram local artifacts (never commit the derived index or per-repo memory of THIS repo)
 .entergram/index.sqlite
+.entergram/index.db*
+.entergram/telemetry.jsonl
+.entergram/rl/
 .entergram/**/*.local
 # secrets / env
 .env
@@ -13,3 +18,4 @@ dist/
 
 # Agent worktrees / local agent scratch
 .claude/
+

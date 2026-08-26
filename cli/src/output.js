@@ -1,3 +1,5 @@
+import { formatProvenanceTree } from "./provenance.js";
+
 export function formatSuccess(message) {
   return `✓ ${message}`;
 }
@@ -60,4 +62,37 @@ export function formatLearnSummary({ added, merged, git, docs, pr, issue, viaLLM
   if (viaLLM) detailParts.push(`${viaLLM} via LLM`);
   if (detailParts.length) summary += `; ${detailParts.join('; ')}`;
   return summary + '.';
+}
+
+/** Render a decision provenance tree */
+export function formatProvenance(trace) {
+  return formatProvenanceTree(trace);
+}
+
+/** Render telemetry metrics summary */
+export function formatTelemetry(stats) {
+  const lines = [
+    `RL Telemetry & Decision Intelligence Stats`,
+    `• Total Interaction Events: ${stats.totalEvents}`,
+    `• Total Tokens Processed:   ${stats.totalTokens} (avg ${stats.avgTokensPerCall} tok/call)`,
+    `• Rewarded Outcome Events:  ${stats.rewardedEvents} (avg reward: ${stats.avgReward})`,
+  ];
+  if (stats.byType && Object.keys(stats.byType).length > 0) {
+    const types = Object.entries(stats.byType).map(([k, v]) => `${k} (${v})`).join(', ');
+    lines.push(`• Events by Type:           ${types}`);
+  }
+  return lines.join('\n');
+}
+
+/** Render cellular synaptic network statistics */
+export function formatNetworkStats(stats) {
+  const lines = [
+    `Cognitive Cellular Synaptic Network`,
+    `• Active Brain Cells:        ${stats.totalCells}`,
+    `• Total Dendritic Links:     ${stats.totalDendriticLinks} (avg ${stats.avgLinksPerCell} links/cell)`,
+    `• Verified Task Resolutions: ${stats.totalResolutions}`,
+    `• Task Execution Failures:   ${stats.totalFailures}`,
+    `• Network Mean Plasticity:   ${stats.avgPlasticity}`,
+  ];
+  return lines.join('\n');
 }
