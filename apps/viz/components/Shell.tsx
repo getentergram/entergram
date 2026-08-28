@@ -11,6 +11,7 @@ import HeatmapView from "./HeatmapView";
 import Inspector from "./Inspector";
 import CommandPalette from "./CommandPalette";
 import StatBar from "./StatBar";
+import CinematicDirector from "./CinematicDirector";
 
 const VIEWS: { id: ViewId; label: string; hint: string }[] = [
   { id: "map", label: "Brain Map", hint: "The whole connectome" },
@@ -122,6 +123,9 @@ export default function Shell() {
 
       <StatBar />
       <CommandPalette />
+      {typeof window !== "undefined" && (new URLSearchParams(window.location.search).get("cinematic") === "1" || (window as any).isCinematic) && (
+        <CinematicDirector />
+      )}
     </div>
   );
 }
