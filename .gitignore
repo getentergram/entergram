@@ -20,4 +20,4 @@ out/
 .claude/
 
 cli/ui/_next
-docs/media
+docs/mediascripts/__pycache__
