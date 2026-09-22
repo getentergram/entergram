@@ -25,7 +25,7 @@ Anything that speaks MCP: Claude Code, Cursor, Windsurf, Continue. Add one `get-
 Recall cost is proportional to what a query matches, not total memory size — a large memory costs about the same per query as a small one. `learn` is incremental via watermarks, so re-running is cheap.
 
 **Is it free / open source?**
-The CLI is MIT. Paid tiers add hosted sync, team features, and a done-for-you install. See the [README](../README.md) for pricing.
+Yes — entirely. MIT-licensed, every feature, no tiers and no seat counts.
 
 **How do I remove a wrong memory?**
 `get-entergram review --reject <id>` (deletes the cell) or edit/delete the Markdown file directly, then `get-entergram reindex`.
