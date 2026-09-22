@@ -1,0 +1,89 @@
+name: Sync Homebrew formula
+
+# There is no registry to push a formula to — the formula IS the distribution.
+# "Publishing" it means keeping its url and sha256 in step with whatever version
+# is live on npm. This runs after a successful CLI publish, rewrites both fields
+# from the real published tarball, and opens a PR with the change.
+on:
+  workflow_run:
+    workflows: ["Publish CLI to npm"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    # Only chase a publish that actually succeeded.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Resolve the published tarball and its checksum
+        id: npm
+        run: |
+          set -euo pipefail
+          version=$(npm view get-entergram version)
+          tarball=$(npm view get-entergram dist.tarball)
+          # Prefer the registry's own integrity value over re-hashing where possible,
+          # but shasum of the exact bytes Homebrew will download is the ground truth.
+          sha=$(curl -fsSL "$tarball" | shasum -a 256 | awk '{print $1}')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha"         >> "$GITHUB_OUTPUT"
+          echo "get-entergram@$version -> $sha"
+
+      - name: Rewrite the formula
+        id: edit
+        run: |
+          set -euo pipefail
+          f=Formula/get-entergram.rb
+          before=$(sha1sum "$f" | awk '{print $1}')
+          # Replace only the url and sha256 lines; leave install/test blocks alone.
+          sed -i -E \
+            -e 's|^(  url ").*(")$|\1${{ steps.npm.outputs.tarball }}\2|' \
+            -e 's|^(  sha256 ").*(")$|\1${{ steps.npm.outputs.sha }}\2|' \
+            "$f"
+          after=$(sha1sum "$f" | awk '{print $1}')
+          if [ "$before" = "$after" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Formula already matches the published tarball."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            grep -E '^\s+(url|sha256)' "$f"
+          fi
+
+      - name: Open a PR with the updated formula
+        if: steps.edit.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/homebrew-${{ steps.npm.outputs.version }}
+          title: "chore(brew): point formula at get-entergram@${{ steps.npm.outputs.version }}"
+          commit-message: "chore(brew): point formula at get-entergram@${{ steps.npm.outputs.version }}"
+          body: |
+            Generated after `get-entergram@${{ steps.npm.outputs.version }}` was published.
+
+            - `url` → `${{ steps.npm.outputs.tarball }}`
+            - `sha256` → `${{ steps.npm.outputs.sha }}`
+
+            The checksum is a `shasum -a 256` of the exact bytes Homebrew will download,
+            not a value copied from the registry metadata.
+
+            Verify locally before merging:
+
+            ```bash
+            brew tap chandrasaripaka/entergram git@github.com:chandrasaripaka/entergram.git
+            brew install chandrasaripaka/entergram/get-entergram
+            entergram doctor
+            ```

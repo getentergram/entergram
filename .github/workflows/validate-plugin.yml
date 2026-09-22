@@ -1,0 +1,129 @@
+name: Validate Claude plugin
+
+# The plugin has no registry either: the repo IS the marketplace, so whatever sits
+# on main is what users install the moment they run /plugin marketplace add.
+# That makes main the release surface, and these checks the only gate in front of it.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".claude-plugin/**"
+      - "skills/**"
+      - "commands/**"
+      - "cli/package.json"
+      - ".github/workflows/validate-plugin.yml"
+  pull_request:
+    paths:
+      - ".claude-plugin/**"
+      - "skills/**"
+      - "commands/**"
+      - "cli/package.json"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Manifests parse and carry the required fields
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const fail = m => { console.log(`::error::${m}`); process.exitCode = 1; };
+
+          const plugin = JSON.parse(fs.readFileSync('.claude-plugin/plugin.json', 'utf8'));
+          const market = JSON.parse(fs.readFileSync('.claude-plugin/marketplace.json', 'utf8'));
+
+          if (!plugin.name) fail('plugin.json: name is required');
+          if (!/^[a-z0-9-]+$/.test(plugin.name || '')) fail('plugin.json: name must be kebab-case');
+
+          for (const f of ['name', 'owner', 'plugins']) {
+            if (!market[f]) fail(`marketplace.json: ${f} is required`);
+          }
+          if (!market.owner?.name) fail('marketplace.json: owner.name is required');
+          if (!Array.isArray(market.plugins) || market.plugins.length === 0) {
+            fail('marketplace.json: plugins must be a non-empty array');
+          }
+          for (const p of market.plugins ?? []) {
+            if (!p.name) fail('marketplace.json: every plugin entry needs a name');
+            if (p.source === undefined) fail(`marketplace.json: ${p.name} needs a source`);
+          }
+          console.log(`install id: /plugin install ${market.plugins[0].name}@${market.name}`);
+          JS
+
+      - name: Versions agree across manifests and the package
+        # A plugin pinned to a version the CLI no longer ships installs an MCP server
+        # that does not match the skills shipped beside it.
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const plugin = JSON.parse(fs.readFileSync('.claude-plugin/plugin.json', 'utf8'));
+          const market = JSON.parse(fs.readFileSync('.claude-plugin/marketplace.json', 'utf8'));
+          const pkg = JSON.parse(fs.readFileSync('cli/package.json', 'utf8'));
+          const entry = market.plugins.find(p => p.name === plugin.name) ?? {};
+          const seen = { 'plugin.json': plugin.version, 'marketplace.json': entry.version, 'cli/package.json': pkg.version };
+          console.log(seen);
+          const set = new Set(Object.values(seen).filter(Boolean));
+          if (set.size > 1) {
+            console.log(`::error::version mismatch across manifests: ${JSON.stringify(seen)}`);
+            process.exitCode = 1;
+          }
+          JS
+
+      - name: Declared components exist on disk
+        run: |
+          node - <<'JS'
+          const fs = require('fs');
+          const fail = m => { console.log(`::error::${m}`); process.exitCode = 1; };
+
+          // Components live at the plugin ROOT, never inside .claude-plugin/.
+          if (fs.existsSync('.claude-plugin/skills') || fs.existsSync('.claude-plugin/commands')) {
+            fail('skills/ and commands/ must sit at the repo root, not inside .claude-plugin/');
+          }
+
+          let skills = 0;
+          for (const d of fs.existsSync('skills') ? fs.readdirSync('skills') : []) {
+            const p = `skills/${d}/SKILL.md`;
+            if (!fs.existsSync(p)) { fail(`skills/${d} has no SKILL.md`); continue; }
+            const body = fs.readFileSync(p, 'utf8');
+            const fm = /^---\n([\s\S]*?)\n---/.exec(body);
+            if (!fm) { fail(`${p} has no frontmatter`); continue; }
+            for (const k of ['name', 'description']) {
+              if (!new RegExp(`^${k}:`, 'm').test(fm[1])) fail(`${p} frontmatter is missing ${k}`);
+            }
+            skills++;
+          }
+
+          const commands = fs.existsSync('commands')
+            ? fs.readdirSync('commands').filter(f => f.endsWith('.md')).length : 0;
+          console.log(`skills: ${skills}, commands: ${commands}`);
+          if (skills === 0 && commands === 0) fail('plugin ships no skills and no commands');
+          JS
+
+      - name: The declared MCP server is installable
+        # plugin.json runs the server via npx against the published package, so the
+        # plugin is only as installable as that package is resolvable.
+        run: |
+          set -uo pipefail
+          spec=$(node -p "
+            const p=require('./.claude-plugin/plugin.json');
+            const s=p.mcpServers&&Object.values(p.mcpServers)[0];
+            (s&&(s.args||[]).find(a=>/get-entergram/.test(a)))||''
+          ")
+          if [ -z "$spec" ]; then
+            echo "MCP server does not resolve a published package — nothing to check."
+            exit 0
+          fi
+          echo "plugin resolves: $spec"
+          pkg=${spec%@*}; [ -z "$pkg" ] && pkg=$spec
+          if npm view "$spec" version >/dev/null 2>&1; then
+            echo "$spec resolves on npm — plugin can start its MCP server."
+          else
+            echo "::warning::$spec does not resolve on npm yet. The plugin will fail at startup with E404 until the package is published."
+          fi
