@@ -1,15 +1,6 @@
 import WaitlistForm from "./components/WaitlistForm";
 
-const STRIPE_LINK = process.env.NEXT_PUBLIC_STRIPE_LINK || "#";
-const UPI_LINK = process.env.NEXT_PUBLIC_UPI_LINK || "";
 const GITHUB_LINK = process.env.NEXT_PUBLIC_GITHUB_LINK || "#";
-
-// Subscription Payment Links (optional). When set, the tier can be subscribed to directly;
-// otherwise it falls back to the waitlist.
-const subTier = (name: string, envLink: string | undefined, price: string, unit: string, blurb: string) =>
-  envLink
-    ? { name, price, unit, cta: "Subscribe", href: envLink, blurb, highlight: false }
-    : { name, price, unit, cta: "Join waitlist", href: "#waitlist", blurb, highlight: false };
 
 const features = [
   {
@@ -47,13 +38,6 @@ const pluginSteps = [
   { cmd: "/plugin install entergram@entergram", label: "Install — MCP server and skills wire themselves" },
 ];
 
-const tiers = [
-  { name: "Install", price: "$500", unit: "one-off", cta: "Get set up", href: STRIPE_LINK, blurb: "We install Entergram on your repo, tune it, and wire your agent in an hour.", highlight: true },
-  subTier("Starter", process.env.NEXT_PUBLIC_STRIPE_STARTER, "$19", "/mo", "Solo, one repo."),
-  subTier("Pro", process.env.NEXT_PUBLIC_STRIPE_PRO, "$49", "/mo", "Private sync, PR/issue learning, priority."),
-  subTier("Teams", process.env.NEXT_PUBLIC_STRIPE_TEAMS, "$199", "/mo per repo", "Shared engineering memory for the whole team."),
-];
-
 export default function Home() {
   return (
     <main className="mx-auto max-w-5xl px-6">
@@ -62,7 +46,7 @@ export default function Home() {
         <span className="text-lg font-bold tracking-tight">🧠 Entergram</span>
         <div className="flex items-center gap-6 text-sm text-white/70">
           <a href="#features" className="hidden hover:text-white sm:inline">Features</a>
-          <a href="#pricing" className="hidden hover:text-white sm:inline">Pricing</a>
+          <a href="#free" className="hidden hover:text-white sm:inline">Free</a>
           <a href={GITHUB_LINK} className="hover:text-white">GitHub</a>
           <a href="#waitlist" className="rounded-lg bg-white/10 px-3 py-1.5 hover:bg-white/20">Early access</a>
         </div>
@@ -137,39 +121,21 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="scroll-mt-24 py-16">
-        <h2 className="mb-2 text-center text-2xl font-bold">Pricing</h2>
-        <p className="mb-10 text-center text-sm text-white/50">Start with a done-for-you install. Subscriptions when you want them.</p>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {tiers.map((t) => (
-            <div
-              key={t.name}
-              className={`flex flex-col rounded-2xl border p-6 ${t.highlight ? "border-accent bg-accent/10" : "border-white/10 bg-panel"}`}
-            >
-              <h3 className="text-sm font-semibold text-white/70">{t.name}</h3>
-              <p className="mt-2">
-                <span className="text-3xl font-bold">{t.price}</span>
-                <span className="text-sm text-white/50"> {t.unit}</span>
-              </p>
-              <p className="mt-3 flex-1 text-sm text-white/60">{t.blurb}</p>
-              <a
-                href={t.href}
-                className={`mt-6 rounded-lg px-4 py-2 text-center text-sm font-semibold transition ${t.highlight ? "bg-accent text-white hover:opacity-90" : "bg-white/10 hover:bg-white/20"}`}
-              >
-                {t.cta}
-              </a>
-              {t.name === "Install" && UPI_LINK && (
-                <a href={UPI_LINK} className="mt-2 text-center text-xs text-white/50 hover:text-white hover:underline">
-                  or pay via UPI →
-                </a>
-              )}
-            </div>
-          ))}
+      {/* Free & open source */}
+      <section id="free" className="scroll-mt-24 py-16">
+        <div className="rounded-2xl border border-accent/20 bg-accent/[0.06] p-8 text-center">
+          <h2 className="text-2xl font-bold">Free, and open source</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-white/60">
+            Every feature, no tiers, no seat counts. Entergram is MIT-licensed and runs entirely on
+            your machine — your code and your memory never leave it unless you choose to sync.
+          </p>
+          <a
+            href={GITHUB_LINK}
+            className="mt-6 inline-block rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
+          >
+            Get it on GitHub
+          </a>
         </div>
-        <p className="mt-6 text-center text-sm text-white/40">
-          Need on-prem / local-first at scale? <a href="#waitlist" className="text-accent2 hover:underline">Book a demo →</a>
-        </p>
       </section>
 
       {/* Footer */}
@@ -177,7 +143,7 @@ export default function Home() {
         <span>🧠 Entergram — persistent memory for AI coding agents.</span>
         <div className="flex gap-6">
           <a href={GITHUB_LINK} className="hover:text-white">GitHub</a>
-          <a href="#pricing" className="hover:text-white">Pricing</a>
+          <a href="#free" className="hover:text-white">Free</a>
           <a href="#waitlist" className="hover:text-white">Waitlist</a>
         </div>
       </footer>

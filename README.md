@@ -31,19 +31,46 @@ Entergram gives your agent a **persistent, local-first engineering memory** buil
 
 > *"I connected Entergram to a 300,000-line codebase in under five minutes. Claude immediately understood the architecture, explained why past decisions were made, and remembered everything across sessions."*
 
-## Quickstart
+## Install
+
+Installation differs by harness. Pick one — they deliver the same tool.
+
+### Claude Code — plugin (recommended)
+
+```
+/plugin marketplace add chandrasaripaka/entergram
+/plugin install entergram@entergram
+```
+
+The plugin declares the MCP server itself and brings the `recall-before-build` and
+`capture-decision` skills with it, plus `/recall` and `/why`. Nothing to install globally and no
+config file to edit.
+
+### npm — any agent, or standalone
 
 ```bash
-# 1. Install
-npm install -g get-entergram        # or: curl -fsSL https://entergram.dev/install | bash
+npm install -g get-entergram
+```
 
-# 2. Learn your repo (git history + docs → memory)
+### Homebrew
+
+This repo is not named `homebrew-*`, so tap it by URL:
+
+```bash
+brew tap chandrasaripaka/entergram https://github.com/chandrasaripaka/entergram
+brew install get-entergram
+```
+
+### Then, in your project
+
+```bash
 cd your-project
 get-entergram init
-get-entergram learn
-
-# 3. Connect your agent (below), then just code — it remembers.
+get-entergram learn     # git history + docs → memory
 ```
+
+Connect your agent (below) — or skip it entirely if you installed the Claude Code plugin, which
+wires itself. Then just code; it remembers.
 
 ### Connect your agent
 
@@ -93,15 +120,10 @@ Markdown is the source of truth; the local SQLite index is just a rebuildable ca
 | `get-entergram doctor` | Health + coverage check |
 | `get-entergram serve` | Run the MCP server for your agent |
 
-## Pricing
+## Free and open source
 
-| | Price | For |
-|---|---|---|
-| **Install** | **$500 one-off** | We set it up on your repo, tune it, wire your agent |
-| Starter | $19/mo | Solo, one repo |
-| Pro | $49/mo | Private sync, PR/issue learning, priority |
-| Teams | $199/mo per repo | Shared engineering memory for the whole team |
-| Enterprise | [Book a demo](#) | On-prem / local-first at scale |
+Every feature, no tiers, no seat counts. Entergram is MIT-licensed and runs entirely on your
+machine — your code and your memory never leave it unless you choose to sync.
 
 ## Entergram vs. the alternatives
 
