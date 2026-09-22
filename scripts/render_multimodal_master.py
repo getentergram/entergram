@@ -3,12 +3,13 @@ import os
 import glob
 import subprocess
 import shutil
+from pathlib import Path
 
-MEDIA_DIR = "/home/getentergram/Documents/GitHub/entergram/docs/media"
+MEDIA_DIR = str(Path(__file__).resolve().parent.parent / "docs" / "media")
 AUDIO_DIR = os.path.join(MEDIA_DIR, "audio")
 IMAGES_DIR = os.path.join(MEDIA_DIR, "scraped_images")
 SUBTITLE_DIR = os.path.join(MEDIA_DIR, "subtitles")
-RAW_DIR = "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scratch/raw_flagship_4k"
+RAW_DIR = str(Path(os.environ.get("ENTERGRAM_RAW_DIR", Path(__file__).resolve().parent.parent / "docs" / "media" / "raw_flagship_4k")))
 
 MASTER_AUDIO = os.path.join(AUDIO_DIR, "brain_os_master_mix.wav")
 OUTPUT_FLAGSHIP = os.path.join(MEDIA_DIR, "brain_os_flagship_90s.mp4")

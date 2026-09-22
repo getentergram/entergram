@@ -1,9 +1,15 @@
 import { createRequire } from "node:module";
-const require = createRequire("/home/getentergram/Documents/GitHub/entergram/apps/viz/package.json");
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const REPO = resolve(HERE, "..");
+// Resolve playwright out of apps/viz, which is where it is installed.
+const require = createRequire(resolve(REPO, "apps/viz/package.json"));
 const { chromium } = require("playwright");
 import { mkdirSync, existsSync, rmSync } from "node:fs";
 
-const RAW_DIR = "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scratch/raw_flagship_4k";
+const RAW_DIR = process.env.ENTERGRAM_RAW_DIR ?? resolve(REPO, "docs/media/raw_flagship_4k");
 
 if (existsSync(RAW_DIR)) rmSync(RAW_DIR, { recursive: true, force: true });
 mkdirSync(RAW_DIR, { recursive: true });

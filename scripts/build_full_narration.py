@@ -2,8 +2,9 @@
 import os
 import sys
 import subprocess
+from pathlib import Path
 
-MEDIA_DIR = "/home/getentergram/Documents/GitHub/entergram/docs/media"
+MEDIA_DIR = str(Path(__file__).resolve().parent.parent / "docs" / "media")
 AUDIO_DIR = os.path.join(MEDIA_DIR, "audio")
 SUBTITLE_DIR = os.path.join(MEDIA_DIR, "subtitles")
 os.makedirs(AUDIO_DIR, exist_ok=True)
