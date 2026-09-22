@@ -6,7 +6,7 @@
 
 **The *why* behind your codebase — architecture, decisions, and rationale — on tap in Claude Code, Cursor, and Windsurf. In 5 minutes.**
 
-[![Install](https://img.shields.io/badge/install-npm%20i%20--g%20entergram-black)](#quickstart)
+[![Install](https://img.shields.io/badge/install-npm%20i%20--g%20get--entergram-black)](#install)
 [![MCP](https://img.shields.io/badge/works%20with-MCP-blue)](#connect-your-agent)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -58,8 +58,11 @@ This repo is not named `homebrew-*`, so tap it by URL:
 
 ```bash
 brew tap chandrasaripaka/entergram https://github.com/chandrasaripaka/entergram
-brew install get-entergram
+brew install chandrasaripaka/entergram/get-entergram
 ```
+
+> Pick **one** of npm or Homebrew. Both install the same `entergram` and `get-entergram`
+> binaries, so having both present makes which one you get depend on `PATH` order.
 
 ### Then, in your project
 
@@ -137,6 +140,6 @@ machine — your code and your memory never leave it unless you choose to sync.
 
 ## Support
 
-⭐ Star this repo · 🐛 Issues & PRs welcome · 💬 [Book a setup call](#)
+⭐ Star this repo · 🐛 Issues & PRs welcome
 
 <div align="center"><sub>Built on a memory architecture dogfooded across 180+ facts, 4 machines, and 500+ commits.</sub></div>
