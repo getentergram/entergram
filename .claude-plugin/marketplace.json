@@ -1,0 +1,23 @@
+{
+  "name": "entergram",
+  "owner": {
+    "name": "Entergram Project"
+  },
+  "plugins": [
+    {
+      "name": "entergram",
+      "source": ".",
+      "displayName": "Entergram",
+      "description": "Persistent engineering memory for your coding agent — recall prior decisions before you build, capture the rationale after you decide.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Entergram Project"
+      },
+      "homepage": "https://github.com/chandrasaripaka/entergram",
+      "repository": "https://github.com/chandrasaripaka/entergram",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": ["memory", "recall", "architecture", "decisions", "mcp"]
+    }
+  ]
+}

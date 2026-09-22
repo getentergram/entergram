@@ -196,7 +196,7 @@ entergram sync [push|pull]                                 # phase 2 — team/cr
 entergram serve         # MCP server (stdio)
 ```
 
-Distribution: `npm i -g entergram` (Node wrapper) or `curl … | bash`. Node/TS core (fast MCP libs,
+Distribution: `npm i -g get-entergram` (Node wrapper) or `curl … | bash`. Node/TS core (fast MCP libs,
 Cursor/Continue ecosystem), SQLite via better-sqlite3, `simple-git` + `gh` for harvest.
 
 ---
@@ -216,7 +216,7 @@ Cursor/Continue ecosystem), SQLite via better-sqlite3, `simple-git` + `gh` for h
 |---|---|---|
 | 1 | **Positioning**: name, domain, README rewrite, ICP, one-liner | See Day-1 pack below; name → Entergram; ICP = senior eng on 50k+ LOC, 6mo+ repos on Claude/Cursor |
 | 2 | **Landing page**: hero, demo GIF slot, features, pricing, waitlist, Stripe link (Next.js/Vercel/Tailwind) | No blog, no docs yet |
-| 3 | **Installation**: one-command install + CLI shell (`init`/`remember`/`recall`/`learn`/`doctor`) | `npm i -g entergram` or `curl…\|bash`; wraps `brain.sh` internals |
+| 3 | **Installation**: one-command install + CLI shell (`init`/`remember`/`recall`/`learn`/`doctor`) | `npm i -g get-entergram` or `curl…\|bash`; wraps `brain.sh` internals |
 | 4 | **Memory engine**: repo indexing (README, docs, ADRs, git history) into SQLite | Cell schema §3; source of truth = markdown, SQLite = FTS index; no external DB |
 | 5 | **Agent integration**: Claude Code, Cursor, Windsurf, Continue | Ship as **MCP server** (§6) — the real "one integration" |
 | 6 | **GitHub integration**: learn from commits/PRs/issues → {decision, reason, outcome, author} | Ingestion pipeline §4; squash-aware; incremental watermark |

@@ -40,6 +40,13 @@ const steps = [
   { cmd: "get-entergram serve  # add to your agent as an MCP server", label: "Connect your agent — then just code" },
 ];
 
+// Claude Code users can skip the manual MCP wiring above: the plugin declares the
+// server itself, and ships the recall/capture skills alongside it.
+const pluginSteps = [
+  { cmd: "/plugin marketplace add chandrasaripaka/entergram", label: "Add the marketplace" },
+  { cmd: "/plugin install entergram@entergram", label: "Install — MCP server and skills wire themselves" },
+];
+
 const tiers = [
   { name: "Install", price: "$500", unit: "one-off", cta: "Get set up", href: STRIPE_LINK, blurb: "We install Entergram on your repo, tune it, and wire your agent in an hour.", highlight: true },
   subTier("Starter", process.env.NEXT_PUBLIC_STRIPE_STARTER, "$19", "/mo", "Solo, one repo."),
@@ -111,6 +118,22 @@ export default function Home() {
               <pre className="overflow-x-auto font-mono text-sm text-accent2">{s.cmd}</pre>
             </div>
           ))}
+        </div>
+
+        <div className="mt-10 rounded-xl border border-accent2/20 bg-accent2/[0.04] p-5">
+          <p className="mb-1 text-sm font-semibold">Using Claude Code? Two commands.</p>
+          <p className="mb-4 text-xs text-white/50">
+            The plugin declares the MCP server itself — no global install, no config file to edit —
+            and brings the recall and capture skills with it.
+          </p>
+          <div className="space-y-3">
+            {pluginSteps.map((s, i) => (
+              <div key={i} className="rounded-lg border border-white/10 bg-panel p-3">
+                <p className="mb-1.5 text-xs uppercase tracking-wide text-white/40">{s.label}</p>
+                <pre className="overflow-x-auto font-mono text-sm text-accent2">{s.cmd}</pre>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
