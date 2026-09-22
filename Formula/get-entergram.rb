@@ -8,7 +8,7 @@ class GetEntergram < Formula
   #   curl -sL "$(npm view get-entergram dist.tarball)" | shasum -a 256
   # Kept in valid 64-char form so `brew style` passes; an install against it fails
   # loudly with a checksum mismatch rather than a parse error.
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 "d04a6817095fbbd97ed807444a0dea08a43f1e8acacab61e94e9e932cc90fefc"
   license "MIT"
 
   depends_on "node"
