@@ -180,31 +180,58 @@ export const stylesheet = [
   // --- interaction states -------------------------------------------------
   {
     selector: ".dim",
-    style: { "background-opacity": 0.1, "line-color": "#1c1c26", opacity: 0.12, "text-opacity": 0 },
+    style: {
+      "background-opacity": 0.5,
+      "line-color": "#1e293b",
+      opacity: 0.45,
+      "text-opacity": 0,
+    },
   },
   {
     selector: ".focus",
     style: {
-      "border-width": 3,
-      "border-color": "#ffffff",
+      "border-width": 4,
+      "border-color": "#38bdf8",
       "border-opacity": 1,
       "text-opacity": 1,
-      "font-size": 11,
-      color: "#ffffff",
-      "z-index": 99,
+      "font-size": 12,
+      color: "#38bdf8",
+      "z-index": 999,
+      "background-color": "#0284c7",
     },
   },
   {
     selector: ".neighbor",
-    style: { "text-opacity": 1, "border-width": 2, "border-color": "#6da7ec", "border-opacity": 0.9 },
+    style: {
+      "text-opacity": 1,
+      "border-width": 2.5,
+      "border-color": "#818cf8",
+      "border-opacity": 0.9,
+      "background-color": "#4f46e5",
+    },
   },
   {
     selector: "edge.pathEdge",
-    style: { "line-color": "#cde2fb", opacity: 1, width: 3, "z-index": 98 },
+    style: {
+      "line-color": "#38bdf8",
+      opacity: 1,
+      width: 4.5,
+      "z-index": 998,
+      "curve-style": "bezier",
+    },
   },
   {
     selector: "node.pathNode",
-    style: { "border-width": 3, "border-color": "#cde2fb", "border-opacity": 1, "text-opacity": 1, "z-index": 99 },
+    style: {
+      "border-width": 4,
+      "border-color": "#38bdf8",
+      "border-opacity": 1,
+      "text-opacity": 1,
+      "font-size": 13,
+      color: "#ffffff",
+      "z-index": 999,
+      "background-color": "#0284c7",
+    },
   },
   { selector: ".labelled", style: { "text-opacity": 1 } },
 ];
