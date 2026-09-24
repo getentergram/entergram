@@ -3,12 +3,8 @@ class GetEntergram < Formula
   homepage "https://github.com/getentergram/entergram"
   # Built from the published npm tarball: the package already ships bin/, src/ and the
   # prebuilt viz UI, so there is nothing to compile here beyond the native sqlite dep.
-  url "https://registry.npmjs.org/get-entergram/-/get-entergram-0.1.0.tgz"
-  # PLACEHOLDER — all zeros until the package is published. Fill it with:
-  #   curl -sL "$(npm view get-entergram dist.tarball)" | shasum -a 256
-  # Kept in valid 64-char form so `brew style` passes; an install against it fails
-  # loudly with a checksum mismatch rather than a parse error.
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  url "https://registry.npmjs.org/get-entergram/-/get-entergram-0.1.1.tgz"
+  sha256 "e3d6f4e70afc5f35ecf9b0d9c6d145cff6248922c86ef9a361577bf5e6e84491"
   license "MIT"
 
   depends_on "node"
