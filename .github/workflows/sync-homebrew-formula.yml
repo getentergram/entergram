@@ -65,6 +65,11 @@ jobs:
           fi
 
       - name: Open a PR with the updated formula
+        id: pr
+        # This org disables write permissions for workflows, so GITHUB_TOKEN is
+        # read-only and Actions cannot open PRs. Don't fail the run over a policy
+        # decision -- fall through to the summary, which prints the values to apply.
+        continue-on-error: true
         if: steps.edit.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
@@ -87,3 +92,31 @@ jobs:
             brew install getentergram/entergram/get-entergram
             entergram doctor
             ```
+
+      - name: Report
+        if: always()
+        run: |
+          {
+            echo "### Homebrew formula — get-entergram@${{ steps.npm.outputs.version }}"
+            echo ""
+            if [ "${{ steps.edit.outputs.changed }}" != "true" ]; then
+              echo "Formula already matches the published tarball. Nothing to do."
+            elif [ "${{ steps.pr.outcome }}" = "success" ]; then
+              echo "Opened a PR with the updated \`url\` and \`sha256\`."
+            else
+              echo "Could not open a PR automatically."
+              echo ""
+              echo "This organization disables write permissions for workflows, so"
+              echo "\`GITHUB_TOKEN\` is read-only and Actions may not create pull requests."
+              echo "Enable **Org Settings → Actions → General → Workflow permissions →"
+              echo "Read and write**, plus **Allow GitHub Actions to create and approve"
+              echo "pull requests**, and this step becomes self-service."
+              echo ""
+              echo "Until then, apply these two lines to \`Formula/get-entergram.rb\`:"
+              echo ""
+              echo '```ruby'
+              echo '  url "${{ steps.npm.outputs.tarball }}"'
+              echo '  sha256 "${{ steps.npm.outputs.sha }}"'
+              echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
