@@ -14,9 +14,18 @@ import {
 import { getTelemetryStats } from "../src/rl/telemetry.js";
 import { SynapticNetwork } from "../src/runtime/synaptic_network.js";
 import { applySupervisorMutation } from "../src/runtime/mutation_tracker.js";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+// Read the version from package.json rather than hardcoding it: a literal here
+// silently drifts from the published version on every release.
+const { version } = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "package.json"), "utf8"),
+);
 
 const program = new Command();
-program.name("get-entergram").description("Persistent engineering memory for AI coding agents.").version("0.1.0");
+program.name("get-entergram").description("Persistent engineering memory for AI coding agents.").version(version);
 
 function requireRoot(dir) {
   const root = findRoot(dir || process.cwd());
