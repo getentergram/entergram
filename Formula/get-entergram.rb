@@ -1,6 +1,6 @@
 class GetEntergram < Formula
   desc "Persistent engineering memory for AI coding agents"
-  homepage "https://github.com/chandrasaripaka/entergram"
+  homepage "https://github.com/getentergram/entergram"
   # Built from the published npm tarball: the package already ships bin/, src/ and the
   # prebuilt viz UI, so there is nothing to compile here beyond the native sqlite dep.
   url "https://registry.npmjs.org/get-entergram/-/get-entergram-0.1.0.tgz"

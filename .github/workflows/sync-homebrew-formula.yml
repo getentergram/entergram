@@ -83,7 +83,7 @@ jobs:
             Verify locally before merging:
 
             ```bash
-            brew tap chandrasaripaka/entergram git@github.com:chandrasaripaka/entergram.git
-            brew install chandrasaripaka/entergram/get-entergram
+            brew tap getentergram/entergram git@github.com:getentergram/entergram.git
+            brew install getentergram/entergram/get-entergram
             entergram doctor
             ```
