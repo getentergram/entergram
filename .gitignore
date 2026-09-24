@@ -19,5 +19,4 @@ out/
 # Agent worktrees / local agent scratch
 .claude/
 
-cli/ui/_next
 docs/mediascripts/__pycache__

@@ -1,6 +1,6 @@
 {
   "name": "get-entergram",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Persistent engineering memory for AI coding agents — the why behind your codebase, on tap.",
   "type": "module",
   "bin": {

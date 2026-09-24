@@ -1,7 +1,7 @@
 {
   "name": "entergram",
   "displayName": "Entergram",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Persistent engineering memory for your coding agent — the why behind your codebase, recalled before you build and captured after you decide.",
   "author": {
     "name": "Entergram Project"
