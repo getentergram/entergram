@@ -34,7 +34,7 @@ const steps = [
 // Claude Code users can skip the manual MCP wiring above: the plugin declares the
 // server itself, and ships the recall/capture skills alongside it.
 const pluginSteps = [
-  { cmd: "/plugin marketplace add chandrasaripaka/entergram", label: "Add the marketplace" },
+  { cmd: "/plugin marketplace add getentergram/entergram", label: "Add the marketplace" },
   { cmd: "/plugin install entergram@entergram", label: "Install — MCP server and skills wire themselves" },
 ];
 

@@ -4,7 +4,7 @@ services:
       context: ./web
       args:
         # NEXT_PUBLIC_* are baked at build time; set them here or via a .env file.
-        NEXT_PUBLIC_GITHUB_LINK: ${NEXT_PUBLIC_GITHUB_LINK:-https://github.com/chandrasaripaka/entergram}
+        NEXT_PUBLIC_GITHUB_LINK: ${NEXT_PUBLIC_GITHUB_LINK:-https://github.com/getentergram/entergram}
     image: entergram-web:latest
     ports:
       - "3000:3000"

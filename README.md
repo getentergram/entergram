@@ -38,7 +38,7 @@ Installation differs by harness. Pick one — they deliver the same tool.
 ### Claude Code — plugin (recommended)
 
 ```
-/plugin marketplace add chandrasaripaka/entergram
+/plugin marketplace add getentergram/entergram
 /plugin install entergram@entergram
 ```
 
@@ -57,8 +57,8 @@ npm install -g get-entergram
 This repo is not named `homebrew-*`, so tap it by URL:
 
 ```bash
-brew tap chandrasaripaka/entergram https://github.com/chandrasaripaka/entergram
-brew install chandrasaripaka/entergram/get-entergram
+brew tap getentergram/entergram https://github.com/getentergram/entergram
+brew install getentergram/entergram/get-entergram
 ```
 
 > Pick **one** of npm or Homebrew. Both install the same `entergram` and `get-entergram`
