@@ -123,7 +123,9 @@ export default function Shell() {
 
       <StatBar />
       <CommandPalette />
-      <CinematicDirector />
+      {typeof window !== "undefined" && (new URLSearchParams(window.location.search).get("cinematic") === "1" || (window as any).isCinematic) && (
+        <CinematicDirector />
+      )}
     </div>
   );
 }

@@ -1,0 +1,382 @@
+[
+  {
+    "id": 1,
+    "filename": "01_image_1.svg",
+    "alt": "image_1",
+    "width": 700,
+    "height": 360,
+    "src": "data:image/svg+xml;charset=utf-8,%3Csvg%20font-family%3D%22-apple-system-body%2C%20ui-sans-serif%2C%20-apple-system%2C%20system-ui%2C%20%26quot%3BSegoe%20UI%26quot%3B%2C%20Helvetica%2C%20%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%20Arial%2C%20sans-serif%2C%20%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%20%26quot%3BSegoe%20UI%20Symbol%26quot%3B%22%20font-weight%3D%22400%22%20data-d-component%3D%22svg%22%20fill%3D%22currentColor%22%20height%3D%22360%22%20style%3D%22color%3Argb(13%2C%2013%2C%2013)%22%20viewBox%3D%220%200%20700%20360%22%20width%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20x%3D%2240%22%20y%3D%2230%22%20width%3D%22620%22%20height%3D%2250%22%20rx%3D%2212%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22350%22%20y%3D%2260%22%20text-anchor%3D%22middle%22%20font-size%3D%2218%22%20font-family%3D%22Arial%22%3E.claude%2Fbrain%20(Markdown%20%2B%20JSON)%3C%2Ftext%3E%3Crect%20x%3D%2240%22%20y%3D%22110%22%20width%3D%22620%22%20height%3D%2250%22%20rx%3D%2212%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22350%22%20y%3D%22140%22%20text-anchor%3D%22middle%22%20font-size%3D%2218%22%20font-family%3D%22Arial%22%3EBrain%20Parser%20(Graph%20Builder)%3C%2Ftext%3E%3Crect%20x%3D%2240%22%20y%3D%22190%22%20width%3D%22620%22%20height%3D%2260%22%20rx%3D%2212%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22350%22%20y%3D%22220%22%20text-anchor%3D%22middle%22%20font-size%3D%2218%22%20font-family%3D%22Arial%22%3EKnowledge%20Graph%20API%3C%2Ftext%3E%3Ctext%20x%3D%22350%22%20y%3D%22240%22%20text-anchor%3D%22middle%22%20font-size%3D%2213%22%20font-family%3D%22Arial%22%3EGraphQL%20%E2%80%A2%20Search%20%E2%80%A2%20Timeline%20%E2%80%A2%20Personas%3C%2Ftext%3E%3Crect%20x%3D%2240%22%20y%3D%22280%22%20width%3D%22620%22%20height%3D%2255%22%20rx%3D%2212%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22350%22%20y%3D%22312%22%20text-anchor%3D%22middle%22%20font-size%3D%2218%22%20font-family%3D%22Arial%22%3EReact%20UI%20(Graph%20%2B%20Timeline%20%2B%20Persona%20Views)%3C%2Ftext%3E%3Cline%20x1%3D%22350%22%20y1%3D%2280%22%20x2%3D%22350%22%20y2%3D%22110%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22350%22%20y1%3D%22160%22%20x2%3D%22350%22%20y2%3D%22190%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22350%22%20y1%3D%22250%22%20x2%3D%22350%22%20y2%3D%22280%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/01_image_1.svg",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/01_image_1.svg"
+  },
+  {
+    "id": 2,
+    "filename": "02_skeletonkey_connect_dots_explore_timelines_possibi.png",
+    "alt": "SkeletonKey - Connect Dots, Explore Timelines & Possibilities",
+    "width": 1612,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/WY0odRP9x6Lu3fb60iI8lv2_SK6xkczGs2SMKJrf1z8k2swZuQDwq5zYsoyMdHHgP64VUW42vWlbGiNSYjQsIHnGC1UtitPJj2FlQNPT0BPPgz-dzOS8hx5ohl8v4VrNQPKoyoSmCde4PCCmakBqpuFTeJRt7WTadFRckIXhLuI?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/02_skeletonkey_connect_dots_explore_timelines_possibi.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/02_skeletonkey_connect_dots_explore_timelines_possibi.png"
+  },
+  {
+    "id": 3,
+    "filename": "03_basic_ux_for_invision_studio_free_ui_kit_ui_store_.png",
+    "alt": "Basic UX for Invision Studio - Free UI Kit - UI STORE DESIGN",
+    "width": 1216,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/VOnAxPt7VkP-wubo9VknFxoM6kNpQld5WtrEH60a5LqMWkxj_HPBEraxhiuaLmSaVG4vqHVq_dIBdSm9w0dA6qbVHADhK42vsYxVq_8cEUlKsS9IGJKrOOoPfLApxxb9I3RWAueeecIuTK2KnlNiPPdSIJyJU9y8PUaXBQXU5wg?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/03_basic_ux_for_invision_studio_free_ui_kit_ui_store_.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/03_basic_ux_for_invision_studio_free_ui_kit_ui_store_.png"
+  },
+  {
+    "id": 4,
+    "filename": "04_synapse_devpost.png",
+    "alt": "Synapse | Devpost",
+    "width": 1024,
+    "height": 948,
+    "src": "https://images.openai.com/static-rsc-4/Bp-dwxygHEuJIqUpnLqYV9YDU6-3JfAZ2R5wwlaevmpIOTVYV9OI6bbeSH0bc4Jh7Per9Hv-8yXf8diVxmZECXttgtgx__K_w7yUounLaaFXzWSMGz_ijj4ZtWH25jH3ne2T9Qr8mtuVQ9AC7SU6H2Wt0zSxUJc4-4TPA2gnv4c?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/04_synapse_devpost.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/04_synapse_devpost.png"
+  },
+  {
+    "id": 5,
+    "filename": "05_ai_infinity_power_bi_dashboards_hr_analytics.png",
+    "alt": "AI Infinity | Power BI Dashboards & HR Analytics",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/IAZsvD-jC9iHxamu_-3nWZQ5IxLl43pMWYyjXdyylpUaN7mLcR9-S6QHTKcnw3VEQGAbzZD_LZfo2bLUxUn921jAdkJu49hf30dQJm33SjNb1OengzNo-__iWyNsTM1kVk0poN1pJbf8IuhxEGdjeCcJSUJVXOhAy1vSr71HOvU?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/05_ai_infinity_power_bi_dashboards_hr_analytics.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/05_ai_infinity_power_bi_dashboards_hr_analytics.png"
+  },
+  {
+    "id": 6,
+    "filename": "06_franchise_digital_studio_build_apps_websites_in_da.png",
+    "alt": "Franchise Digital Studio | Build Apps & Websites in Days",
+    "width": 1408,
+    "height": 768,
+    "src": "https://images.openai.com/static-rsc-4/-W23dRdBQcQCDOwPZbL9XtG6jyXWWGXs4p50o_6Z01WCaJDuNHyQ_nF2DM7um9Z6KD1KmPJj53Xr5PBTsJuvZOWW9q4MysVIYhE8c2My-sfwILUPyED-mmScOBdaWGGpfrcS8HzhX3Ft8oj07mORlih39CJFg4AR1Y6nf3tquYo?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/06_franchise_digital_studio_build_apps_websites_in_da.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/06_franchise_digital_studio_build_apps_websites_in_da.png"
+  },
+  {
+    "id": 7,
+    "filename": "07_build_dashboards_with_ai_workshop.png",
+    "alt": "Build Dashboards with AI - Workshop",
+    "width": 1600,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/y_JoDnV_JTQb_PwZjzavT2emOiQhRERlYelh8-5a0896HB8g4dHmSRQjxMVJPIEkJGDQU1iI1Ndk0AT8XePOGEiK8QvQenPe5OQHS8L4bYDGZj5VclcZ7HWUnCRLGkz-4JEbbuKJk_3H9De4Ow8rK4ANZzxgPg_HsyJxiNaxnbI?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/07_build_dashboards_with_ai_workshop.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/07_build_dashboards_with_ai_workshop.png"
+  },
+  {
+    "id": 8,
+    "filename": "08_obsidian_vs_notion_which_is_better_for_academic_re.png",
+    "alt": "Obsidian vs Notion: Which is Better for Academic Research? | Obsibrain Blog",
+    "width": 1683,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/2iMzO2ADz9F4chob0hnc2wYt-oLzBEUtPprQsVKPjGhtL-XiPe1PD52fKPQwXcJJKT2ZH-Ut5QhNBrx_KI-Q0CXxcZ4lNniVtBFzEk5phNVvTVqEz697dATY3X7Z975FaFe__lRFJvttkUlokq-fB3pgclvGr9bzT3ZOVIgE7sE?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/08_obsidian_vs_notion_which_is_better_for_academic_re.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/08_obsidian_vs_notion_which_is_better_for_academic_re.png"
+  },
+  {
+    "id": 9,
+    "filename": "09_kfupm_team_design.png",
+    "alt": "KFUPM | TEAM Design",
+    "width": 1290,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/K8JGsWTkCQ6FZiLDTqh8Eum4wLLDA_JKpw6tA8aDbR1HsDDFL7yQNj4ZxXHdCe-wcer_c4HeNdmnX7okn2SURslBJXxi87xdQliv8cCnR_9jCsaLi1jM1fbMbfWOhuEBsYDLxNlPnYq29vWSQkbptQaMlXY21cfn7b4XbPbyGH0?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/09_kfupm_team_design.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/09_kfupm_team_design.png"
+  },
+  {
+    "id": 10,
+    "filename": "10_pursuit_technologies_ai_enhanced_platforms_for_nex.png",
+    "alt": "Pursuit Technologies | AI-Enhanced Platforms for Next-Generation Workflows",
+    "width": 1570,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/ytW5Sr9DhILAVTWU74QYDxwktKLClP0b5758aiUQHzz5KEsmvHLRAIRQQ99xo5-qeQYdZxMxQVhU0XUtKjWFYjY1aSJS6r3zQR4lU0PVdYJ08gLZtU_RxA7V6jzFtFVwziboUu3gqTGLDOhS3u9ls8YGSxDMiiUVpGyichUJA6Q?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/10_pursuit_technologies_ai_enhanced_platforms_for_nex.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/10_pursuit_technologies_ai_enhanced_platforms_for_nex.png"
+  },
+  {
+    "id": 11,
+    "filename": "11_3d_digital_brain_with_glowing_neural_network_conne.png",
+    "alt": "3D digital brain with glowing neural network connections and abstract data mesh on dark background, representing intelligence and neural tech concept. 3D Rendering",
+    "width": 1613,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/dUxMP3n1wua_BZkl0S3EI6f46qctUVGv-YoRKZxdIp6kJE-_MBLbV5oqc-E-Wqp5OwWlJbNnHukzlYQ_OxLT4ftuL_Z6Iqs_EeKZPuld-WYmqSqKh3DL8LgpUSZ5cf5RT-o7mWzLe-FuZcZ9pfsYMUo29V4cpGsYn7eElw_0_24ah4HaEEQ1fXWp2lj9-QJ-?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/11_3d_digital_brain_with_glowing_neural_network_conne.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/11_3d_digital_brain_with_glowing_neural_network_conne.png"
+  },
+  {
+    "id": 12,
+    "filename": "12_gaxos_ai_inc_shares_fall_7_28_after_hours_despite_.png",
+    "alt": "Gaxos.Ai Inc. shares fall 7.28% after-hours despite launching Art-Gen.AI, an AI image and video creation platform.",
+    "width": 1368,
+    "height": 768,
+    "src": "https://images.openai.com/static-rsc-4/OkSoBhiy0By36gWI6pPySMtfju18IQ8ygISy9voRMThFL3EIWWmVmk2MwRsygWwV7wzbY-xGto7H3wSBYIPZA9VjKl9APulgjuE3gonkWJKrFIEF8XV40-ujsLMcfsMp4KLyAtILCfP4-pMXNGNo1AApytEcjVyl7JtZzKFOrq4?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/12_gaxos_ai_inc_shares_fall_7_28_after_hours_despite_.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/12_gaxos_ai_inc_shares_fall_7_28_after_hours_despite_.png"
+  },
+  {
+    "id": 13,
+    "filename": "13_samsung_s_home_ai_wants_to_make_your_smart_home_sm.png",
+    "alt": "Samsung’s Home AI Wants To Make Your Smart Home Smarter",
+    "width": 900,
+    "height": 600,
+    "src": "https://images.openai.com/static-rsc-4/Y1DWqCIzUMBK-D44EOK5wTjTZKy06gy5TkGlC18mdKGVtYWiY_fzNKA3X6hfd1hwFkmTyISu4-myM8Dau_3MXH-NjYHvpE2iGdd7QVYuSuLr3SXauU3TUhbFkUvaJPKvmQc9S1_WZ-4W4M1F3mNaabclkq4gV6hfhlORmHft41U?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/13_samsung_s_home_ai_wants_to_make_your_smart_home_sm.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/13_samsung_s_home_ai_wants_to_make_your_smart_home_sm.png"
+  },
+  {
+    "id": 14,
+    "filename": "14_yellow_technologies_ai_agents_automation_agency.png",
+    "alt": "Yellow Technologies - AI Agents & Automation Agency",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/B8Ecsw8hWeoUf-XtljHQ37HCB7DhNU55vRIpNaavR1wfN6OESZQXU4F483Kw9HIw5GrH0WMhDNnYKNV1e9elRFIAmM4cQsSXPa2ZtMZLckU5U-SZ7SGTy9bGnKXnQwDNsCSx9ZNtNmXfQcV-Ak2qHjiYzKU8HOK5rGsO9ocGps4?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/14_yellow_technologies_ai_agents_automation_agency.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/14_yellow_technologies_ai_agents_automation_agency.png"
+  },
+  {
+    "id": 15,
+    "filename": "15_graph_structure_design_for_ai_powered_graph_rag_sy.png",
+    "alt": "Graph Structure Design for AI-Powered Graph RAG Systems: A Comprehensive Guide - News from generation RAG",
+    "width": 1368,
+    "height": 768,
+    "src": "https://images.openai.com/static-rsc-4/1yfuoIH9lJYSTtgVDHIAb72B2gMmGAWiCHjpCn3451Tcu0fFja5ggXeSxGKOIQP6e1YHwKKBPx5KT8PxgwTWHkONlUijIsQ_M9iQuri53YZYmA5MTMl2KehnYMtOtxGnUCwJ4GgDkbWYUtiwFeFy77y8zH8rZtyIOGJo3VA2JD4?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/15_graph_structure_design_for_ai_powered_graph_rag_sy.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/15_graph_structure_design_for_ai_powered_graph_rag_sy.png"
+  },
+  {
+    "id": 16,
+    "filename": "16_scientific_discovery_linking_hypothesis_and_data_s.png",
+    "alt": "Scientific Discovery: Linking Hypothesis and Data | ShShell.com",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/0UFzSYUwQ_SRb8-u91sPOMwHpcfIURGWnd1DS-gSldWiK3RDCagcqjkdK1ZIyh6Nnd63PpwysUVZmA3_xjWkzllcXgnGg325MBwgj0to5JlPOTfU7t8qT2VdnlTrNa2qUE-lC5s3T512VyJNkLQ6ahSjsjQpqaYlO1m8YYCmqOo?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/16_scientific_discovery_linking_hypothesis_and_data_s.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/16_scientific_discovery_linking_hypothesis_and_data_s.png"
+  },
+  {
+    "id": 17,
+    "filename": "17_lessonhacker_kat_morgan.png",
+    "alt": "LessonHacker - Kat Morgan",
+    "width": 1580,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/tg3ssvD6j0DIwSqVSZMacurkywuf9fyadLzvf5DTuv4-vO3qSlGHCDQxB4cn062uKSjFQH0DF3vxDD09f77sZK55VRfXUAQrs50TD_lW4Fy2td6YM3D2qoHeJI5xdjYoWxIV_ANcRQyWTaygoMaeozEWpPZTVPuBQYt6F1xdecw?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/17_lessonhacker_kat_morgan.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/17_lessonhacker_kat_morgan.png"
+  },
+  {
+    "id": 18,
+    "filename": "18_altrona.png",
+    "alt": "Altrona",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/omozzig4rkd9ylE1GvTCVyPav3u2s8oVKgKSWVt6zvJXVwdtLjAjwVr-4O-yMiKhplHhCxkzwFa0mnYSkOrdpLKxr1hX4Gc72ffcfuWxUVCO-TfjG7sgJUKUeplvyZb-ERfX9noSMvwaHJJb-RCZyYoO1LW3gg4NzlN8e1waCLg?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/18_altrona.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/18_altrona.png"
+  },
+  {
+    "id": 19,
+    "filename": "19_neurosphere_ai_business_dashboard_by_metamorph_lab.png",
+    "alt": "NeuroSphere — AI Business Dashboard by Metamorph Lab on Dribbble",
+    "width": 1147,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/Hv6Dp_9XcC7O_sTAZgZ6BVRP5lJRk-BFmmJz8U9lDspX_EMF9Pa980LxrSRxxbz4m11zpiaeqkugP8cbVVE5dpA_dBSkcAxgNZfsdt1EMvHI_2iovodrgsKogav0nLFE9TJ7ZyyR5QM7zaHBVx7PQ0kSTVo2xc5w3cIytI8vsoM?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/19_neurosphere_ai_business_dashboard_by_metamorph_lab.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/19_neurosphere_ai_business_dashboard_by_metamorph_lab.png"
+  },
+  {
+    "id": 20,
+    "filename": "20_ai_infinity_power_bi_dashboards_hr_analytics.png",
+    "alt": "AI Infinity | Power BI Dashboards & HR Analytics",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/IAZsvD-jC9iHxamu_-3nWZQ5IxLl43pMWYyjXdyylpUaN7mLcR9-S6QHTKcnw3VEQGAbzZD_LZfo2bLUxUn921jAdkJu49hf30dQJm33SjNb1OengzNo-__iWyNsTM1kVk0poN1pJbf8IuhxEGdjeCcJSUJVXOhAy1vSr71HOvU?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/20_ai_infinity_power_bi_dashboards_hr_analytics.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/20_ai_infinity_power_bi_dashboards_hr_analytics.png"
+  },
+  {
+    "id": 21,
+    "filename": "21_desarrollo_de_software_a_medida_cero_ideas_cero_id.png",
+    "alt": "Desarrollo de software a medida | Cero Ideas | Cero ideas",
+    "width": 1290,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/MOJ3twaqgKkKS1j3OjZ6aW5zOYSUYeJX-SDvYMiJOtJMCVdUazZVvwkrB_xtQg0yf9p9GVk771XuZXuqn2JHvprpbWY8F7kUXOt6VAJU2LfM0-YU79Xaij3HbXAVAj3_dbMijCUCOcOcy0-MIRrDHEXptFNyUlZzKUao8tT60G0?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/21_desarrollo_de_software_a_medida_cero_ideas_cero_id.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/21_desarrollo_de_software_a_medida_cero_ideas_cero_id.png"
+  },
+  {
+    "id": 22,
+    "filename": "22_build_dashboards_with_ai_workshop.png",
+    "alt": "Build Dashboards with AI - Workshop",
+    "width": 1600,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/y_JoDnV_JTQb_PwZjzavT2emOiQhRERlYelh8-5a0896HB8g4dHmSRQjxMVJPIEkJGDQU1iI1Ndk0AT8XePOGEiK8QvQenPe5OQHS8L4bYDGZj5VclcZ7HWUnCRLGkz-4JEbbuKJk_3H9De4Ow8rK4ANZzxgPg_HsyJxiNaxnbI?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/22_build_dashboards_with_ai_workshop.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/22_build_dashboards_with_ai_workshop.png"
+  },
+  {
+    "id": 23,
+    "filename": "23_milestone_timeline_premium_interactions_component_.png",
+    "alt": "Milestone Timeline: Premium Interactions Component by Aviral Lakhanpaul — Framer Marketplace",
+    "width": 1147,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/FdqzcBxjtT0JbWAf8yoaw-2wEhnTFqrRprvrYR22iAIi6yVJYTEXJIESBSOvUmdKdeq9lwvfiVquq5pU3tg9I-5BZMwZhRqcb9iWx0N08cbnxbNy9-tSK8rLUpE9YdRNiOHbBkBGEyRnPTwdVsPDOFGTauDjppb3B3cbW1XBBfA?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/23_milestone_timeline_premium_interactions_component_.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/23_milestone_timeline_premium_interactions_component_.png"
+  },
+  {
+    "id": 24,
+    "filename": "24_generative_workflows_platform_for_storyboard_comic.png",
+    "alt": "Generative Workflows Platform for Storyboard, Comic, and Video Teams | LlamaGen.Ai",
+    "width": 1344,
+    "height": 768,
+    "src": "https://images.openai.com/static-rsc-4/d7hyIKdTfwujbL_ZvPwztIduaF9pLwNX0yMuEpRJHBE_-deesrO4SPl8BJLIo2oD9aYNGqnNw8P9DRrSbIKbyKdJrpOGTZRj9lB2QlLZm67hJVGozAbNt0MmqaNpvHcUno5bFDSGVjfyQza1M5Eq0TZyBQS4cLBvB3dfHsCOwKg?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/24_generative_workflows_platform_for_storyboard_comic.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/24_generative_workflows_platform_for_storyboard_comic.png"
+  },
+  {
+    "id": 25,
+    "filename": "25_a_very_simple_guide_to_knowledge_graphs_for_health.png",
+    "alt": "A very simple guide to Knowledge Graphs for Health Data Scientists | by Honghan Wu | TDS Archive | Medium",
+    "width": 1358,
+    "height": 710,
+    "src": "https://images.openai.com/static-rsc-4/wMYdSFVhhkl0MRCtarp8F7qIZK5rb-ZnpxS20swbPBPhNGWragEJpc3ysoDDSBTbcNUl7gzuW7P4TBcL7xo2uERmyBOlHxf2h8Sw7NifC6rJt-EtXQyC09iB09mmjmgzRnyfzHooggzTFhSi2pRTlKk4XbyKV2k7peI2yWNS3mw?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/25_a_very_simple_guide_to_knowledge_graphs_for_health.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/25_a_very_simple_guide_to_knowledge_graphs_for_health.png"
+  },
+  {
+    "id": 26,
+    "filename": "26_amlgo_labs_business_solutions_with_data_and_ai.png",
+    "alt": "Amlgo Labs - Business Solutions with Data and AI",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/gEIyPmTEBFrHphrH_yRYgfgDn4PX71uL5QXrWVJhHIlhp8aIMbXsKh5gO9JolCtz0vlonUdbuOuIvdcORTRo6u1ppT2EMrmO-rHgRr8L6t5MxBrKaeEeGeDtKpdNmD3wyRyG3iaXNXbZAGYgARY_0x1Y33Ydr3fza1z6NUV_hpw?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/26_amlgo_labs_business_solutions_with_data_and_ai.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/26_amlgo_labs_business_solutions_with_data_and_ai.png"
+  },
+  {
+    "id": 27,
+    "filename": "27_hexaware_unveils_agentverse_ai_platform_for_enterp.png",
+    "alt": "Hexaware unveils Agentverse AI platform for enterprises",
+    "width": 1200,
+    "height": 677,
+    "src": "https://images.openai.com/static-rsc-4/mjnVG7wVkXIC-9dKitIhQUMq4c778eJHO65oZytCkSjTPvO_-fyju2TUs6rzO5RZ8zbI0WPhcJNBN3b0W8iKDAqe3Ew6v4yMY99Yh4dYcIzMN1-12RxTd2OBVX9464f9EGDx_L_eqUcDaJpKD5kz-MnKbI9WbkqNoOMzmj_89AA?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/27_hexaware_unveils_agentverse_ai_platform_for_enterp.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/27_hexaware_unveils_agentverse_ai_platform_for_enterp.png"
+  },
+  {
+    "id": 28,
+    "filename": "28_interface_cerebral_futurista_mostrando_a_tecnologi.png",
+    "alt": "Interface Cerebral Futurista Mostrando A Tecnologia De Rede Neural | JPG baixar grátis - Pikbest",
+    "width": 700,
+    "height": 933,
+    "src": "https://images.openai.com/static-rsc-4/4nUtY3NP0LUdeB5TZ-PmG0wA5xZFCIhsHscYTBr8BknakLtR3R3-OJQNOTHofuEU5nhAjWvmyMxXJEwD8RCryR5bnsxo-dQraIDMnEK-5THZokNiNjKYkF2wXHF6zjSc-jArmyteKhZEhp0Q8guOArhGVje8pmPt_nZrID1K0oM?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/28_interface_cerebral_futurista_mostrando_a_tecnologi.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/28_interface_cerebral_futurista_mostrando_a_tecnologi.png"
+  },
+  {
+    "id": 29,
+    "filename": "29_image_29.svg",
+    "alt": "image_29",
+    "width": 800,
+    "height": 140,
+    "src": "data:image/svg+xml;charset=utf-8,%3Csvg%20font-family%3D%22-apple-system-body%2C%20ui-sans-serif%2C%20-apple-system%2C%20system-ui%2C%20%26quot%3BSegoe%20UI%26quot%3B%2C%20Helvetica%2C%20%26quot%3BApple%20Color%20Emoji%26quot%3B%2C%20Arial%2C%20sans-serif%2C%20%26quot%3BSegoe%20UI%20Emoji%26quot%3B%2C%20%26quot%3BSegoe%20UI%20Symbol%26quot%3B%22%20font-weight%3D%22400%22%20data-d-component%3D%22svg%22%20fill%3D%22currentColor%22%20height%3D%22140%22%20style%3D%22color%3Argb(13%2C%2013%2C%2013)%22%20viewBox%3D%220%200%20800%20140%22%20width%3D%22100%25%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20x%3D%2220%22%20y%3D%2230%22%20width%3D%22140%22%20height%3D%2250%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%2290%22%20y%3D%2260%22%20text-anchor%3D%22middle%22%20font-size%3D%2214%22%3EScript%3C%2Ftext%3E%3Crect%20x%3D%22180%22%20y%3D%2230%22%20width%3D%22140%22%20height%3D%2250%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22250%22%20y%3D%2260%22%20text-anchor%3D%22middle%22%20font-size%3D%2214%22%3EGemini%20Nano%3C%2Ftext%3E%3Crect%20x%3D%22340%22%20y%3D%2230%22%20width%3D%22140%22%20height%3D%2250%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22410%22%20y%3D%2260%22%20text-anchor%3D%22middle%22%20font-size%3D%2214%22%3EVoice%3C%2Ftext%3E%3Crect%20x%3D%22500%22%20y%3D%2230%22%20width%3D%22140%22%20height%3D%2250%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22570%22%20y%3D%2260%22%20text-anchor%3D%22middle%22%20font-size%3D%2214%22%3EPlaywright%3C%2Ftext%3E%3Crect%20x%3D%22660%22%20y%3D%2230%22%20width%3D%22120%22%20height%3D%2250%22%20rx%3D%2210%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Ctext%20x%3D%22720%22%20y%3D%2260%22%20text-anchor%3D%22middle%22%20font-size%3D%2214%22%3E4K%20Video%3C%2Ftext%3E%3Cline%20x1%3D%22160%22%20y1%3D%2255%22%20x2%3D%22180%22%20y2%3D%2255%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22320%22%20y1%3D%2255%22%20x2%3D%22340%22%20y2%3D%2255%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22480%22%20y1%3D%2255%22%20x2%3D%22500%22%20y2%3D%2255%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3Cline%20x1%3D%22640%22%20y1%3D%2255%22%20x2%3D%22660%22%20y2%3D%2255%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%2F%3E%3C%2Fsvg%3E",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/29_image_29.svg",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/29_image_29.svg"
+  },
+  {
+    "id": 30,
+    "filename": "30_lines_of_neural_connections_with_bright_stock_moti.png",
+    "alt": "Lines Of Neural Connections With Bright Stock Motion Graphics SBV-348504151 - Storyblocks",
+    "width": 1529,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/mA61oCC62ttHL5bRzsRdbSG8ZFdwHA4rH7IHHI25WMZf9plf8pQC8ZSkGs6sdbJL_lctiFpDd7aV2eGecd2CLCqjrz-v-C-FiBCfZlKzbSp3RniC_SR7mYuVyaMQtSZAwCq3FYsrNTQ5jkjAt_mCfaBTVNe5A853K23-uoK08Dg?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/30_lines_of_neural_connections_with_bright_stock_moti.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/30_lines_of_neural_connections_with_bright_stock_moti.png"
+  },
+  {
+    "id": 31,
+    "filename": "31_cognitive_security_and_defense_against_influence_o.png",
+    "alt": "Cognitive Security and Defense against Influence Operations",
+    "width": 800,
+    "height": 600,
+    "src": "https://images.openai.com/static-rsc-4/KzVlMHr4TL9BahFkSiUKkaFrto8BU3FQb2NJqtazH8sxYQrGwP-ZPQuPHJk0mNeaTC3lqWf2dd9FWNX1WBMkUjhiC526j50qCkw86espaGJgWvO2nL2tva06DQfvRoQvzUibuywznepBupp84U5dP9Uktzh-Ji2CCGaJGbGZN-Q?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/31_cognitive_security_and_defense_against_influence_o.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/31_cognitive_security_and_defense_against_influence_o.png"
+  },
+  {
+    "id": 32,
+    "filename": "32_pulsing_neon_brain_network_animation_showing_glowi.png",
+    "alt": "Pulsing Neon Brain Network Animation Showing Glowing Nodes and Flowing Data Streams - Free Stock Video | Pikwizard",
+    "width": 1529,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/AvSs9E7-CIs5ig3BxUNwYWc2TOR_ADJzO-tgDum2wZbNamef8P-LVuxRG9DNATOBs09FP2mXoyyWbYOURYDvSXx5JI2mvGAys3ZDbwksolDzJ0MdKiQkosrNgB5gZpde-6Na9NXcv0vvZD9X8cidV4CfNEAWv1vhsmrOozdv7mU?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/32_pulsing_neon_brain_network_animation_showing_glowi.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/32_pulsing_neon_brain_network_animation_showing_glowi.png"
+  },
+  {
+    "id": 33,
+    "filename": "33_minimal_deep_blue_glowing_sphere_with_sharp_electr.png",
+    "alt": "Minimal deep blue glowing sphere with sharp electric rim light on dark navy background. Clean futuristic plasma orb with smooth gradient core and subtle halo diffusion. Luxury digital sci background.",
+    "width": 1529,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/ErWRa0fo660UXZuv63iq4ksdtEP7-0WO2-zAxN0ymicQshdiuGASJwKmPNcSSITKLLydAquaLnQb3eVabrQXZdXwO5jku__yhseH4dPXlXEPGWnXXb62IVN3CNDP5IRpaiLHeac5jjdnL6u1rz3hAvO702E-sJT45cUQoLQaOmIxjPXQmsi2vgQUj6J3wqk0?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/33_minimal_deep_blue_glowing_sphere_with_sharp_electr.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/33_minimal_deep_blue_glowing_sphere_with_sharp_electr.png"
+  },
+  {
+    "id": 34,
+    "filename": "34_editing_long_form_content_for_clarity_the_ultimate.png",
+    "alt": "Editing Long-Form Content for Clarity: The Ultimate Guide 2027",
+    "width": 1344,
+    "height": 768,
+    "src": "https://images.openai.com/static-rsc-4/D87Ia6LpAjlMe7Lh8ZnJqQrJ2-e8jq7gccUHmhxvrEx7oFNHEXmX9w0itCYVgUxMys7k_O-VKC54A0vum1u64CZm9wT2auG5nT5PKO1_Pn5HRZowT0J7xTqSPyOgNc7s3OSrY_eCmF-Fxq83LPOB32C4TY9J6qhOu7u9guUSgVk?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/34_editing_long_form_content_for_clarity_the_ultimate.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/34_editing_long_form_content_for_clarity_the_ultimate.png"
+  },
+  {
+    "id": 35,
+    "filename": "35_animated_explainer_video_alqen_ai_behance.png",
+    "alt": "Animated explainer video - Alqen AI :: Behance",
+    "width": 1529,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/a7qrEG76z26hOAoMgbYLZa9UfWKORVavvoi4gXJP5VVgT8Jk9S_AVlAKavyNlHvmXhsyNmBX_M9n0k7dxtK4xhpjXxXOGPkle6LzPEO6Tz9I3jxoRfmX5Z7o-3LIbmNVyBRkuBgNq01F2mI26fkAJzF30vFX6rAQmatdz3Ld3OA?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/35_animated_explainer_video_alqen_ai_behance.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/35_animated_explainer_video_alqen_ai_behance.png"
+  },
+  {
+    "id": 36,
+    "filename": "36_networks_crowds_and_markets_reasoning_about_a_high.png",
+    "alt": "🌐💰 Networks, Crowds, and Markets: Reasoning About a Highly Connected World",
+    "width": 1024,
+    "height": 1024,
+    "src": "https://images.openai.com/static-rsc-4/E-3ecRV7SdKmmHzqH2MVs2iHfsO2pzM7yVOOzflV0xO_H4O7CyudNBIZ7M30SWJ5n3bGR-ZQsezl66W9vWTZevCvgiiWsX1m5KEg3uGVrumd8I3V4UZYd2RSGEHpTGJZFuUvTCCqoOt8HSy8pSIz6Lgs8RpZJRkS2Jlvc2tCaK4?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/36_networks_crowds_and_markets_reasoning_about_a_high.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/36_networks_crowds_and_markets_reasoning_about_a_high.png"
+  },
+  {
+    "id": 37,
+    "filename": "37_ilexius_gmbh_linkedin.png",
+    "alt": "ilexius GmbH | LinkedIn",
+    "width": 1529,
+    "height": 860,
+    "src": "https://images.openai.com/static-rsc-4/Afrfhaulhil7DH_2pKvG2aHjpSMTUWaXEFer82t0FE2Zb8FbxfO42Hjlw-Ob4Fh3kel2g3AROpwEWEFxuvZn2HVgfnkv5BLBsD-_NlxAD23tHjFKEqPkjbWlQyqejh0cBr3rBIOo6az-_jIDO-DtOBV_5kl1-BWBJHFmq86fSKI?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/37_ilexius_gmbh_linkedin.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/37_ilexius_gmbh_linkedin.png"
+  },
+  {
+    "id": 38,
+    "filename": "38_vessel_traffic_management_system.png",
+    "alt": "Vessel Traffic Management System",
+    "width": 940,
+    "height": 788,
+    "src": "https://images.openai.com/static-rsc-4/CL7X3kD0IhaKZs5wq5kkQSc56y2nD0Z6zBN4BFbOzPOsKxAJgFW09tEnD1IoJQXTlUYxyf2dMiJOGDDsvpwZdP2S5Y6vbEpvd-NFdzVM3P2cXFFrJuWd3t0vHLF2Lcp8dkGpXzZkkJRtU3hdQakbS_NgLK9a--Z4UleS-nh57Bc?purpose=inline",
+    "path": "/home/getentergram/Documents/GitHub/entergram/docs/media/scraped_images/38_vessel_traffic_management_system.png",
+    "artifactPath": "/home/getentergram/.gemini/antigravity/brain/0916c832-5f9b-4b3a-981e-98fd8f702792/scraped_images/38_vessel_traffic_management_system.png"
+  }
+]

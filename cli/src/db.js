@@ -292,13 +292,23 @@ function hybridRerank(root, db, rows, query, bandit = null) {
   return candidates;
 }
 
-/** Pack ranked rows under a token budget into the recall result shape. */
-function packHits(rows, query, budget) {
+/**
+ * Pack ranked rows under a token budget into the recall result shape.
+ *
+ * The first row is always admitted (`&& hits.length`): a budget too small for even the
+ * top-ranked hook must still return the best available hit rather than an empty result.
+ * Without that guard a caller sees `total > 0` alongside `hits: []` and cannot tell a
+ * too-small budget from a genuine miss.
+ *
+ * Exported for testing: packing is order-dependent, and exercising it through search()
+ * tests bm25's ranking rather than the packer.
+ */
+export function packHits(rows, query, budget) {
   const hits = [];
   let used = 0;
   for (const r of rows) {
     const cost = est(r.hook);
-    if (used + cost > budget) continue;
+    if (used + cost > budget && hits.length) continue;
     hits.push({
       id: r.id,
       hook: r.hook,

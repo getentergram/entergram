@@ -61,6 +61,8 @@ export default function BrainMap() {
         pixelRatio: 1,
       });
       cyRef.current = cy;
+      (window as any).cy = cy;
+      (window as any).cyReady = true;
       setCyReady((c) => c + 1);
 
       cy.on("tap", "node", (e: EventObject) => select(e.target.id()));
@@ -125,7 +127,7 @@ export default function BrainMap() {
       neighborhood.nodes().not(node).addClass("neighbor");
       node.addClass("focus");
     });
-  }, [selectedId, nodes]);
+  }, [selectedId, nodes, cyReady]);
 
   // --- journey path overlay ------------------------------------------------
   useEffect(() => {
@@ -145,7 +147,7 @@ export default function BrainMap() {
         }
       });
     });
-  }, [journeyPath]);
+  }, [journeyPath, cyReady]);
 
   return (
     <div className="relative h-full w-full">
