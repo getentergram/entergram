@@ -66,39 +66,44 @@ jobs:
         working-directory: cli
 
       - name: Require the commit's checks to be green
-        # Branch protection would normally stop an unverified commit reaching
-        # main, but it needs GitHub Pro or a public repo and this org has
-        # neither, so nothing blocks the merge itself. Enforce it here instead:
-        # publishing is the irreversible step, and npm cannot unpublish freely.
-        # Waits for the other workflows on this same commit and refuses to ship
-        # unless every one of them succeeded.
+        # Branch protection would normally gate the merge, but it needs GitHub
+        # Pro or a public repo and this org has neither. So gate the
+        # irreversible step instead: npm has no free unpublish.
+        #
+        # Judge only the checks that actually reported. An earlier version
+        # required `cli` and `validate` by name and hung for ten minutes when
+        # `validate` was simply absent -- a path-filtered workflow does not run
+        # at all, so it produces no check run, and absent is not pending.
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           for attempt in $(seq 1 30); do
+            # Exclude this run's own check, which is in progress by definition.
             runs=$(gh api "/repos/${{ github.repository }}/commits/${{ github.sha }}/check-runs" \
-                     --jq '.check_runs[] | "\(.name)=\(.status):\(.conclusion // "pending")"')
-            pending=0; failed=""
-            for name in cli validate; do
-              line=$(echo "$runs" | grep "^$name=" || true)
-              if [ -z "$line" ]; then pending=1; continue; fi
-              case "$line" in
-                *":success")          : ;;
-                *"completed:skipped") : ;;   # path-filtered away, not a failure
-                *"completed:"*)       failed="$failed $name" ;;
-                *)                    pending=1 ;;
-              esac
-            done
+                     --jq '.check_runs[] | select(.name != "${{ github.job }}")
+                           | "\(.name)=\(.status):\(.conclusion // "pending")"')
+
+            if [ -z "$runs" ]; then
+              echo "no other checks reported on this commit; this job's own tests are the gate"
+              exit 0
+            fi
+
+            failed=$(echo "$runs" | awk -F'[=:]' '$2=="completed" && $3!="success" && $3!="skipped" && $3!="neutral" {print $1}')
+            pending=$(echo "$runs" | awk -F'[=:]' '$2!="completed" {print $1}')
+
             if [ -n "$failed" ]; then
-              echo "::error::refusing to publish — failing checks on this commit:$failed"
+              echo "::error::refusing to publish — failing checks on this commit: $(echo $failed)"
               exit 1
             fi
-            if [ "$pending" -eq 0 ]; then echo "all required checks green"; exit 0; fi
-            echo "attempt $attempt: still waiting on checks..."
+            if [ -z "$pending" ]; then
+              echo "all reported checks green:"; echo "$runs" | sed 's/^/  /'
+              exit 0
+            fi
+            echo "attempt $attempt: waiting on $(echo $pending)"
             sleep 20
           done
-          echo "::error::required checks did not report within 10 minutes; not publishing"
+          echo "::error::checks still running after 10 minutes; not publishing"
           exit 1
 
       - name: Test
