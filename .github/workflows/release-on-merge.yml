@@ -44,10 +44,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          # A PAT lets the release commit re-trigger other workflows and works
-          # even where the org forbids GITHUB_TOKEN writes. Falls back to the
-          # built-in token, which is enough when org policy allows writes.
-          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          # Check out with the built-in token: reading only needs the default
+          # read permission, and a misconfigured PAT should not be able to stop
+          # the release before it starts -- an unapproved fine-grained PAT here
+          # failed the whole run with a 403 on checkout.
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: pnpm/action-setup@v4
         with:
@@ -170,6 +171,8 @@ jobs:
           grep -E '^\s+(url|sha256)' Formula/get-entergram.rb
 
       - name: Commit, tag, and push
+        env:
+          PUSH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           v="${{ steps.ver.outputs.version }}"
@@ -183,8 +186,12 @@ jobs:
 
           [skip ci]"
           git tag "v$v"
-          git push origin HEAD:main
-          git push origin "v$v"
+          # Push with the PAT when one is configured, else the built-in token.
+          # GITHUB_TOKEN can push when the workflow declares contents: write and
+          # org policy permits it; the PAT is the fallback when it does not.
+          remote="https://x-access-token:${PUSH_TOKEN}@github.com/${{ github.repository }}.git"
+          git push "$remote" HEAD:main
+          git push "$remote" "v$v"
 
       - name: GitHub release
         env:
