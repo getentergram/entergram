@@ -9,6 +9,11 @@ on:
     paths:
       - "cli/**"
       - ".github/workflows/publish-cli.yml"
+  # Cutting a GitHub release publishes. push-to-main triggers do not currently
+  # fire in this repo, so a release is the reliable automatic path; dispatch
+  # stays as the manual one.
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       dry_run:

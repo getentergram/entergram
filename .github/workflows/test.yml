@@ -1,0 +1,85 @@
+name: Test
+
+# The repo had no test gate on pull requests: validate-plugin checks the
+# manifests, but nothing ran the CLI suite before a merge. Both packaging bugs
+# that shipped a broken viz got through green manifest checks, so this runs the
+# actual suite and re-asserts the tarball invariant on every PR.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: cli/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: node --test 'test/*.test.js' 'test/runtime/*.test.js'
+
+      - name: The tarball ships a usable viz UI
+        # Two separate bugs shipped a broken `entergram viz`: files[] omitted
+        # "ui", and .gitignore excluded cli/ui/_next so index.html referenced a
+        # script and stylesheet that were in neither git nor the package. A
+        # green test run caught neither, so assert both directly.
+        run: |
+          set -euo pipefail
+          npm pack --dry-run --json > /tmp/pack.json
+          count=$(node -e '
+            const f = require("/tmp/pack.json")[0].files.map(x => x.path);
+            console.log(f.filter(p => p.startsWith("ui/")).length);
+          ')
+          echo "ui/ files in tarball: $count"
+          if [ "$count" -eq 0 ]; then
+            echo '::error::No ui/ files in the tarball — entergram viz would 404 for installed users.'
+            exit 1
+          fi
+
+          # every asset index.html references must actually be in the tarball
+          missing=$(node -e '
+            const fs = require("fs");
+            const files = new Set(require("/tmp/pack.json")[0].files.map(x => x.path));
+            const html = fs.readFileSync("ui/index.html", "utf8");
+            const refs = [...new Set([...html.matchAll(/_next\/static\/[^"]+\.(?:js|css)/g)].map(m => m[0]))];
+            const gone = refs.filter(r => !files.has("ui/" + r));
+            console.log(gone.join("\n"));
+          ')
+          if [ -n "$missing" ]; then
+            echo '::error::index.html references assets missing from the tarball:'
+            echo "$missing"
+            exit 1
+          fi
+          echo "every asset index.html references is present"
+
+      - name: The CLI reports the packaged version
+        # bin/entergram.js used to hardcode .version("0.1.0"), so a correctly
+        # installed release still misreported itself.
+        run: |
+          set -euo pipefail
+          pkg=$(node -p "require('./package.json').version")
+          cli=$(node bin/entergram.js --version)
+          echo "package.json=$pkg  cli=$cli"
+          [ "$pkg" = "$cli" ] || { echo "::error::version drift: package.json=$pkg but CLI reports $cli"; exit 1; }
