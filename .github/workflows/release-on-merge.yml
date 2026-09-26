@@ -64,6 +64,42 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: cli
 
+      - name: Require the commit's checks to be green
+        # Branch protection would normally stop an unverified commit reaching
+        # main, but it needs GitHub Pro or a public repo and this org has
+        # neither, so nothing blocks the merge itself. Enforce it here instead:
+        # publishing is the irreversible step, and npm cannot unpublish freely.
+        # Waits for the other workflows on this same commit and refuses to ship
+        # unless every one of them succeeded.
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 30); do
+            runs=$(gh api "/repos/${{ github.repository }}/commits/${{ github.sha }}/check-runs" \
+                     --jq '.check_runs[] | "\(.name)=\(.status):\(.conclusion // "pending")"')
+            pending=0; failed=""
+            for name in cli validate; do
+              line=$(echo "$runs" | grep "^$name=" || true)
+              if [ -z "$line" ]; then pending=1; continue; fi
+              case "$line" in
+                *":success")          : ;;
+                *"completed:skipped") : ;;   # path-filtered away, not a failure
+                *"completed:"*)       failed="$failed $name" ;;
+                *)                    pending=1 ;;
+              esac
+            done
+            if [ -n "$failed" ]; then
+              echo "::error::refusing to publish — failing checks on this commit:$failed"
+              exit 1
+            fi
+            if [ "$pending" -eq 0 ]; then echo "all required checks green"; exit 0; fi
+            echo "attempt $attempt: still waiting on checks..."
+            sleep 20
+          done
+          echo "::error::required checks did not report within 10 minutes; not publishing"
+          exit 1
+
       - name: Test
         run: node --test 'test/*.test.js' 'test/runtime/*.test.js'
         working-directory: cli
