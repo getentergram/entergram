@@ -182,7 +182,11 @@ jobs:
 
       - name: Commit, tag, and push
         env:
-          PUSH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          # GITHUB_TOKEN is sufficient: this job declares contents: write and
+          # the push, tag and release all succeed with it. RELEASE_TOKEN is no
+          # longer preferred -- an unapproved fine-grained PAT took precedence
+          # and failed the release step with 403.
+          PUSH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           v="${{ steps.ver.outputs.version }}"
@@ -205,7 +209,7 @@ jobs:
 
       - name: GitHub release
         env:
-          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           v="${{ steps.ver.outputs.version }}"
           gh release create "v$v" --repo "${{ github.repository }}" --title "v$v" --generate-notes
