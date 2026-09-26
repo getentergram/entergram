@@ -19,4 +19,5 @@ out/
 # Agent worktrees / local agent scratch
 .claude/
 
-docs/mediascripts/__pycache__
+docs/media
+scripts/__pycache__
