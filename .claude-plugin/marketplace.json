@@ -9,7 +9,7 @@
       "source": ".",
       "displayName": "Entergram",
       "description": "Persistent engineering memory for your coding agent — recall prior decisions before you build, capture the rationale after you decide.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "Entergram Project"
       },

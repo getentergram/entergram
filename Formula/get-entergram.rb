@@ -3,8 +3,8 @@ class GetEntergram < Formula
   homepage "https://github.com/getentergram/entergram"
   # Built from the published npm tarball: the package already ships bin/, src/ and the
   # prebuilt viz UI, so there is nothing to compile here beyond the native sqlite dep.
-  url "https://registry.npmjs.org/get-entergram/-/get-entergram-0.1.1.tgz"
-  sha256 "e3d6f4e70afc5f35ecf9b0d9c6d145cff6248922c86ef9a361577bf5e6e84491"
+  url "https://registry.npmjs.org/get-entergram/-/get-entergram-0.1.2.tgz"
+  sha256 "77c7162b0b5e9f830cecee7312d0627700c34d7c5bd6c6e6d3a9f174876a092f"
   license "MIT"
 
   depends_on "node"
