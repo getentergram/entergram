@@ -1,0 +1,168 @@
+name: Release on merge
+
+# Merging a change to the CLI or the plugin cuts a release: bump the three
+# manifests together, publish to npm, point the Homebrew formula at the new
+# tarball, tag, and draft the GitHub release.
+#
+# Two things this repo learned the hard way shape the design:
+#
+#   npm publish is asynchronous. The registry answered 404 for minutes after a
+#   successful publish ("Your package is being processed"), so the formula step
+#   polls for the tarball instead of reading the registry once.
+#
+#   The release commit lands on main and would re-trigger this workflow. The
+#   `chore(release):` guard below is what stops it looping.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cli/**"
+      - ".claude-plugin/**"
+      - "skills/**"
+      - "commands/**"
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version increment"
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Don't react to our own release commit.
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # A PAT lets the release commit re-trigger other workflows and works
+          # even where the org forbids GITHUB_TOKEN writes. Falls back to the
+          # built-in token, which is enough when org policy allows writes.
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+          cache-dependency-path: cli/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: cli
+
+      - name: Test
+        run: node --test 'test/*.test.js' 'test/runtime/*.test.js'
+        working-directory: cli
+
+      - name: Decide the version
+        id: ver
+        # If the manifests already name a version npm has never seen, that
+        # version is the release and nothing is bumped -- this is how a manual
+        # bump in a PR still works. Otherwise take the next increment.
+        run: |
+          set -euo pipefail
+          current=$(node scripts/version.mjs current)
+          if npm view "get-entergram@$current" version >/dev/null 2>&1; then
+            bump="${{ inputs.bump || 'patch' }}"
+            version=$(node scripts/version.mjs next "$bump")
+            echo "$current is already published; bumping $bump -> $version"
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+          else
+            version="$current"
+            echo "$current is not on npm yet; releasing it as-is"
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+          fi
+          node scripts/version.mjs set "$version" >/dev/null
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: The tarball ships a usable viz UI
+        # files[] once omitted "ui", and .gitignore once excluded cli/ui/_next,
+        # each shipping an `entergram viz` that 404s. Neither showed up in tests.
+        working-directory: cli
+        run: |
+          set -euo pipefail
+          npm pack --dry-run --json > /tmp/pack.json
+          node -e '
+            const fs = require("fs");
+            const files = new Set(require("/tmp/pack.json")[0].files.map(x => x.path));
+            const ui = [...files].filter(p => p.startsWith("ui/"));
+            if (ui.length === 0) { console.log("::error::no ui/ files in the tarball"); process.exit(1); }
+            const html = fs.readFileSync("ui/index.html", "utf8");
+            const refs = [...new Set([...html.matchAll(/_next\/static\/[^"]+\.(?:js|css)/g)].map(m => m[0]))];
+            const gone = refs.filter(r => !files.has("ui/" + r));
+            if (gone.length) { console.log("::error::index.html references assets missing from the tarball: " + gone.join(", ")); process.exit(1); }
+            console.log(`ui/: ${ui.length} files, all ${refs.length} referenced assets present`);
+          '
+
+      - name: Publish to npm
+        working-directory: cli
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Wait for the registry, then point the formula at the tarball
+        # npm accepts a publish before the tarball is downloadable; reading the
+        # registry immediately gives a 404 and a wrong checksum.
+        run: |
+          set -euo pipefail
+          v="${{ steps.ver.outputs.version }}"
+          url="https://registry.npmjs.org/get-entergram/-/get-entergram-$v.tgz"
+          for i in $(seq 1 40); do
+            code=$(curl -s -o /tmp/pkg.tgz -w '%{http_code}' -L "$url" || true)
+            [ "$code" = "200" ] && break
+            echo "attempt $i: registry returned $code, waiting..."
+            sleep 15
+          done
+          [ "$code" = "200" ] || { echo "::error::tarball never became downloadable"; exit 1; }
+          sha=$(shasum -a 256 /tmp/pkg.tgz | awk '{print $1}')
+          echo "sha256 $sha"
+          sed -i -E -e "s|^(  url \").*(\")$|\1$url\2|" -e "s|^(  sha256 \").*(\")$|\1$sha\2|" Formula/get-entergram.rb
+          grep -E '^\s+(url|sha256)' Formula/get-entergram.rb
+
+      - name: Commit, tag, and push
+        run: |
+          set -euo pipefail
+          v="${{ steps.ver.outputs.version }}"
+          git config user.name  "getentergram"
+          git config user.email "getentergram@users.noreply.github.com"
+          git add cli/package.json .claude-plugin/plugin.json .claude-plugin/marketplace.json Formula/get-entergram.rb
+          git commit -m "chore(release): v$v
+
+          Published get-entergram@$v to npm and pointed the Homebrew formula at
+          its tarball. Plugin and marketplace manifests bumped in step.
+
+          [skip ci]"
+          git tag "v$v"
+          git push origin HEAD:main
+          git push origin "v$v"
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          v="${{ steps.ver.outputs.version }}"
+          gh release create "v$v" --repo "${{ github.repository }}" --title "v$v" --generate-notes
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### get-entergram v${{ steps.ver.outputs.version }}"
+            echo ""
+            echo "- bumped: ${{ steps.ver.outputs.bumped }}"
+            echo "- npm, Homebrew formula and plugin manifests are all on this version"
+          } >> "$GITHUB_STEP_SUMMARY"
