@@ -39,6 +39,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Declaring a permissions block sets every unlisted scope to none, so the
+      # gate below could not read check-runs and failed with
+      # "Resource not accessible by integration (HTTP 403)".
+      checks: read
+      actions: read
 
     steps:
       - uses: actions/checkout@v4
