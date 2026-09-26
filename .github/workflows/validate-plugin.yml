@@ -12,12 +12,10 @@ on:
       - "commands/**"
       - "cli/package.json"
       - ".github/workflows/validate-plugin.yml"
+  # No path filter: this is a required status check, and a path-filtered check
+  # never reports on a PR that misses its paths, which leaves that PR waiting
+  # forever on a check that will not run. The job takes seconds.
   pull_request:
-    paths:
-      - ".claude-plugin/**"
-      - "skills/**"
-      - "commands/**"
-      - "cli/package.json"
   workflow_dispatch:
 
 jobs:
