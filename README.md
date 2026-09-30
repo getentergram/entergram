@@ -120,6 +120,13 @@ Markdown is the source of truth; the local SQLite index is just a rebuildable ca
 | `get-entergram dispatch "<q>"` | Select the strongest-matching procedure (or fall back to recall) |
 | `get-entergram remember "<fact>"` | Write a fact by hand |
 | `get-entergram review` | Triage auto-extracted facts (accept / edit / reject) |
+| `get-entergram trace <id>` | Trace why a decision was made — what it descended from, what it caused |
+| `get-entergram viz` | Open the memory as a browsable knowledge graph on localhost |
+| `get-entergram network` | Show connection metrics and the link graph |
+| `get-entergram stimulate "<q>"` | Show what a query activates across the whole store, beyond the top matches |
+| `get-entergram mutate <id>` | Adjust a cell's parameters, or show them |
+| `get-entergram telemetry` | Ranking telemetry and decision metrics |
+| `get-entergram reindex` | Rebuild the search index from the stored cells |
 | `get-entergram doctor` | Health + coverage check |
 | `get-entergram serve` | Run the MCP server for your agent |
 
