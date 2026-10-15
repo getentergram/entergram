@@ -58,10 +58,12 @@ test('scalar values are unaffected', () => {
 test('a glob doc_path matches nested files instead of being skipped', () => {
   const root = makeRepo('entergram-glob-');
   mkdirSync(join(root, 'docs/deep/deeper'), { recursive: true });
-  const section = (t) => `# ${t}\n\n${'Body text long enough to clear the minimum length bar. '.repeat(3)}\n`;
-  writeFileSync(join(root, 'docs/top.md'), section('Top level doc'));
-  writeFileSync(join(root, 'docs/deep/mid.md'), section('Middle doc'));
-  writeFileSync(join(root, 'docs/deep/deeper/low.md'), section('Deep doc'));
+  // Distinct bodies on purpose: identical ones are genuine duplicates and get
+  // merged, which would make this test about dedup rather than glob expansion.
+  const section = (t, b) => `# ${t}\n\n${b.repeat(3)}\n`;
+  writeFileSync(join(root, 'docs/top.md'), section('Top level doc', 'The index is a rebuildable cache. '));
+  writeFileSync(join(root, 'docs/deep/mid.md'), section('Middle doc', 'Cells are plain markdown you can diff. '));
+  writeFileSync(join(root, 'docs/deep/deeper/low.md'), section('Deep doc', 'Recall is capped by a token budget. '));
 
   writeConfig(root, 'doc_paths = ["docs/**/*.md"]');
   const { added } = learnDocs(root);
@@ -83,4 +85,20 @@ test('excluded paths stay excluded when expanding a glob', () => {
 
   writeConfig(root, 'doc_paths = ["docs/**/*.md"]\nexclude = ["node_modules"]');
   assert.equal(learnDocs(root).added, 1, 'node_modules should not be harvested');
+});
+
+test('sections with identical content are merged, not duplicated', () => {
+  // Hooks now carry the first sentence for short verbless headings, which makes
+  // boilerplate sections look alike to the deduper -- by design, but worth
+  // pinning so the behaviour is deliberate rather than discovered later.
+  const root = makeRepo('entergram-dupe-');
+  mkdirSync(join(root, 'docs'), { recursive: true });
+  const same = `${'Identical body text repeated across two files. '.repeat(3)}`;
+  writeFileSync(join(root, 'docs/a.md'), `# Setup\n\n${same}\n`);
+  writeFileSync(join(root, 'docs/b.md'), `# Install\n\n${same}\n`);
+
+  writeConfig(root, 'doc_paths = ["docs"]');
+  const { added, merged } = learnDocs(root);
+  assert.equal(added + merged, 2, 'both sections accounted for');
+  assert.ok(merged >= 1, 'identical content should merge rather than duplicate');
 });

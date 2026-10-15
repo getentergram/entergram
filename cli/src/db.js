@@ -96,8 +96,14 @@ export function reindex(root) {
       const vec = embedCell(c);
       embedStmt.run(c.id, serializeVector(vec), nowIso);
 
-      // Process citations and build initial provenance links
-      for (const m of (c.text || "").matchAll(/\[\[(B-\d+)\]\]/g)) {
+      // Process citations and build initial provenance links.
+      // Skip cells harvested from docs: a [[B-NNN]] inside prose is the doc
+      // talking ABOUT cells, often ids from another store entirely, not an
+      // author asserting a relationship between two cells in this one. Importing
+      // them made `doctor` fail on entergram's own repo, where the pharma docs
+      // cite illustrative ids like [[B-1204]] that were never meant to exist.
+      const fromDoc = /"kind"\s*:\s*"doc"/.test(c.source || "");
+      for (const m of fromDoc ? [] : (c.text || "").matchAll(/\[\[(B-\d+)\]\]/g)) {
         if (c.id && m[1]) {
           edge.run(c.id, m[1]);
           provStmt.run(c.id, m[1], "related", JSON.stringify({ context: "cited in text" }), nowIso);
