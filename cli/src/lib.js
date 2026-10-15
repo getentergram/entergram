@@ -240,6 +240,34 @@ export function reviewQueue(root, threshold = 0.6) {
 }
 
 /** Ingest docs/README/ADRs into cells, one per meaningful section (heuristic v1). */
+// Build a claim-shaped hook for a doc section.
+//
+// Using the heading alone produced hooks like "Stack", "TL;DR" and "The Atlas":
+// measured across two unrelated repos, ~86% of doc hooks contained no verb at
+// all. Recall matches against the hook, so near-identical topic words gave the
+// ranker nothing to separate -- every query came back "50 of 50 matches" and
+// let the budget do the truncating.
+//
+// Appending the section's first sentence gives the ranker real terms to match
+// while keeping the heading's context.
+function docHook(title, body) {
+  const flat = body.trim().replace(/\s+/g, " ");
+  // Skip boilerplate the first line often is: a bare link, an image, a badge.
+  const prose = flat.replace(/^(!\[[^\]]*\]\([^)]*\)|\[[^\]]*\]\([^)]*\)|[|>#*`-]+)\s*/, "").trim();
+  const m = /^(.{15,170}?[.!?])(?:\s|$)/.exec(prose);
+  const sentence = (m ? m[1] : prose.slice(0, 140)).trim();
+  if (!sentence) return title;
+  // Only rescue headings that carry almost no signal on their own: short AND
+  // verbless, the "Stack" / "TL;DR" / "The Atlas" shape. Appending a sentence to
+  // every heading inflated recall cost ~2.5x (533 -> 1357 tokens on one query)
+  // without improving which cell ranked first, so the cost is spent only where
+  // the hook would otherwise be near-useless.
+  const hasVerb = /\b(is|are|was|were|use[sd]?|add(ed|s)?|fix(ed|es)?|must|should|never|always|requires?|needs?|because)\b/i.test(title);
+  const words = title.trim().split(/\s+/).length;
+  if (hasVerb || words > 4) return title;
+  return `${title} — ${sentence}`.slice(0, 120);
+}
+
 export function learnDocs(root) {
   const p = paths(root);
   const state = JSON.parse(readFileSync(p.state, "utf8"));
@@ -258,7 +286,7 @@ export function learnDocs(root) {
         tags: [...new Set((sec.title + " " + rel).toLowerCase().match(/[a-z][a-z0-9-]{3,}/g) || [])].slice(0, 4),
         scope: "docs",
         confidence: isAdr ? 0.7 : 0.5,
-        hook: sec.title,
+        hook: docHook(sec.title, sec.body),
         what: sec.body.trim().slice(0, 500),
         source: { kind: "doc", path: rel, heading: sec.title },
       });
@@ -417,7 +445,12 @@ export function doctor(root) {
   for (const c of cells) {
     if (!c.id) problems.push(`${c.file}: missing id`);
     if (!c.hook) problems.push(`${c.file}: missing hook`);
-    for (const m of c.text.matchAll(/\[\[(B-\d+)\]\]/g)) {
+    // A [[B-NNN]] inside a doc-harvested cell is the doc talking ABOUT cells --
+    // often ids belonging to another store -- not a link this store owns. Flagging
+    // those made doctor fail on entergram's own repo, whose docs cite illustrative
+    // ids like [[B-1204]] that were never meant to resolve here.
+    const fromDoc = /"kind"\s*:\s*"doc"/.test(c.source || "");
+    for (const m of fromDoc ? [] : c.text.matchAll(/\[\[(B-\d+)\]\]/g)) {
       if (!ids.has(m[1])) problems.push(`${c.file}: dangling link ${m[1]}`);
     }
   }
