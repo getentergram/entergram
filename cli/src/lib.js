@@ -280,13 +280,26 @@ export function readConfig(root) {
   };
   const { config } = paths(root);
   if (!existsSync(config)) return out;
-  for (const line of readFileSync(config, "utf8").split("\n")) {
-    const m = /^(\w+)\s*=\s*(.+)$/.exec(line.trim());
+
+  const parseList = (body) =>
+    body.split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter(Boolean);
+
+  const lines = readFileSync(config, "utf8").split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(\w+)\s*=\s*(.*)$/.exec(lines[i].trim());
     if (!m) continue;
-    const [, key, raw] = m;
-    out[key] = raw.startsWith("[")
-      ? raw.replace(/^\[|\]$/g, "").split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter(Boolean)
-      : raw.replace(/^"|"$/g, "");
+    const [, key] = m;
+    let raw = m[2];
+
+    if (raw.startsWith("[")) {
+      // An array may span lines. `init` writes doc_paths that way, and reading
+      // only the first line yielded "[" -> [""] -> [] -- an empty list that
+      // overrode the default above and silently disabled doc ingestion.
+      while (!raw.includes("]") && i + 1 < lines.length) raw += " " + lines[++i].trim();
+      out[key] = parseList(raw.slice(raw.indexOf("[") + 1, raw.lastIndexOf("]") === -1 ? undefined : raw.lastIndexOf("]")));
+    } else {
+      out[key] = raw.replace(/^"|"$/g, "");
+    }
   }
   return out;
 }
@@ -305,9 +318,46 @@ function docFiles(root) {
       else if (/\.mdx?$/i.test(e.name)) out.push(r);
     }
   };
+  // A doc_path may be a glob. The default config ships "docs/**/*.md", which was
+  // passed to existsSync() verbatim -- a path containing ** never exists, so the
+  // entry was skipped and whole docs trees went uningested.
+  const expandGlob = (pattern) => {
+    const parts = pattern.split("/");
+    const firstGlob = parts.findIndex((p) => p.includes("*") || p.includes("?"));
+    const base = parts.slice(0, firstGlob).join("/");
+    const baseAbs = base ? join(root, base) : root;
+    if (!existsSync(baseAbs) || !statSync(baseAbs).isDirectory()) return [];
+    // Translate the glob in ONE pass. Doing it as a chain of .replace() calls
+    // corrupts itself: the rule for "*" rewrites the "*" inside the replacement
+    // that the "**/" rule just inserted.
+    const rx = new RegExp(
+      "^" + pattern.replace(/\*\*\/|\*\*|\*|\?|[.+^${}()|[\]\\]/g, (tok) => {
+        if (tok === "**/") return "(?:[^/]+/)*";   // zero or more directories
+        if (tok === "**") return ".*";
+        if (tok === "*") return "[^/]*";
+        if (tok === "?") return "[^/]";
+        return "\\" + tok;                        // literal regex metacharacter
+      }) + "$",
+    );
+    const found = [];
+    const descend = (rel) => {
+      for (const e of readdirSync(join(root, rel), { withFileTypes: true })) {
+        if (e.name.startsWith(".")) continue;
+        const r = rel ? `${rel}/${e.name}` : e.name;
+        if (isExcluded(r)) continue;
+        if (e.isDirectory()) descend(r);
+        else if (rx.test(r)) found.push(r);
+      }
+    };
+    descend(base);
+    return found;
+  };
+
   for (const entry of cfg.doc_paths) {
+    if (isExcluded(entry)) continue;
+    if (entry.includes("*") || entry.includes("?")) { out.push(...expandGlob(entry)); continue; }
     const abs = join(root, entry);
-    if (!existsSync(abs) || isExcluded(entry)) continue;
+    if (!existsSync(abs)) continue;
     if (statSync(abs).isDirectory()) walk(entry);
     else out.push(entry);
   }
