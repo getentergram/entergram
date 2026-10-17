@@ -84,8 +84,18 @@ export function initRepo(root) {
 const slug = (s) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "cell";
 
-export function nextId(root) {
+/**
+ * Next free `B-NNNN` id. When `index` (from buildCellIndex) is given, the id is
+ * drawn from an in-memory counter instead of re-listing the cell dir -- see
+ * issue #27, where ingesting M candidates re-listed the directory M times.
+ */
+export function nextId(root, index) {
+  if (index) {
+    index.nextIdNum += 1;
+    return "B-" + String(index.nextIdNum).padStart(4, "0");
+  }
   const { cells } = paths(root);
+  _diskStats.dirListings++;
   const ids = readdirSync(cells)
     .map((f) => /^B-(\d+)/.exec(f))
     .filter(Boolean)
@@ -94,10 +104,31 @@ export function nextId(root) {
   return "B-" + String(n).padStart(4, "0");
 }
 
-/** Serialize + write one cell. Returns { id, file }. */
-export function writeCell(root, c) {
+/**
+ * Build an in-memory snapshot of all cells once, for reuse across many
+ * writeCellDeduped calls in a single ingestion run. Without this, findDuplicate
+ * re-read every cell file and nextId re-listed the cell dir for every single
+ * candidate, making a `learn` run over M candidates against N existing cells
+ * cost O(N*M) disk operations instead of O(N+M) (issue #27).
+ */
+export function buildCellIndex(root) {
+  const cells = readCells(root);
+  let maxId = 0;
+  for (const c of cells) {
+    // Match the original nextId()'s behavior exactly: parse the id out of the
+    // filename, not the frontmatter id field, in case the two ever disagree.
+    const m = /^B-(\d+)/.exec(c.file || "");
+    if (m) maxId = Math.max(maxId, Number(m[1]));
+  }
+  return { cells, nextIdNum: maxId };
+}
+
+/** Serialize + write one cell. Returns { id, file }. Pass `index` (from
+ * buildCellIndex) to avoid a directory relist for the id and to keep the
+ * in-memory cell list current for subsequent dedup checks in the same run. */
+export function writeCell(root, c, index) {
   const { cells } = paths(root);
-  const id = c.id || nextId(root);
+  const id = c.id || nextId(root, index);
   const tags = c.tags?.length ? c.tags : ["untagged"];
   const fm = [
     "---",
@@ -122,8 +153,22 @@ export function writeCell(root, c) {
     c.related?.length ? "\nRelated: " + c.related.map((r) => `[[${r}]]`).join(", ") : "",
     "",
   ].join("\n");
-  const file = join(cells, `${id}-${slug(c.hook || c.what)}.md`);
-  writeFileSync(file, fm + "\n" + body);
+  const name = `${id}-${slug(c.hook || c.what)}.md`;
+  const file = join(cells, name);
+  const text = fm + "\n" + body;
+  writeFileSync(file, text);
+  if (index) {
+    index.cells.push({
+      file: name, id, tags, hook: c.hook || c.what || "", type: c.type || "reference",
+      scope: c.scope || "global", confidence: c.confidence ?? 1.0,
+      created: c.created || new Date().toISOString().slice(0, 10),
+      // Match the shape readCells() would produce on a re-read: source is the
+      // raw frontmatter string, not the live object, so any later consumer of
+      // this cached cell sees the same thing it would see after a disk reload.
+      source: c.source != null ? JSON.stringify(c.source) : undefined,
+      effector: undefined, body, text,
+    });
+  }
   return { id, file };
 }
 
@@ -141,13 +186,22 @@ function parseFrontmatter(text) {
   return { fm, body: m[2] };
 }
 
+// Test-only counters for the two disk operations issue #27 made quadratic:
+// reading every cell file for dedup, and listing the cell dir for the next id.
+// Tests assert these stay ~constant across a `learn` run instead of timing
+// wall-clock, which is reliable but flakier under CI load. Production code
+// never reads this export.
+export const _diskStats = { cellFileReads: 0, dirListings: 0 };
+
 /** Load every cell as a structured object. */
 export function readCells(root) {
   const { cells } = paths(root);
   if (!existsSync(cells)) return [];
+  _diskStats.dirListings++;
   return readdirSync(cells)
     .filter((f) => f.endsWith(".md") && /^B-\d+/.test(f))
     .map((f) => {
+      _diskStats.cellFileReads++;
       const text = readFileSync(join(cells, f), "utf8");
       const { fm, body } = parseFrontmatter(text);
       if (!fm.id) return null;
@@ -197,12 +251,14 @@ function jaccard(a, b) {
 
 const words = (s) => (s || "").toLowerCase().match(/[a-z0-9]{3,}/g) || [];
 
-/** Find an existing cell that looks like the same fact as `candidate` (tag overlap + hook similarity). */
-export function findDuplicate(root, candidate) {
+/** Find an existing cell that looks like the same fact as `candidate` (tag overlap + hook similarity).
+ * Pass `index` (from buildCellIndex) to check against an in-memory cell list instead
+ * of re-reading every cell file from disk -- see issue #27. */
+export function findDuplicate(root, candidate, index) {
   const candTags = candidate.tags || [];
   const candWords = words(candidate.hook || candidate.what);
   let best = null, bestScore = 0, bestHookScore = 0;
-  for (const c of readCells(root)) {
+  for (const c of index ? index.cells : readCells(root)) {
     const tagScore = jaccard(candTags, c.tags || []);
     if (tagScore === 0) continue; // require at least some shared tag before comparing text
     const hookScore = jaccard(candWords, words(c.hook));
@@ -223,10 +279,15 @@ export function findDuplicate(root, candidate) {
  * Write a cell, but dedup/reconcile against existing cells first (ingestion §4.4-4.5):
  * same fact found → merge into it (stronger/more-recent confidence wins) instead of
  * creating a duplicate; return { merged: true } so callers can tally it separately.
+ *
+ * Pass `index` (from buildCellIndex) when calling this in a loop over many candidates
+ * (git/doc/PR ingestion) -- it reuses one in-memory cell list and next-id counter
+ * across the whole run instead of re-reading every cell file and re-listing the cell
+ * dir per candidate (issue #27).
  */
-export function writeCellDeduped(root, candidate) {
-  const dup = findDuplicate(root, candidate);
-  if (!dup) return { ...writeCell(root, candidate), merged: false };
+export function writeCellDeduped(root, candidate, index) {
+  const dup = findDuplicate(root, candidate, index);
+  if (!dup) return { ...writeCell(root, candidate, index), merged: false };
   const dupConf = Number(dup.confidence ?? 0);
   const candConf = Number(candidate.confidence ?? 0);
   const patch = { confidence: Math.max(candConf, dupConf) };
@@ -236,6 +297,9 @@ export function writeCellDeduped(root, candidate) {
   // whichever commit got deduped second silently clobber the first cell's rationale.
   if (candConf > dupConf && candidate.why) patch.why = candidate.why;
   updateCell(root, dup.id, patch);
+  // Keep the cached snapshot in sync so a later candidate in this same run that
+  // also dedups against `dup` sees its updated confidence, not a stale value.
+  if (index) dup.confidence = patch.confidence;
   const { cells } = paths(root);
   return { id: dup.id, file: join(cells, dup.file), merged: true };
 }
@@ -282,6 +346,9 @@ export function learnDocs(root) {
   const seen = new Set(state.seenDocs || []);
   const files = docFiles(root);
   let added = 0, skipped = 0, merged = 0;
+  // Load cells once and reuse across every section in this run (issue #27) instead
+  // of re-reading all cell files and re-listing the cell dir per section.
+  const index = buildCellIndex(root);
   for (const rel of files) {
     const text = readFileSync(join(root, rel), "utf8");
     for (const sec of splitSections(text)) {
@@ -297,7 +364,7 @@ export function learnDocs(root) {
         hook: docHook(sec.title, sec.body),
         what: sec.body.trim().slice(0, 500),
         source: { kind: "doc", path: rel, heading: sec.title },
-      });
+      }, index);
       seen.add(key);
       wasMerged ? merged++ : added++;
     }
@@ -477,6 +544,9 @@ export function learnGit(root, { limit = 50, since } = {}) {
     { encoding: "utf8", maxBuffer: 1 << 24 },
   );
   let added = 0, skipped = 0, merged = 0;
+  // Load cells once and reuse across every commit in this run (issue #27) instead
+  // of re-reading all cell files and re-listing the cell dir per commit.
+  const index = buildCellIndex(root);
   for (const rec of raw.split(RS)) {
     const line = rec.replace(/^\n/, "");
     if (!line.trim()) continue;
@@ -500,7 +570,7 @@ export function learnGit(root, { limit = 50, since } = {}) {
       what: subject.trim(),
       why: bodyText.trim() || "(rationale not in commit message — refine with `get-entergram review`)",
       source: { kind: "commit", sha: sha.slice(0, 9), author, date },
-    });
+    }, index);
     seen.add(sha);
     wasMerged ? merged++ : added++;
   }
