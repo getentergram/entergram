@@ -5,6 +5,7 @@ import Database from "better-sqlite3";
 import { join } from "node:path";
 import { existsSync, readFileSync, mkdirSync } from "node:fs";
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { readCells, paths } from "./lib.js";
 import { embedQuery, embedCell, serializeVector, deserializeVector, cosineSimilarity } from "./embeddings.js";
 import { computeDynamicConfidence, checkStaleness } from "./temporal.js";
@@ -35,6 +36,11 @@ export function openDb(root) {
     const cols = db.prepare("PRAGMA table_info(cells)").all().map((c) => c.name);
     if (!cols.includes("effector")) db.exec("ALTER TABLE cells ADD COLUMN effector TEXT;");
     if (!cols.includes("status")) db.exec("ALTER TABLE cells ADD COLUMN status TEXT;");
+    // Per-cell content hash so ensureIndex can detect in-place edits, not just
+    // additions/deletions (issue #20). NULL on a pre-existing row (an upgrade from
+    // before this column existed) never equals a freshly computed hash, so it reads
+    // as stale and self-heals on the next ensureIndex() call.
+    if (!cols.includes("content_hash")) db.exec("ALTER TABLE cells ADD COLUMN content_hash TEXT;");
   } catch {
     // Ignore migration error if already exists
   }
@@ -58,6 +64,12 @@ function loadWatermarks(root) {
   ];
 }
 
+/** Content fingerprint of a cell's full on-disk text (frontmatter + body) — used to tell an
+ *  in-place edit apart from an untouched file, independent of file size or row count. */
+function hashCell(c) {
+  return createHash("sha256").update(c.text || "").digest("hex");
+}
+
 /** Rebuild the index from the Markdown cells, computing embeddings & provenance. Returns cell count. */
 export function reindex(root) {
   const db = openDb(root);
@@ -65,7 +77,7 @@ export function reindex(root) {
   const wipe = db.transaction(() => {
     db.exec("DELETE FROM cells; DELETE FROM cells_fts; DELETE FROM edges; DELETE FROM ingest_watermark; DELETE FROM embeddings;");
     const ins = db.prepare(
-      "INSERT INTO cells(id,type,scope,hook,body,tags_str,source,confidence,created,file,effector,status) VALUES (@id,@type,@scope,@hook,@body,@tags_str,@source,@confidence,@created,@file,@effector,@status)",
+      "INSERT INTO cells(id,type,scope,hook,body,tags_str,source,confidence,created,file,effector,status,content_hash) VALUES (@id,@type,@scope,@hook,@body,@tags_str,@source,@confidence,@created,@file,@effector,@status,@content_hash)",
     );
     const fts = db.prepare("INSERT INTO cells_fts(id,hook,body,tags) VALUES (?,?,?,?)");
     const edge = db.prepare("INSERT OR IGNORE INTO edges(from_id,to_id) VALUES (?,?)");
@@ -88,7 +100,7 @@ export function reindex(root) {
         hook: c.hook || "", body: c.body || "", tags_str: tags,
         source: c.source || "", confidence: conf,
         created: c.created || "", file: c.file, effector: c.effector || "",
-        status,
+        status, content_hash: hashCell(c),
       });
       fts.run(c.id, c.hook || "", c.body || "", tags);
 
@@ -193,13 +205,27 @@ export function seedHistoricalCitations(root, db, cells, force = false) {
   return seeded;
 }
 
-/** Keep the index in step with the cells if it's stale (cheap count check). */
+/** Keep the index in step with the cells. A row-count comparison alone catches additions
+ *  and deletions but misses an in-place edit to an existing cell file — same id, same
+ *  filename, same row count, different content (issue #20). So alongside the count we
+ *  compare each on-disk cell's content hash against what's stored for that id; any
+ *  mismatch (including an id that moved on/off disk while the count happened to hold,
+ *  or a NULL hash left behind by a pre-upgrade row) is staleness too. */
 export function ensureIndex(root) {
   const db = openDb(root);
-  const indexed = db.prepare("SELECT COUNT(*) n FROM cells").get().n;
-  db.close();
-  const onDisk = readCells(root).length;
-  if (indexed !== onDisk) reindex(root);
+  let indexedRows;
+  try {
+    indexedRows = db.prepare("SELECT id, content_hash FROM cells").all();
+  } finally {
+    db.close();
+  }
+
+  const onDisk = readCells(root);
+  const indexedHashes = new Map(indexedRows.map((r) => [r.id, r.content_hash]));
+  const stale = indexedRows.length !== onDisk.length
+    || onDisk.some((c) => indexedHashes.get(c.id) !== hashCell(c));
+
+  if (stale) reindex(root);
 }
 
 const est = (s) => Math.ceil((s || "").length / 4);
