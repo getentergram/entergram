@@ -67,6 +67,53 @@ test("checkStaleness: detects stale decisions whose confidence dropped below thr
   assert.match(stale.reason, /decayed/i);
 });
 
+test("computeDynamicConfidence: recall citations alone cannot promote an unreviewed (draft) cell past the review threshold", () => {
+  // A fresh, never-human-reviewed cell (confidence 0.4, below the 0.6 "unreviewed" line).
+  const cell = {
+    confidence: 0.4,
+    created: "2024-01-01",
+    scope: "global",
+  };
+
+  const nowSec = Date.parse("2024-01-01T00:00:00Z") / 1000;
+
+  // Simulate repeated recalls: each recall records a fresh citation (same as search()'s
+  // citation insert), same as the issue's reproduction (4 consecutive recalls).
+  let citations = [];
+  let conf = computeDynamicConfidence(cell, citations, nowSec);
+  assert.ok(conf < 0.6, "fresh draft cell starts unreviewed");
+
+  for (let i = 1; i <= 10; i++) {
+    citations = [...citations, { timestamp: "2024-01-01T00:00:00Z", success: true }];
+    conf = computeDynamicConfidence(cell, citations, nowSec);
+    assert.ok(
+      conf < 0.6,
+      `citation #${i} must not flip the unreviewed marker (confidence ${conf} crossed 0.6)`,
+    );
+  }
+});
+
+test("computeDynamicConfidence: reconfirmation still boosts an already-reviewed (active) cell", () => {
+  // Guard against an overcorrection that disables reconfirmation entirely — it must keep
+  // working for cells that already cleared human review (confidence >= 0.6).
+  const cell = {
+    confidence: 0.8,
+    created: "2024-01-01",
+    scope: "deployment",
+  };
+
+  const nowSec = Date.parse("2024-06-01T00:00:00Z") / 1000; // ~150 days later
+  const confWithoutCitations = computeDynamicConfidence(cell, [], nowSec);
+
+  const citations = [
+    { timestamp: "2024-05-20T00:00:00Z", success: true },
+    { timestamp: "2024-05-28T00:00:00Z", success: true },
+  ];
+  const confWithCitations = computeDynamicConfidence(cell, citations, nowSec);
+
+  assert.ok(confWithCitations > confWithoutCitations);
+});
+
 test("transitionLifecycle: returns valid patch and sets zero confidence on supersession", () => {
   const cell = { id: "B-0010", confidence: 0.9 };
   const patch = transitionLifecycle(cell, "superseded", "Replaced by B-0099 Valkey migration");

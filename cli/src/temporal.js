@@ -17,6 +17,7 @@ export const DECAY_RATES = {
 
 const DEFAULT_DECAY_RATE = 0.002;
 const RECONFIRM_WEIGHT = 0.15; // Boost per successful citation
+const REVIEW_THRESHOLD = 0.6; // Below this, a cell is "unreviewed" and citations alone can't clear it
 
 /**
  * Parses an ISO date string or timestamp into seconds since epoch.
@@ -63,9 +64,15 @@ export function computeDynamicConfidence(cell, citations = [], nowSec = Math.flo
   // Exponential base decay
   const baseConfidence = initialConf * Math.exp(-lambda * ageDays);
 
-  // Citation reconfirmation boost
+  // Citation reconfirmation boost — but only for cells a human has already reviewed
+  // (initial on-disk confidence at/above the review threshold). A recall is a read, not a
+  // review: if it counted as reconfirmation for a still-unreviewed cell, retrieval alone
+  // would promote it to look reviewed after a handful of queries (issue #19). Reconfirmation
+  // instead only offsets decay for decisions that already cleared human review, so a cited,
+  // trusted cell doesn't go stale from disuse.
+  const alreadyReviewed = initialConf >= REVIEW_THRESHOLD;
   let reconfirmBoost = 0;
-  if (Array.isArray(citations) && citations.length > 0) {
+  if (alreadyReviewed && Array.isArray(citations) && citations.length > 0) {
     for (const c of citations) {
       if (c.success !== false) {
         const citeSec = toEpochSeconds(c.timestamp);
