@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { existsSync, readFileSync, mkdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readCells, paths } from "./lib.js";
+import { readCells, paths, readConfig } from "./lib.js";
 import { embedQuery, embedCell, serializeVector, deserializeVector, cosineSimilarity } from "./embeddings.js";
 import { computeDynamicConfidence, checkStaleness } from "./temporal.js";
 import { initProvenanceSchema, traceDecisionProvenance } from "./provenance.js";
@@ -336,7 +336,7 @@ function hybridRerank(root, db, rows, query, bandit = null) {
  * Exported for testing: packing is order-dependent, and exercising it through search()
  * tests bm25's ranking rather than the packer.
  */
-export function packHits(rows, query, budget) {
+export function packHits(rows, query, budget, { synthesis: wantSynthesis = true } = {}) {
   const hits = [];
   let used = 0;
   for (const r of rows) {
@@ -357,19 +357,34 @@ export function packHits(rows, query, budget) {
     });
     used += cost;
   }
-  return { hits, tokens: used, total: rows.length, synthesis: synthesize(query, hits) };
+  return { hits, tokens: used, total: rows.length, synthesis: wantSynthesis ? synthesize(query, hits) : "" };
+}
+
+/**
+ * Resolve the recall options a caller didn't pin down explicitly from entergram.toml's
+ * `[recall]` section -- `default_budget` and `synthesis` were parsed into config and then
+ * never consulted. Absent config (or an absent/non-false `synthesis`), this reproduces
+ * today's hardcoded defaults exactly, so existing repos see no change in behavior.
+ */
+function resolveRecallOptions(root, budget) {
+  const cfg = readConfig(root);
+  return {
+    budget: budget ?? cfg.recall?.default_budget ?? 2000,
+    synthesis: cfg.recall?.synthesis !== false,
+  };
 }
 
 /** FTS/bm25 + Vector + Temporal + RL recall, packed under a token budget. */
-export function search(root, query, budget = 2000) {
+export function search(root, query, budget) {
   const match = ftsMatch(query);
   if (!match) return { hits: [], tokens: 0, total: 0, synthesis: "" };
+  const { budget: effectiveBudget, synthesis } = resolveRecallOptions(root, budget);
   const db = openDb(root);
   let result;
   try {
     const rawRows = rankedRows(db, match);
     const ranked = hybridRerank(root, db, rawRows, query);
-    result = packHits(ranked, query, budget);
+    result = packHits(ranked, query, effectiveBudget, { synthesis });
 
     // Record telemetry event
     logTelemetryEvent(root, {
@@ -397,9 +412,10 @@ export function search(root, query, budget = 2000) {
 /**
  * Basal-ganglia-style action selection with hybrid RL ranking: choose between recall and a procedure.
  */
-export function dispatch(root, query, budget = 2000) {
+export function dispatch(root, query, budget) {
   const match = ftsMatch(query);
   if (!match) return { winner: "recall", hits: [], tokens: 0, total: 0, synthesis: "" };
+  const { budget: effectiveBudget, synthesis } = resolveRecallOptions(root, budget);
 
   const db = openDb(root);
   try {
@@ -408,7 +424,7 @@ export function dispatch(root, query, budget = 2000) {
     const rankedAll = hybridRerank(root, db, allRows, query, bandit);
 
     const asRecall = () => {
-      const res = { winner: "recall", ...packHits(rankedAll, query, budget) };
+      const res = { winner: "recall", ...packHits(rankedAll, query, effectiveBudget, { synthesis }) };
       logTelemetryEvent(root, {
         event_type: "dispatch",
         query,
