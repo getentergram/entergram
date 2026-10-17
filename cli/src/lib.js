@@ -307,7 +307,17 @@ export function learnDocs(root) {
   return { added, skipped, merged };
 }
 
-/** Minimal entergram.toml reader — just enough for flat string/array keys (no TOML dep needed). */
+/**
+ * Minimal entergram.toml reader — flat string/array keys, plus one level of
+ * `[section]` nesting (no TOML dep needed).
+ *
+ * `[extraction]`/`[recall]` headers used to be silently skipped (they have no
+ * "=", so the old key=value regex never matched them) and every key that
+ * followed landed on the flat top-level object as a raw string -- so
+ * `cfg.extraction.min_commit_len` was always undefined, and what little did
+ * show up (`cfg.min_commit_len`) was the string "20", not the number 20.
+ * Tracking the current section and coercing scalars fixes both.
+ */
 export function readConfig(root) {
   const out = {
     name: root.split("/").pop(), sources: ["git", "docs", "github"],
@@ -320,21 +330,45 @@ export function readConfig(root) {
   const parseList = (body) =>
     body.split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter(Boolean);
 
+  // Bare scalars (unquoted) come back typed -- number/boolean -- rather than as
+  // raw TOML text, so `extraction.min_commit_len` etc. are usable directly.
+  // Quoted strings still come back as plain (unquoted) strings, as before.
+  const coerceScalar = (raw) => {
+    const unquoted = raw.replace(/^"|"$/g, "");
+    if (raw === unquoted) {
+      if (unquoted === "true") return true;
+      if (unquoted === "false") return false;
+      if (/^-?\d+(\.\d+)?$/.test(unquoted)) return Number(unquoted);
+    }
+    return unquoted;
+  };
+
+  let section = null; // null = top-level; otherwise the current [section] name
   const lines = readFileSync(config, "utf8").split("\n");
   for (let i = 0; i < lines.length; i++) {
-    const m = /^(\w+)\s*=\s*(.*)$/.exec(lines[i].trim());
+    const trimmed = lines[i].trim();
+
+    const header = /^\[(\w+)\]$/.exec(trimmed);
+    if (header) {
+      section = header[1];
+      out[section] ??= {};
+      continue;
+    }
+
+    const m = /^(\w+)\s*=\s*(.*)$/.exec(trimmed);
     if (!m) continue;
     const [, key] = m;
     let raw = m[2];
+    const target = section ? out[section] : out;
 
     if (raw.startsWith("[")) {
       // An array may span lines. `init` writes doc_paths that way, and reading
       // only the first line yielded "[" -> [""] -> [] -- an empty list that
       // overrode the default above and silently disabled doc ingestion.
       while (!raw.includes("]") && i + 1 < lines.length) raw += " " + lines[++i].trim();
-      out[key] = parseList(raw.slice(raw.indexOf("[") + 1, raw.lastIndexOf("]") === -1 ? undefined : raw.lastIndexOf("]")));
+      target[key] = parseList(raw.slice(raw.indexOf("[") + 1, raw.lastIndexOf("]") === -1 ? undefined : raw.lastIndexOf("]")));
     } else {
-      out[key] = raw.replace(/^"|"$/g, "");
+      target[key] = coerceScalar(raw);
     }
   }
   return out;
@@ -465,11 +499,37 @@ export function doctor(root) {
   return { count: cells.length, problems };
 }
 
+/**
+ * Which `learn` sources should run for a given `--source` value, honoring
+ * entergram.toml's top-level `sources` list when `src` is "all" (the default) --
+ * that key used to be parsed into an array and then never consulted, so a repo
+ * that trimmed its `sources` list still had `learn --source all` touch every
+ * source anyway. An explicit, non-"all" `--source` is unaffected: it always
+ * meant exactly that one source and still does.
+ */
+export function resolveSources(root, src) {
+  if (src !== "all") {
+    return { git: src === "git", docs: src === "docs", pr: src === "pr", issue: src === "issue" };
+  }
+  const cfg = readConfig(root);
+  const list = Array.isArray(cfg.sources) && cfg.sources.length ? cfg.sources : ["git", "docs", "github"];
+  const has = (name) => list.includes(name);
+  // "all" never implied issues historically (issues only ran via an explicit
+  // --source issue), so that stays true regardless of what `sources` lists.
+  return { git: has("git"), docs: has("docs"), pr: has("pr") || has("github"), issue: false };
+}
+
 /** Ingest recent git commits into cells (heuristic v1 — LLM extraction is the GitHub-source path below). */
-export function learnGit(root, { limit = 50, since } = {}) {
+export function learnGit(root, { limit = 50, since, minCommitLen } = {}) {
   const p = paths(root);
   const state = JSON.parse(readFileSync(p.state, "utf8"));
   const seen = new Set(state.seenShas);
+  // entergram.toml's [extraction].min_commit_len (per its own comment: "Min commit
+  // message length worth extracting a decision from") used to be parsed and then
+  // dropped on the floor. Absent from config (or from an explicit caller option),
+  // this defaults to 0 -- i.e. no length filtering -- so repos whose config predates
+  // this wiring keep ingesting exactly what they always did.
+  const minLen = minCommitLen ?? readConfig(root).extraction?.min_commit_len ?? 0;
   const US = "\x1f", RS = "\x1e";
   const range = since ? `${since}..HEAD` : "";
   const raw = execSync(
@@ -485,6 +545,7 @@ export function learnGit(root, { limit = 50, since } = {}) {
     if (seen.has(sha)) { skipped++; continue; }
     // Skip low-signal commits.
     if (/^(wip|fix typo|merge|bump|chore|format)\b/i.test(subject.trim())) { skipped++; seen.add(sha); continue; }
+    if (subject.trim().length < minLen) { skipped++; seen.add(sha); continue; }
     const type = /\b(add|introduce|migrat|switch|replace|refactor|remov|decid|design)/i.test(subject)
       ? "decision" : "reference";
     const tags = [...new Set(
