@@ -145,6 +145,33 @@ machine — your code and your memory never leave it unless you choose to sync.
 | Local-first / your data | ✅ | ❌ | ❌ | mostly cloud |
 | Selective, token-cheap recall | ✅ | — | — | depends |
 
+## Development
+
+This is a pnpm monorepo. Layout:
+
+| Path | What's there |
+|---|---|
+| `cli/` | The `get-entergram` / `entergram` CLI and MCP server (Node, published to npm) |
+| `web/` | Landing page (Next.js, deployed on GCP Cloud Run / Vercel) |
+| `apps/viz/` | The `get-entergram viz` knowledge-graph browser |
+| `commands/`, `skills/` | The Claude Code plugin's slash commands and skills |
+| `docs/` | Architecture, master spec, onboarding, and other project docs |
+| `scripts/` | Build/media tooling (not part of the shipped package) |
+
+Build and test the CLI from source:
+
+```bash
+cd cli
+pnpm install
+pnpm test          # node --test test/*.test.js test/runtime/*.test.js
+node bin/get-entergram.js --help
+```
+
+## Contributing
+
+Issues and PRs are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow, commit
+conventions, and how review/merge works.
+
 ## Support
 
 ⭐ Star this repo · 🐛 Issues & PRs welcome

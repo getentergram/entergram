@@ -1,7 +1,0 @@
-index.db
-index.db-shm
-index.db-wal
-index.json
-telemetry.jsonl
-rl/
-*.local
