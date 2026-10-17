@@ -87,6 +87,25 @@ test('excluded paths stay excluded when expanding a glob', () => {
   assert.equal(learnDocs(root).added, 1, 'node_modules should not be harvested');
 });
 
+// --- init's default doc_paths covers common non-"docs" directory names --------------
+
+test('the default doc_paths ingests a repo whose docs live under doc/ or documentation/', () => {
+  // Regression for #25: a repo with 3024 markdown files outside the default
+  // doc_paths (README.md, docs/**, ARCHITECTURE.md, DESIGN.md) only had its
+  // README ingested. This doesn't try to detect "the real docs directory" --
+  // it just broadens the committed default list with the other common names.
+  const root = makeRepo('entergram-docpaths-');
+  mkdirSync(join(root, 'doc'), { recursive: true });
+  mkdirSync(join(root, 'documentation'), { recursive: true });
+  const section = (t, b) => `# ${t}\n\n${b.repeat(3)}\n`;
+  writeFileSync(join(root, 'doc/guide.md'), section('Guide', 'Content lives outside docs/ on purpose. '));
+  writeFileSync(join(root, 'documentation/manual.md'), section('Manual', 'Also outside docs/ on purpose. '));
+
+  // No writeConfig call: this exercises the config init actually wrote.
+  const { added } = learnDocs(root);
+  assert.equal(added, 2, 'both non-"docs" directories should be picked up by the default doc_paths');
+});
+
 test('sections with identical content are merged, not duplicated', () => {
   // Hooks now carry the first sentence for short verbless headings, which makes
   // boilerplate sections look alike to the deduper -- by design, but worth
