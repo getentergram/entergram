@@ -19,22 +19,26 @@ how much work to throw away.
 
 ## How
 
-Use the `entergram` MCP tools if they are connected. Otherwise shell out:
+Call the `recall` MCP tool, exposed by the `get-entergram` MCP server this
+plugin connects:
 
-```bash
-entergram recall "<the question you are about to answer yourself>"
+```json
+{ "query": "<the question you are about to answer yourself>" }
 ```
+
+There is no `entergram` shell command installed by this plugin — do not
+shell out to one; the MCP tool is the only way to reach memory here.
 
 Phrase the query as the question, not as keywords. The index is built over
 cell hooks and bodies, and a natural question matches better than a bag of
 nouns.
 
-If a procedure might exist for the task rather than a fact, use `dispatch`
-instead — it selects a citable action bound to an effector, or falls back to
-recall:
+If a procedure might exist for the task rather than a fact, call the
+`dispatch` MCP tool instead — it selects a citable action bound to an
+effector, or falls back to recall:
 
-```bash
-entergram dispatch "<task>"
+```json
+{ "query": "<task>" }
 ```
 
 `dispatch` only ever SELECTS. It never runs the effector. Executing whatever
@@ -47,8 +51,9 @@ comes back is your decision (and the user's), not the tool's.
 - **A hit that contradicts what you were about to do** — stop and surface the
   conflict before proceeding. The cell may be stale, or you may be about to
   undo a deliberate decision. That is the user's call, not yours.
-- **`total > 0` but no hits** — the budget truncated the result. Re-run with
-  `--budget 100000`. Do not conclude the memory is empty.
+- **`total > 0` but no hits** — the budget truncated the result. Call
+  `recall` again with `"budget": 100000`. Do not conclude the memory is
+  empty.
 - **No matches** — proceed normally, and note that this is a candidate for
   write-back once you have solved it. See `capture-decision`.
 

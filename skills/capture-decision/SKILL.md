@@ -31,15 +31,21 @@ real signal is now competing with filler for the token budget.
 
 ## How to write one
 
-```bash
-entergram remember "<hook — the one-line claim>" \
-  --type decision \
-  --tags "<comma,separated>" \
-  --why "<the rationale, and what was rejected>"
+Call the `remember` MCP tool (exposed by the `get-entergram` MCP server this
+plugin connects):
+
+```json
+{
+  "what": "<hook — the one-line claim>",
+  "why": "<the rationale, and what was rejected>",
+  "tags": ["<tag-one>", "<tag-two>"],
+  "type": "decision"
+}
 ```
 
-`--type` is one of `decision`, `gotcha`, `convention`, `reference`,
-`architecture`, `procedure`.
+There is no `entergram` shell command installed by this plugin — do not
+shell out to one. `type` is one of `decision`, `gotcha`, `convention`,
+`reference`, `architecture`, `procedure`.
 
 Rules that make a cell useful later:
 
@@ -56,15 +62,14 @@ Rules that make a cell useful later:
 
 ## Before writing
 
-Check you are not duplicating. `entergram recall "<your hook>"` first — if a
-cell already covers it, update that one rather than adding a near-duplicate.
-Two cells making the same claim with different confidence is worse than one.
+Check you are not duplicating. Call the `recall` MCP tool with
+`{ "query": "<your hook>" }` first — if a cell already covers it, update that
+one rather than adding a near-duplicate. Two cells making the same claim with
+different confidence is worse than one.
 
 ## After writing
 
-```bash
-entergram doctor
-```
+Call the `doctor` MCP tool (no arguments).
 
 Must report consistent. If it does not, fix it now rather than leaving a
 broken index for the next session.
