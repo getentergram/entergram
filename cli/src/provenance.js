@@ -2,6 +2,8 @@
 // Tracks causal decision trees: Problem -> Alternatives Evaluated -> Rejected Options (with why)
 // -> Chosen Architecture -> Constraints -> Superseded/Superseding Chains.
 
+import { classifyTrust, scanSuspiciousContent, trustFlags, UNTRUSTED_DATA_NOTICE } from "./safety.js";
+
 export const EDGE_TYPES = [
   "considered",
   "rejected",
@@ -101,8 +103,13 @@ export function traceDecisionProvenance(db, cellId) {
   const incoming = db.prepare("SELECT * FROM decision_graph WHERE to_id = ?").all(cellId);
 
   const getCellMeta = (id) => {
-    const row = db.prepare("SELECT id, hook, type, confidence, scope FROM cells WHERE id = ?").get(id);
-    return row || { id, hook: `[External or uncached ref: ${id}]`, type: "unknown" };
+    const row = db.prepare("SELECT id, hook, type, confidence, scope, source, body FROM cells WHERE id = ?").get(id);
+    if (!row) return { id, hook: `[External or uncached ref: ${id}]`, type: "unknown" };
+    return {
+      ...row,
+      trust: classifyTrust(row.source),
+      suspicious: scanSuspiciousContent(`${row.hook || ""}\n${row.body || ""}`).length > 0,
+    };
   };
 
   const parseMeta = (m) => {
@@ -152,6 +159,8 @@ export function traceDecisionProvenance(db, cellId) {
       status: isActive ? "active" : supersededBy.length > 0 ? "superseded" : "decayed",
       created: cell.created,
       effector: cell.effector,
+      trust: classifyTrust(cell.source),
+      suspicious: scanSuspiciousContent(`${cell.hook || ""}\n${cell.body || ""}`).length > 0,
     },
     provenance: {
       considered,
@@ -179,7 +188,7 @@ export function formatProvenanceTree(trace) {
 
   lines.push(`Decision Provenance Tree for ${c.id} (${statusIcon})`);
   lines.push(` Hook: "${c.hook}"`);
-  lines.push(` Scope: ${c.scope} | Type: ${c.type} | Conf: ${c.confidence}`);
+  lines.push(` Scope: ${c.scope} | Type: ${c.type} | Conf: ${c.confidence} | Trust: ${c.trust}${c.suspicious ? " | ⚠ possible-injection-phrasing" : ""}`);
   lines.push("");
 
   const p = trace.provenance;
@@ -187,7 +196,7 @@ export function formatProvenanceTree(trace) {
   if (p.supersededBy.length > 0) {
     lines.push("  ⚠️ SUPERSEDED BY:");
     for (const s of p.supersededBy) {
-      lines.push(`    └── 🔄 ${s.source.id}: "${s.source.hook}"`);
+      lines.push(`    └── 🔄 ${s.source.id}: "${s.source.hook}"${trustFlags(s.source)}`);
     }
     lines.push("");
   }
@@ -195,36 +204,38 @@ export function formatProvenanceTree(trace) {
   if (p.supersedes.length > 0) {
     lines.push("  Replaces Older Decisions (Supersedes):");
     for (const s of p.supersedes) {
-      lines.push(`    └── ⏳ ${s.target.id}: "${s.target.hook}"`);
+      lines.push(`    └── ⏳ ${s.target.id}: "${s.target.hook}"${trustFlags(s.target)}`);
     }
   }
 
   if (p.rejected.length > 0) {
     lines.push("  Rejected Alternatives:");
     for (const r of p.rejected) {
-      lines.push(`    └── ❌ ${r.target.id || r.target.hook}: ${r.target.hook}`);
+      lines.push(`    └── ❌ ${r.target.id || r.target.hook}: ${r.target.hook}${trustFlags(r.target)}`);
       lines.push(`        Reason: "${r.reason}"`);
     }
   } else if (p.considered.length > 0) {
     lines.push("  Considered Alternatives:");
     for (const alt of p.considered) {
-      lines.push(`    └── 🔍 ${alt.target.id}: "${alt.target.hook}"`);
+      lines.push(`    └── 🔍 ${alt.target.id}: "${alt.target.hook}"${trustFlags(alt.target)}`);
     }
   }
 
   if (p.constraints.length > 0) {
     lines.push("  Governing Constraints:");
     for (const cons of p.constraints) {
-      lines.push(`    └── 🛡️ ${cons.target.id || cons.constraint}: "${cons.target.hook || cons.constraint}"`);
+      lines.push(`    └── 🛡️ ${cons.target.id || cons.constraint}: "${cons.target.hook || cons.constraint}"${trustFlags(cons.target)}`);
     }
   }
 
   if (p.causedBy.length > 0) {
     lines.push("  Caused By Incidents/Gotchas:");
     for (const cb of p.causedBy) {
-      lines.push(`    └── ⚠️ ${cb.target.id}: "${cb.target.hook}"`);
+      lines.push(`    └── ⚠️ ${cb.target.id}: "${cb.target.hook}"${trustFlags(cb.target)}`);
     }
   }
+
+  lines.push("", UNTRUSTED_DATA_NOTICE);
 
   return lines.join("\n");
 }

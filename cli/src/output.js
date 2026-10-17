@@ -1,4 +1,9 @@
 import { formatProvenanceTree } from "./provenance.js";
+import { trustFlags as hitFlags, UNTRUSTED_DATA_NOTICE } from "./safety.js";
+
+// Re-exported so mcp.js (and callers of this module) have one place to import the
+// trust/safety presentation helpers from. See safety.js for the actual logic.
+export { hitFlags, UNTRUSTED_DATA_NOTICE };
 
 export function formatSuccess(message) {
   return `✓ ${message}`;
@@ -22,7 +27,7 @@ export function formatDispatch(result, query) {
   if (result.winner === 'procedure') {
     const { cell, effectorPath, why, citedProcedures } = result;
     const lines = [
-      `▶ procedure ${cell.id}  [${cell.tags.join(', ')}]`,
+      `▶ procedure ${cell.id}  [${cell.tags.join(', ')}]${hitFlags(cell)}`,
       `  ${cell.hook}`,
       `  effector: ${effectorPath}`,
       `  ${why}`,
@@ -31,17 +36,18 @@ export function formatDispatch(result, query) {
       lines.push(`  cites: ${citedProcedures.map((c) => `${c.id} (${c.hook})`).join(', ')}`);
     }
     lines.push('  (dispatch only selects — nothing has been run)');
+    lines.push(`  ${UNTRUSTED_DATA_NOTICE}`);
     return lines.join('\n');
   }
   const { hits, total, tokens, synthesis } = result;
   if (!hits.length) return `◇ recall fallback — no matches found for "${query}".`;
   const lines = [`◇ recall fallback — ${hits.length} of ${total} matches (${tokens} tok) for "${query}":`, ''];
   for (const h of hits) {
-    const flag = h.confidence < 0.6 ? ' ⚠unreviewed' : '';
-    lines.push(`  ${h.id}  [${h.tags.join(', ')}]  ${h.type}${flag}`);
+    lines.push(`  ${h.id}  [${h.tags.join(', ')}]  ${h.type}${hitFlags(h)}`);
     lines.push(`    ${h.hook}`);
   }
   if (synthesis) lines.push('', synthesis);
+  lines.push('', UNTRUSTED_DATA_NOTICE);
   return lines.join('\n');
 }
 
