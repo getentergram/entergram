@@ -1,6 +1,6 @@
 // PR/issue learning: harvest → extract (LLM or heuristic) → write cells. Incremental.
 import { readFileSync, writeFileSync } from "node:fs";
-import { paths, writeCellDeduped } from "./lib.js";
+import { paths, writeCellDeduped, buildCellIndex } from "./lib.js";
 import { harvestPRs, harvestIssues, ghAvailable } from "./github.js";
 import { extractLLM, extractHeuristic, llmAvailable } from "./extract.js";
 
@@ -9,6 +9,9 @@ async function ingest(root, units, seenKey, { useLLM }) {
   const state = JSON.parse(readFileSync(p.state, "utf8"));
   const seen = new Set(state[seenKey] || []);
   let added = 0, skipped = 0, merged = 0, viaLLM = 0;
+  // Load cells once and reuse across every PR/issue in this run (issue #27) instead
+  // of re-reading all cell files and re-listing the cell dir per unit.
+  const index = buildCellIndex(root);
   for (const u of units) {
     if (seen.has(u.number)) { skipped++; continue; }
     let mem = null;
@@ -24,7 +27,7 @@ async function ingest(root, units, seenKey, { useLLM }) {
       confidence: mem.confidence, hook: mem.what, what: mem.what,
       why: mem.why, outcome: mem.outcome,
       source: { kind: u.kind, ref: u.ref, author: u.author, date: u.date, url: u.url },
-    });
+    }, index);
     seen.add(u.number);
     wasMerged ? merged++ : added++;
   }
