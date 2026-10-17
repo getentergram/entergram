@@ -1,7 +1,7 @@
 // PR/issue learning: harvest → extract (LLM or heuristic) → write cells. Incremental.
 import { readFileSync, writeFileSync } from "node:fs";
 import { paths, writeCellDeduped } from "./lib.js";
-import { harvestPRs, harvestIssues, ghAvailable } from "./github.js";
+import { harvestPRs, harvestIssues, githubAccess, bodyIndex } from "./github.js";
 import { extractLLM, extractHeuristic, llmAvailable } from "./extract.js";
 
 async function ingest(root, units, seenKey, { useLLM }) {
@@ -33,12 +33,37 @@ async function ingest(root, units, seenKey, { useLLM }) {
   return { added, skipped, merged, viaLLM };
 }
 
-export async function learnPRs(root, { limit = 30, useLLM = llmAvailable() } = {}) {
-  if (!ghAvailable(root)) { process.stderr.write("  gh not available / no GitHub remote — skipping PRs.\n"); return { added: 0, skipped: 0, merged: 0, viaLLM: 0 }; }
-  return ingest(root, harvestPRs(root, { limit }), "seenPRs", { useLLM });
+export async function learnPRs(root, { limit = 30, useLLM = llmAvailable(), units } = {}) {
+  const access = githubAccess(root);
+  if (!access.ok) {
+    process.stderr.write(`  ${access.reason}\n`);
+    return { added: 0, skipped: 0, merged: 0, viaLLM: 0, warning: access.reason };
+  }
+  const prUnits = units || harvestPRs(root, { limit });
+  const result = await ingest(root, prUnits, "seenPRs", { useLLM });
+  return { ...result, warning: null };
 }
 
 export async function learnIssues(root, { limit = 30, useLLM = llmAvailable() } = {}) {
-  if (!ghAvailable(root)) { process.stderr.write("  gh not available / no GitHub remote — skipping issues.\n"); return { added: 0, skipped: 0, merged: 0, viaLLM: 0 }; }
-  return ingest(root, harvestIssues(root, { limit }), "seenIssues", { useLLM });
+  const access = githubAccess(root);
+  if (!access.ok) {
+    process.stderr.write(`  ${access.reason}\n`);
+    return { added: 0, skipped: 0, merged: 0, viaLLM: 0, warning: access.reason };
+  }
+  const result = await ingest(root, harvestIssues(root, { limit }), "seenIssues", { useLLM });
+  return { ...result, warning: null };
+}
+
+/**
+ * Pre-harvest merged PRs (when reachable) into a `PR number -> body` lookup that
+ * `learnGit` uses as a placeholder-rationale fallback for bodyless commits (issue #28
+ * part B). Only attempted — and only worth the extra `gh` call — when PR learning is
+ * actually running alongside git learning in this invocation; returns an empty index
+ * (never throws) when GitHub isn't reachable, so git-only learning stays offline-safe.
+ */
+export function prBodiesForGit(root, { limit = 30 } = {}) {
+  const access = githubAccess(root);
+  if (!access.ok) return { index: new Map(), units: null };
+  const units = harvestPRs(root, { limit });
+  return { index: bodyIndex(units), units };
 }

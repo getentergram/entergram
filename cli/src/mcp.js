@@ -6,7 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { findRoot, writeCell, learnGit, learnDocs, doctor, readCells } from "./lib.js";
 import { ensureIndex, reindex, search, dispatch, indexStats, traceDecision } from "./db.js";
-import { learnPRs } from "./learn.js";
+import { learnPRs, prBodiesForGit } from "./learn.js";
 import { formatProvenance } from "./output.js";
 import { recordFeedback } from "./rl/rewards.js";
 import { SynapticNetwork } from "./runtime/synaptic_network.js";
@@ -168,12 +168,17 @@ export async function serve() {
     },
     async ({ source, limit }) => {
       const src = source || "all";
-      let g = { added: 0 }, d = { added: 0 }, pr = { added: 0 };
-      if (src === "git" || src === "all") g = learnGit(root, { limit: limit ?? 50 });
+      let g = { added: 0 }, d = { added: 0 }, pr = { added: 0, warning: null };
+      // Pre-harvest PR bodies once (when GitHub is reachable) so a bodyless commit can
+      // borrow its PR's description as its Why instead of a placeholder (issue #28).
+      let prPrefetch = { index: undefined, units: null };
+      if (src === "all") prPrefetch = prBodiesForGit(root, { limit: limit ?? 50 });
+      if (src === "git" || src === "all") g = learnGit(root, { limit: limit ?? 50, prBodies: prPrefetch.index });
       if (src === "docs" || src === "all") d = learnDocs(root);
-      if (src === "pr" || src === "all") pr = await learnPRs(root, { limit: limit ?? 50 });
+      if (src === "pr" || src === "all") pr = await learnPRs(root, { limit: limit ?? 50, units: prPrefetch.units ?? undefined });
       reindex(root);
-      return textResult(`Learned ${g.added + d.added + pr.added} new cell(s) (git ${g.added}, docs ${d.added}, PRs ${pr.added}).`);
+      const summary = `Learned ${g.added + d.added + pr.added} new cell(s) (git ${g.added}, docs ${d.added}, PRs ${pr.added}).`;
+      return textResult(pr.warning ? `${summary} ${pr.warning}` : summary);
     },
   );
 
