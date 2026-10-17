@@ -12,7 +12,55 @@ export const EDGE_TYPES = [
   "constrained_by",
   "caused_by",
   "related",
+  // Auto-ingestion origin edge (issue #23): the `learn` pipeline emits one of these
+  // per cell at reindex time, pointing from the cell to the commit/PR/issue/doc
+  // section it was learned from. Distinct from "related", which is reserved for a
+  // human's hand-written [[B-NNNN]] link between two cells -- the two coexist
+  // without conflicting since they're different edge_type values on the same cell.
+  "derived_from",
 ];
+
+/**
+ * Derive the provenance-edge target for a cell's origin, from the `source` metadata
+ * the learn pipeline (learnGit/learnDocs/learnPRs/learnIssues) stamps onto every
+ * auto-learned cell. Returns null for a hand-written cell (no source) or a source
+ * shape this doesn't recognize, so callers can skip emitting an edge.
+ *
+ * @param {string|undefined} sourceStr - raw `source` frontmatter value (a JSON string)
+ * @returns {{ toId: string, metadata: object } | null}
+ */
+export function originEdgeFor(sourceStr) {
+  if (!sourceStr) return null;
+  let src;
+  try { src = JSON.parse(sourceStr); } catch { return null; }
+  if (!src || typeof src !== "object" || !src.kind) return null;
+
+  switch (src.kind) {
+    case "commit":
+      if (!src.sha) return null;
+      return {
+        toId: `commit:${src.sha}`,
+        metadata: { kind: "commit", sha: src.sha, author: src.author, date: src.date },
+      };
+    case "pr":
+    case "issue": {
+      const num = (src.ref || "").replace(/^#/, "");
+      if (!num) return null;
+      return {
+        toId: `${src.kind}:${num}`,
+        metadata: { kind: src.kind, ref: src.ref, author: src.author, date: src.date, url: src.url },
+      };
+    }
+    case "doc":
+      if (!src.path) return null;
+      return {
+        toId: `doc:${src.path}${src.heading ? `#${src.heading}` : ""}`,
+        metadata: { kind: "doc", path: src.path, heading: src.heading },
+      };
+    default:
+      return null;
+  }
+}
 
 /**
  * Ensures decision graph tables exist in the SQLite database.
@@ -146,6 +194,14 @@ export function traceDecisionProvenance(db, cellId) {
     metadata: parseMeta(e.metadata),
   }));
 
+  // Auto-ingestion origin (issue #23): commit/PR/issue/doc the cell was learned from.
+  // The target is an external reference (a commit SHA, a doc path), not another cell,
+  // so its descriptive fields live directly in the edge's metadata instead of a cells row.
+  const derivedFrom = outgoing.filter((e) => e.edge_type === "derived_from").map((e) => ({
+    ref: e.to_id,
+    ...parseMeta(e.metadata),
+  }));
+
   const isActive = supersededBy.length === 0 && Number(cell.confidence) >= 0.3;
 
   return {
@@ -169,8 +225,18 @@ export function traceDecisionProvenance(db, cellId) {
       supersedes,
       supersededBy,
       causedBy,
+      derivedFrom,
     },
   };
+}
+
+/** Render one derived_from edge's metadata as a short human-readable origin description. */
+function describeOrigin(d) {
+  if (d.kind === "commit") return `commit ${d.sha}${d.author ? ` by ${d.author}` : ""}${d.date ? ` (${d.date})` : ""}`;
+  if (d.kind === "pr") return `PR ${d.ref}${d.date ? ` (${d.date})` : ""}`;
+  if (d.kind === "issue") return `issue ${d.ref}${d.date ? ` (${d.date})` : ""}`;
+  if (d.kind === "doc") return `doc ${d.path}${d.heading ? ` § ${d.heading}` : ""}`;
+  return d.ref;
 }
 
 /**
@@ -232,6 +298,13 @@ export function formatProvenanceTree(trace) {
     lines.push("  Caused By Incidents/Gotchas:");
     for (const cb of p.causedBy) {
       lines.push(`    └── ⚠️ ${cb.target.id}: "${cb.target.hook}"${trustFlags(cb.target)}`);
+    }
+  }
+
+  if (p.derivedFrom.length > 0) {
+    lines.push("  Learned From:");
+    for (const d of p.derivedFrom) {
+      lines.push(`    └── 📜 ${describeOrigin(d)}`);
     }
   }
 
