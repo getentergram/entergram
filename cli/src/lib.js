@@ -6,6 +6,7 @@ import {
 import { join, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { prNumberFromSubject } from "./github.js";
 
 const DIR = ".entergram";
 
@@ -646,8 +647,13 @@ export function resolveSources(root, src) {
   return { git: has("git"), docs: has("docs"), pr: has("pr") || has("github"), issue: false };
 }
 
-/** Ingest recent git commits into cells (heuristic v1 — LLM extraction is the GitHub-source path below). */
-export function learnGit(root, { limit = 50, since, minCommitLen } = {}) {
+/**
+ * Ingest recent git commits into cells (heuristic v1 — LLM extraction is the GitHub-source
+ * path below). `prBodies` (optional `PR number -> usable body text` map, see
+ * `github.js#bodyIndex`) lets a bodyless squash-merge commit borrow its PR's description
+ * as the cell's Why instead of a placeholder (issue #28 part B).
+ */
+export function learnGit(root, { limit = 50, since, minCommitLen, prBodies } = {}) {
   const p = paths(root);
   const state = JSON.parse(readFileSync(p.state, "utf8"));
   const seen = new Set(state.seenShas);
@@ -681,6 +687,16 @@ export function learnGit(root, { limit = 50, since, minCommitLen } = {}) {
     const tags = [...new Set(
       subject.toLowerCase().match(/[a-z][a-z0-9-]{3,}/g) || [],
     )].slice(0, 4);
+    // A squash-merged commit's subject never carries the real rationale in its body --
+    // that lives in the PR description instead. When the caller harvested PR bodies
+    // (learn --source all/pr running alongside git), borrow the referenced PR's body
+    // rather than writing a near-empty placeholder cell.
+    let why = bodyText.trim();
+    if (!why && prBodies && prBodies.size) {
+      const prNum = prNumberFromSubject(subject);
+      if (prNum != null && prBodies.has(prNum)) why = prBodies.get(prNum);
+    }
+    if (!why) why = "(rationale not in commit message — refine with `get-entergram review`)";
     const { merged: wasMerged } = writeCellDeduped(root, {
       type,
       tags: tags.length ? tags : ["git"],
@@ -689,7 +705,7 @@ export function learnGit(root, { limit = 50, since, minCommitLen } = {}) {
       created: date,
       hook: subject.trim(),
       what: subject.trim(),
-      why: bodyText.trim() || "(rationale not in commit message — refine with `get-entergram review`)",
+      why,
       source: { kind: "commit", sha: sha.slice(0, 9), author, date },
     }, index);
     seen.add(sha);

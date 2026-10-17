@@ -5,7 +5,7 @@ import {
   updateCell, deleteCell, reviewQueue, resolveSources,
 } from "../src/lib.js";
 import { ensureIndex, reindex, search, dispatch, indexStats, traceDecision } from "../src/db.js";
-import { learnPRs, learnIssues } from "../src/learn.js";
+import { learnPRs, learnIssues, prBodiesForGit } from "../src/learn.js";
 import { llmAvailable } from "../src/extract.js";
 import {
   formatSuccess, formatError, formatInfo, formatList, formatDispatch, formatLearnSummary,
@@ -171,9 +171,14 @@ program.command("learn").description("Ingest Git history, docs, and PRs into mem
     const useLLM = o.llm !== false && llmAvailable();
     const want = resolveSources(root, src);
     let g = { added: 0, merged: 0 }, d = { added: 0, merged: 0 }, pr = { added: 0, merged: 0, viaLLM: 0 }, iss = { added: 0, merged: 0, viaLLM: 0 };
-    if (want.git) g = learnGit(root, { limit: o.limit, since: o.since });
+    // When both git and PR learning run together, pre-harvest PR bodies once so a
+    // bodyless squash-merge commit can borrow its PR's description as its Why instead
+    // of a placeholder (issue #28 part B), without git-only learning ever touching `gh`.
+    let prPrefetch = { index: undefined, units: null };
+    if (want.git && want.pr) prPrefetch = prBodiesForGit(root, { limit: o.limit });
+    if (want.git) g = learnGit(root, { limit: o.limit, since: o.since, prBodies: prPrefetch.index });
     if (want.docs) d = learnDocs(root);
-    if (want.pr) pr = await learnPRs(root, { limit: o.limit, useLLM });
+    if (want.pr) pr = await learnPRs(root, { limit: o.limit, useLLM, units: prPrefetch.units ?? undefined });
     if (src === "issue") iss = await learnIssues(root, { limit: o.limit, useLLM });
     reindex(root);
     const total = g.added + d.added + pr.added + iss.added;
@@ -189,6 +194,10 @@ program.command("learn").description("Ingest Git history, docs, and PRs into mem
     })));
     if ((src === "pr" || src === "issue" || src === "all") && !useLLM)
       console.log(formatInfo("Heuristic extraction is running. Set GEMINI_API_KEY (or ANTHROPIC_API_KEY) for richer decision and outcome extraction."));
+    // PR/issue learning was skipped (non-GitHub remote, no remote, or `gh` unreachable) --
+    // say so plainly rather than letting it look like there was simply nothing new (#28).
+    if (pr.warning) console.log(formatInfo(pr.warning));
+    if (iss.warning) console.log(formatInfo(iss.warning));
     const q = reviewQueue(root).length;
     if (q) console.log(formatInfo(`${q} memory cells need a review. Run \`get-entergram review\`.`));
   });
