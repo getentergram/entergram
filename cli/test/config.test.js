@@ -53,6 +53,56 @@ test('scalar values are unaffected', () => {
   assert.equal(readConfig(root).name, 'my-project');
 });
 
+// --- readConfig: [section] headers nest their keys, typed ----------------------------
+// Issue #24: init writes [extraction]/[recall] sections, but every key inside them
+// landed on the flat top-level `out` object as a raw string (section headers have no
+// "=" so they were silently skipped, and the keys under them were indistinguishable
+// from top-level keys) -- so `cfg.extraction.min_commit_len` was always undefined and
+// `cfg.min_commit_len` was the string "20", not the number 20.
+
+test('[extraction] and [recall] keys nest under their section, not the top level', () => {
+  const root = makeRepo(); // init's own template already writes both sections
+  const cfg = readConfig(root);
+
+  assert.equal(typeof cfg.extraction, 'object', 'expected a nested extraction object');
+  assert.equal(typeof cfg.recall, 'object', 'expected a nested recall object');
+
+  // must NOT have flattened onto the top level
+  assert.equal(cfg.min_commit_len, undefined);
+  assert.equal(cfg.max_prs, undefined);
+  assert.equal(cfg.default_budget, undefined);
+  assert.equal(cfg.synthesis, undefined);
+});
+
+test('nested scalars are typed (numbers/booleans), not left as raw TOML strings', () => {
+  const root = makeRepo();
+  writeConfig(root, [
+    '[extraction]',
+    'min_commit_len = 15',
+    'max_prs = 10',
+    '',
+    '[recall]',
+    'default_budget = 500',
+    'synthesis = false',
+  ].join('\n'));
+
+  const cfg = readConfig(root);
+  assert.equal(cfg.extraction.min_commit_len, 15);
+  assert.equal(cfg.extraction.max_prs, 10);
+  assert.equal(cfg.recall.default_budget, 500);
+  assert.equal(cfg.recall.synthesis, false);
+  assert.equal(typeof cfg.recall.synthesis, 'boolean');
+});
+
+test('init\'s own config parses to the exact nested values it documents in comments', () => {
+  const root = makeRepo();
+  const cfg = readConfig(root);
+  assert.equal(cfg.extraction.min_commit_len, 20);
+  assert.equal(cfg.extraction.max_prs, 50);
+  assert.equal(cfg.recall.default_budget, 2000);
+  assert.equal(cfg.recall.synthesis, true);
+});
+
 // --- docFiles: globs are expanded ----------------------------------------------------
 
 test('a glob doc_path matches nested files instead of being skipped', () => {

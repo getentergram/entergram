@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import {
   findRoot, initRepo, writeCell, doctor, learnGit, learnDocs,
-  updateCell, deleteCell, reviewQueue,
+  updateCell, deleteCell, reviewQueue, resolveSources,
 } from "../src/lib.js";
 import { ensureIndex, reindex, search, dispatch, indexStats, traceDecision } from "../src/db.js";
 import { learnPRs, learnIssues } from "../src/learn.js";
@@ -54,7 +54,7 @@ program.command("remember").description("Save a fact or decision into memory")
   });
 
 program.command("recall").description("Retrieve the facts relevant to a query")
-  .argument("<query...>").option("--budget <n>", "token budget", (v) => parseInt(v, 10), 2000)
+  .argument("<query...>").option("--budget <n>", "token budget (default: entergram.toml's recall.default_budget, else 2000)", (v) => parseInt(v, 10))
   .action((words, o) => {
     const root = requireRoot();
     ensureIndex(root);
@@ -71,7 +71,7 @@ program.command("recall").description("Retrieve the facts relevant to a query")
   });
 
 program.command("dispatch").description("Select the strongest-matching procedure for a query, or fall back to recall")
-  .argument("<query...>").option("--budget <n>", "token budget for the recall fallback", (v) => parseInt(v, 10), 2000)
+  .argument("<query...>").option("--budget <n>", "token budget for the recall fallback (default: entergram.toml's recall.default_budget, else 2000)", (v) => parseInt(v, 10))
   .action((words, o) => {
     const root = requireRoot();
     ensureIndex(root);
@@ -162,17 +162,18 @@ program.command("telemetry").description("Show RL telemetry and decision intelli
 
 program.command("learn").description("Ingest Git history, docs, and PRs into memory")
   .option("--source <src>", "git|docs|pr|issue|all", "all")
-  .option("--limit <n>", "max items to scan", (v) => parseInt(v, 10), 50)
+  .option("--limit <n>", "max items to scan (git: 50; pr: entergram.toml's extraction.max_prs, else 30; issue: 30)", (v) => parseInt(v, 10))
   .option("--since <sha>", "only commits after this SHA (git source)")
   .option("--no-llm", "skip LLM extraction (heuristic only)")
   .action(async (o) => {
     const root = requireRoot();
     const src = o.source;
     const useLLM = o.llm !== false && llmAvailable();
+    const want = resolveSources(root, src);
     let g = { added: 0, merged: 0 }, d = { added: 0, merged: 0 }, pr = { added: 0, merged: 0, viaLLM: 0 }, iss = { added: 0, merged: 0, viaLLM: 0 };
-    if (src === "git" || src === "all") g = learnGit(root, { limit: o.limit, since: o.since });
-    if (src === "docs" || src === "all") d = learnDocs(root);
-    if (src === "pr" || src === "all") pr = await learnPRs(root, { limit: o.limit, useLLM });
+    if (want.git) g = learnGit(root, { limit: o.limit, since: o.since });
+    if (want.docs) d = learnDocs(root);
+    if (want.pr) pr = await learnPRs(root, { limit: o.limit, useLLM });
     if (src === "issue") iss = await learnIssues(root, { limit: o.limit, useLLM });
     reindex(root);
     const total = g.added + d.added + pr.added + iss.added;

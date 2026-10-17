@@ -1,6 +1,6 @@
 // PR/issue learning: harvest → extract (LLM or heuristic) → write cells. Incremental.
 import { readFileSync, writeFileSync } from "node:fs";
-import { paths, writeCellDeduped } from "./lib.js";
+import { paths, writeCellDeduped, readConfig } from "./lib.js";
 import { harvestPRs, harvestIssues, ghAvailable } from "./github.js";
 import { extractLLM, extractHeuristic, llmAvailable } from "./extract.js";
 
@@ -33,9 +33,21 @@ async function ingest(root, units, seenKey, { useLLM }) {
   return { added, skipped, merged, viaLLM };
 }
 
-export async function learnPRs(root, { limit = 30, useLLM = llmAvailable() } = {}) {
+/**
+ * Effective item limit for a `learn` harvest: an explicit caller-supplied limit always
+ * wins, otherwise entergram.toml's `[extraction]` key (e.g. `max_prs`) is consulted,
+ * falling back to `fallback` when the config has nothing to say either. Exported so the
+ * precedence itself is directly testable without a live `gh` call.
+ */
+export function resolveLearnLimit(root, explicit, fallback, configKey = "max_prs") {
+  if (explicit != null) return explicit;
+  return readConfig(root).extraction?.[configKey] ?? fallback;
+}
+
+export async function learnPRs(root, { limit, useLLM = llmAvailable() } = {}) {
   if (!ghAvailable(root)) { process.stderr.write("  gh not available / no GitHub remote — skipping PRs.\n"); return { added: 0, skipped: 0, merged: 0, viaLLM: 0 }; }
-  return ingest(root, harvestPRs(root, { limit }), "seenPRs", { useLLM });
+  const effectiveLimit = resolveLearnLimit(root, limit, 30);
+  return ingest(root, harvestPRs(root, { limit: effectiveLimit }), "seenPRs", { useLLM });
 }
 
 export async function learnIssues(root, { limit = 30, useLLM = llmAvailable() } = {}) {

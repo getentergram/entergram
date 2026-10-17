@@ -30,12 +30,12 @@ export async function serve() {
         "Retrieve the decisions, rationale, and facts most relevant to a query, ranked using RL hybrid retrieval (BM25 + vector + temporal validity), packed under a token budget. Call this BEFORE answering questions about the codebase's architecture, past decisions, or history — it's cheaper than re-deriving.",
       inputSchema: {
         query: z.string().describe("what you're looking for"),
-        budget: z.number().optional().describe("token budget (default 2000)"),
+        budget: z.number().optional().describe("token budget (default: entergram.toml's recall.default_budget, else 2000)"),
       },
     },
     async ({ query, budget }) => {
       ensureIndex(root);
-      const { hits, total, synthesis } = search(root, query, budget ?? 2000);
+      const { hits, total, synthesis } = search(root, query, budget);
       if (!hits.length) return textResult(`No memory matches "${query}".`);
       const body = hits
         .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${h.confidence < 0.6 ? ", unreviewed" : ""})\n  ${h.hook}`)
@@ -52,12 +52,12 @@ export async function serve() {
         "Select the strongest-matching action for a query: a citable procedure bound to an effector script, if one is a stronger match than any fact AND its effector actually exists on disk — otherwise the same result `recall` would return. dispatch NEVER runs, spawns, or shells out to the effector; it only reports which one would fire and why. Running it is always your decision.",
       inputSchema: {
         query: z.string().describe("what you're trying to do"),
-        budget: z.number().optional().describe("token budget for the recall fallback (default 2000)"),
+        budget: z.number().optional().describe("token budget for the recall fallback (default: entergram.toml's recall.default_budget, else 2000)"),
       },
     },
     async ({ query, budget }) => {
       ensureIndex(root);
-      const result = dispatch(root, query, budget ?? 2000);
+      const result = dispatch(root, query, budget);
       if (result.winner === "procedure") {
         const { cell, effectorPath, why, citedProcedures } = result;
         const cites = citedProcedures?.length
