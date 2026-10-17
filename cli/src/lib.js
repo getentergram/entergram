@@ -201,15 +201,22 @@ const words = (s) => (s || "").toLowerCase().match(/[a-z0-9]{3,}/g) || [];
 export function findDuplicate(root, candidate) {
   const candTags = candidate.tags || [];
   const candWords = words(candidate.hook || candidate.what);
-  let best = null, bestScore = 0;
+  let best = null, bestScore = 0, bestHookScore = 0;
   for (const c of readCells(root)) {
     const tagScore = jaccard(candTags, c.tags || []);
     if (tagScore === 0) continue; // require at least some shared tag before comparing text
     const hookScore = jaccard(candWords, words(c.hook));
     const score = tagScore * 0.5 + hookScore * 0.5;
-    if (score > bestScore) { bestScore = score; best = c; }
+    if (score > bestScore) { bestScore = score; best = c; bestHookScore = hookScore; }
   }
-  return bestScore >= 0.5 ? best : null;
+  // A high blended score can come almost entirely from tag overlap while the hooks
+  // describe different subjects: tags are extracted with a 4+ char word filter, so
+  // a short distinguishing entity ("foo" vs "bar" in "Remove <flag> feature flag")
+  // never makes it into the tag set and the two commits look tag-identical even
+  // though they're about different flags. The hook text still carries that word,
+  // so also require the hooks themselves to be strongly similar -- not just the
+  // blend -- before two commits are treated as the same fact.
+  return bestScore >= 0.5 && bestHookScore >= 0.75 ? best : null;
 }
 
 /**
@@ -222,12 +229,13 @@ export function writeCellDeduped(root, candidate) {
   if (!dup) return { ...writeCell(root, candidate), merged: false };
   const dupConf = Number(dup.confidence ?? 0);
   const candConf = Number(candidate.confidence ?? 0);
-  if (candConf >= dupConf) {
-    updateCell(root, dup.id, {
-      confidence: Math.max(candConf, dupConf),
-      why: candidate.why || undefined,
-    });
-  }
+  const patch = { confidence: Math.max(candConf, dupConf) };
+  // Only replace the incumbent's Why when the candidate is strictly more confident.
+  // Every git-sourced commit defaults to the same 0.4 confidence, so a tie is the
+  // common case, not the exception -- treating ">=" as license to overwrite let
+  // whichever commit got deduped second silently clobber the first cell's rationale.
+  if (candConf > dupConf && candidate.why) patch.why = candidate.why;
+  updateCell(root, dup.id, patch);
   const { cells } = paths(root);
   return { id: dup.id, file: join(cells, dup.file), merged: true };
 }
