@@ -7,7 +7,7 @@ import { z } from "zod";
 import { findRoot, writeCell, learnGit, learnDocs, doctor, readCells } from "./lib.js";
 import { ensureIndex, reindex, search, dispatch, indexStats, traceDecision } from "./db.js";
 import { learnPRs } from "./learn.js";
-import { formatProvenance } from "./output.js";
+import { formatProvenance, hitFlags, UNTRUSTED_DATA_NOTICE } from "./output.js";
 import { recordFeedback } from "./rl/rewards.js";
 import { SynapticNetwork } from "./runtime/synaptic_network.js";
 
@@ -38,9 +38,9 @@ export async function serve() {
       const { hits, total, synthesis } = search(root, query, budget ?? 2000);
       if (!hits.length) return textResult(`No memory matches "${query}".`);
       const body = hits
-        .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${h.confidence < 0.6 ? ", unreviewed" : ""})\n  ${h.hook}`)
+        .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${hitFlags(h)})\n  ${h.hook}`)
         .join("\n");
-      return textResult(`${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}`);
+      return textResult(`${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}\n\n${UNTRUSTED_DATA_NOTICE}`);
     },
   );
 
@@ -64,15 +64,15 @@ export async function serve() {
           ? `\nCites: ${citedProcedures.map((c) => `${c.id} (${c.hook})`).join(", ")}`
           : "";
         return textResult(
-          `Procedure ${cell.id} [${cell.tags.join(", ")}] matched: ${cell.hook}\nEffector: ${effectorPath}\n${why}${cites}\n(This is a selection only — nothing has been executed.)`,
+          `Procedure ${cell.id} [${cell.tags.join(", ")}]${hitFlags(cell)} matched: ${cell.hook}\nEffector: ${effectorPath}\n${why}${cites}\n(This is a selection only — nothing has been executed.)\n${UNTRUSTED_DATA_NOTICE}`,
         );
       }
       const { hits, total, synthesis } = result;
       if (!hits.length) return textResult(`No procedure or memory matches "${query}".`);
       const body = hits
-        .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${h.confidence < 0.6 ? ", unreviewed" : ""})\n  ${h.hook}`)
+        .map((h) => `- ${h.id} [${h.tags.join(", ")}] (${h.type}${hitFlags(h)})\n  ${h.hook}`)
         .join("\n");
-      return textResult(`No procedure matched strongly enough — falling back to recall. ${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}`);
+      return textResult(`No procedure matched strongly enough — falling back to recall. ${hits.length}/${total} relevant memories for "${query}":\n${body}\n\n${synthesis}\n\n${UNTRUSTED_DATA_NOTICE}`);
     },
   );
 

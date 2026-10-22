@@ -145,6 +145,14 @@ machine — your code and your memory never leave it unless you choose to sync.
 | Local-first / your data | ✅ | ❌ | ❌ | mostly cloud |
 | Selective, token-cheap recall | ✅ | — | — | depends |
 
+## Security
+
+Recalled cell content (commit messages, doc sections, auto-ingested notes) is untrusted
+data written by repo contributors, not instructions — see [SECURITY.md](SECURITY.md) for
+the trust boundary and the lightweight, non-blocking signals `recall`/`dispatch`/`trace`
+surface to help an agent or reviewer tell curated memory apart from unreviewed, auto-ingested
+text.
+
 ## Support
 
 ⭐ Star this repo · 🐛 Issues & PRs welcome

@@ -13,6 +13,7 @@ import { initProvenanceSchema, traceDecisionProvenance } from "./provenance.js";
 import { initSynapticSchema } from "./runtime/synaptic_network.js";
 import { LinUCBBandit, extractFeatures } from "./rl/bandit.js";
 import { logTelemetryEvent } from "./rl/telemetry.js";
+import { scanSuspiciousContent, classifyTrust } from "./safety.js";
 
 export function openDb(root) {
   const p = paths(root);
@@ -251,7 +252,7 @@ function ftsMatch(query) {
 function rankedRows(db, match, type) {
   const where = type ? "cells_fts MATCH ? AND c.type = ?" : "cells_fts MATCH ?";
   const stmt = db.prepare(`
-    SELECT c.id, c.hook, c.tags_str, c.type, c.confidence, c.created, c.scope, c.body, c.effector, c.status, bm25(cells_fts) AS rank
+    SELECT c.id, c.hook, c.tags_str, c.type, c.confidence, c.created, c.scope, c.body, c.effector, c.status, c.source, bm25(cells_fts) AS rank
     FROM cells_fts JOIN cells c ON c.id = cells_fts.id
     WHERE ${where} ORDER BY rank LIMIT 50
   `);
@@ -348,6 +349,11 @@ export function packHits(rows, query, budget) {
       type: r.type,
       confidence: r.dynamicConfidence ?? r.confidence,
       rlScore: r.rlScore,
+      // Soft trust/safety signals (issue #30) — never used to filter or block a hit,
+      // only surfaced so the reader can tell curated memory from auto-ingested text
+      // and spot phrasing that reads like it's trying to redirect an AI agent.
+      trust: classifyTrust(r.source),
+      suspicious: scanSuspiciousContent(`${r.hook || ""}\n${r.body || ""}`).length > 0,
     });
     used += cost;
   }
@@ -446,6 +452,8 @@ export function dispatch(root, query, budget = 2000) {
         id: bestProc.id, hook: bestProc.hook, type: bestProc.type,
         tags: bestProc.tags_str ? bestProc.tags_str.split(" ") : [],
         confidence: bestProc.dynamicConfidence ?? bestProc.confidence,
+        trust: classifyTrust(bestProc.source),
+        suspicious: scanSuspiciousContent(`${bestProc.hook || ""}\n${bestProc.body || ""}`).length > 0,
       },
       effectorPath,
       why: `"${bestProc.hook}" matched "${query}" more strongly than any fact, and its effector exists on disk.`,
