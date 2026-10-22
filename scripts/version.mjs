@@ -64,11 +64,18 @@ function set(version) {
     // A round-trip reformats untouched fields -- it expanded an inline keywords
     // array and mangled an em-dash in this repo before -- turning a one-line
     // change into reviewer noise.
-    const next = raw.replace(/("version"\s*:\s*")\d+\.\d+\.\d+(")/g, `$1${version}$2`);
-    if (next === raw) {
-      console.error(`no version field rewritten in ${t.file}`);
+    //
+    // Setting a version equal to what's already on disk is a legitimate no-op --
+    // a release where the target version was hand-bumped in the merging PR, or a
+    // re-dispatched run after a prior step failed, both call `set` with a version
+    // already written everywhere. Checking the field's presence directly (rather
+    // than whether the replacement changed the text) is what tells that apart
+    // from the real error: no "version" field to rewrite at all.
+    if (!/"version"\s*:\s*"\d+\.\d+\.\d+"/.test(raw)) {
+      console.error(`no version field found in ${t.file}`);
       process.exit(1);
     }
+    const next = raw.replace(/("version"\s*:\s*")\d+\.\d+\.\d+(")/g, `$1${version}$2`);
     writeFileSync(path, next);
     // Re-read through the parser so a malformed write fails here, not in CI.
     if (t.read(JSON.parse(readFileSync(path, "utf8"))) !== version) {
