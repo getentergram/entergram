@@ -254,10 +254,32 @@ function synthesize(query, hits) {
     + (unreviewed ? ` (${unreviewed} of these ${unreviewed === 1 ? "is" : "are"} unreviewed extractions — verify with \`get-entergram review\` before relying on it.)` : "");
 }
 
-/** Tokenize a query into the same FTS `MATCH` expression search()/dispatch() both run. */
+/** Common short/function words that carry almost no retrieval signal on their own ("why",
+ *  "are", "how", ...). Left in the blanket OR query, any one of them matches nearly every
+ *  cell in the store — the "N of N matches" symptom from issue #26 — and drowns out cells
+ *  that only share the query's actual content words. This list is deliberately small and
+ *  limited to genuine English function words so it never swallows a short technical term or
+ *  acronym (e.g. "sql", "css", "api") that happens to be 3-4 letters long. */
+const STOP_WORDS = new Set([
+  "the", "and", "for", "are", "why", "how", "what", "when", "where", "who", "whom", "which",
+  "this", "that", "these", "those", "there", "here", "then", "than", "but", "not", "nor",
+  "with", "from", "into", "onto", "over", "under", "about", "above", "below", "between",
+  "you", "your", "yours", "our", "ours", "its", "his", "her", "hers", "their", "them", "they",
+  "can", "could", "does", "did", "doing", "done", "has", "have", "had", "having",
+  "was", "were", "been", "being", "will", "would", "shall", "should", "may", "might", "must",
+  "all", "any", "both", "each", "few", "lot", "more", "most", "some", "such", "out", "off",
+  "only", "own", "same", "too", "very", "just", "also", "ever", "even",
+]);
+
+/** Tokenize a query into the same FTS `MATCH` expression search()/dispatch() both run.
+ *  Stop words are dropped so they can't single-handedly OR-match the whole store, unless
+ *  the query is made up of nothing else — then fall back to matching on them anyway so an
+ *  all-stop-word query degrades gracefully instead of returning zero candidates. */
 function ftsMatch(query) {
   const terms = query.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t.length > 2);
-  return terms.length ? terms.map((t) => `"${t}"`).join(" OR ") : null;
+  const substantive = terms.filter((t) => !STOP_WORDS.has(t));
+  const effective = substantive.length ? substantive : terms;
+  return effective.length ? effective.map((t) => `"${t}"`).join(" OR ") : null;
 }
 
 /** Shared FTS/bm25 query behind search() and dispatch(). */
@@ -282,10 +304,16 @@ function getCellCitations(db, cellId) {
   return db.prepare("SELECT timestamp, success FROM cell_citations WHERE cell_id = ? ORDER BY id DESC LIMIT 20").all(cellId);
 }
 
+/** How much weight the md5-trigram "embedding" cosine similarity is allowed to carry in the
+ *  ranking feature vector (see issue #26). It is not a real semantic embedding, so it is
+ *  deliberately down-weighted rather than trusted as a meaningful relevance signal; replacing
+ *  it with an actual embedding model is a separate, larger effort out of scope here. */
+const EMBEDDING_RANK_INFLUENCE = 0.1;
+
 /**
  * Hybrid Candidate Retrieval & RL Reranking:
  * 1. Retrieves BM25 lexical candidates
- * 2. Augments with dense vector similarity
+ * 2. Augments with dense vector similarity (heavily down-weighted — see EMBEDDING_RANK_INFLUENCE)
  * 3. Incorporates temporal confidence decay
  * 4. Scores using LinUCB Contextual Bandit
  */
@@ -305,7 +333,7 @@ function hybridRerank(root, db, rows, query, bandit = null) {
   const candidates = [];
   for (const r of rows) {
     const cVec = getCellVector(db, r.id) || embedCell(r);
-    const cosSim = cosineSimilarity(qVec, cVec);
+    const rawCosSim = cosineSimilarity(qVec, cVec);
     const citations = getCellCitations(db, r.id);
     const dynamicConf = computeDynamicConfidence(r, citations);
     const inDegree = inDegreeMap.get(r.id) || 0;
@@ -313,7 +341,13 @@ function hybridRerank(root, db, rows, query, bandit = null) {
     const context = {
       query,
       bm25Score: r.rank,
-      cosineSim: cosSim,
+      // embedLocalDense() (embeddings.js) is md5 hash-bucket character trigrams, not a
+      // trained semantic model — its cosine similarity correlates with shared substrings,
+      // not meaning. Feeding it in at face value let hash noise compete on equal footing
+      // with real relevance signals (bm25, citations, confidence) and was part of the
+      // weak-ranking defect in issue #26. Damp it sharply so it can only nudge ties rather
+      // than drive the ranking, while still surfacing the raw value below for diagnostics.
+      cosineSim: rawCosSim * EMBEDDING_RANK_INFLUENCE,
       dynamicConfidence: dynamicConf,
       inDegree,
       citedCount: citations.length,
@@ -326,7 +360,7 @@ function hybridRerank(root, db, rows, query, bandit = null) {
     candidates.push({
       ...r,
       dynamicConfidence: dynamicConf,
-      cosineSimilarity: cosSim,
+      cosineSimilarity: rawCosSim,
       rlScore,
       features: x,
     });
