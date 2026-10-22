@@ -12,14 +12,22 @@ name: Release on merge
 #
 #   The release commit lands on main and would re-trigger this workflow. The
 #   `chore(release):` guard below is what stops it looping.
+# PAUSED 2026-10-17: a batch of 13 independent fix PRs (issues #18-#30, tracked
+# under #17) is landing in quick succession. One release per merge means one
+# npm publish per fix, and the push-trigger already raced itself once this
+# session -- v0.1.6 published successfully but the follow-up commit/tag push
+# lost a race against the next merge and failed, leaving main a version behind
+# what npm has. Releasing is manual (workflow_dispatch) until the batch is in,
+# then do one release for all of it and restore the push trigger below:
+#
+#   push:
+#     branches: [main]
+#     paths:
+#       - "cli/**"
+#       - ".claude-plugin/**"
+#       - "skills/**"
+#       - "commands/**"
 on:
-  push:
-    branches: [main]
-    paths:
-      - "cli/**"
-      - ".claude-plugin/**"
-      - "skills/**"
-      - "commands/**"
   workflow_dispatch:
     inputs:
       bump:
