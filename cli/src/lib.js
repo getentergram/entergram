@@ -46,9 +46,15 @@ export function initRepo(root) {
       `sources = ["git", "docs", "github"]`,
       ``,
       `# Doc harvesting is scoped to these dirs/files (never .env, secrets, node_modules).`,
+      `# "docs" is the common case, but plenty of repos keep their docs under a`,
+      `# differently-named directory -- "doc" and "documentation" are the other two`,
+      `# names seen often enough to ship by default (unmatched entries are simply`,
+      `# skipped, so listing names that don't exist in a given repo is harmless).`,
       `doc_paths = [`,
       `  "README.md",`,
       `  "docs/**/*.md",`,
+      `  "doc/**/*.md",`,
+      `  "documentation/**/*.md",`,
       `  "ARCHITECTURE.md",`,
       `  "DESIGN.md",`,
       `]`,
@@ -258,12 +264,60 @@ export function reviewQueue(root, threshold = 0.6) {
 //
 // Appending the section's first sentence gives the ranker real terms to match
 // while keeping the heading's context.
+// Trailing periods after these are not sentence ends ("e.g." / "Dr." / "etc.").
+// Checked against the text immediately before a candidate '.', so only the
+// abbreviation itself needs listing, not every sentence that might contain one.
+const ABBREVIATIONS = new Set([
+  "e.g", "i.e", "etc", "mr", "mrs", "ms", "dr", "prof", "sr", "jr",
+  "vs", "inc", "ltd", "co", "st", "fig", "approx", "no", "u.s", "u.k",
+]);
+
+function endsWithAbbreviation(prefix) {
+  const m = /[a-z]+(?:\.[a-z]+)*$/i.exec(prefix);
+  return !!m && ABBREVIATIONS.has(m[0].toLowerCase());
+}
+
+/** Find the first complete sentence in `text` within the first `max` chars.
+ * Returns the sentence (including its ending punctuation) or null if none
+ * qualifies -- e.g. the text has no sentence-ending punctuation in range, or
+ * every candidate is an abbreviation like "e.g." rather than a real sentence end. */
+function firstSentence(text, max) {
+  const re = /[.!?](?=\s|$)/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const end = m.index + 1;
+    if (end > max) break;
+    if (end < 15) continue; // too short to be a real sentence
+    if (endsWithAbbreviation(text.slice(0, m.index))) continue;
+    return text.slice(0, end).trim();
+  }
+  return null;
+}
+
+/** Break `text` to at most `max` chars without severing a word: cut at the
+ * nearest whitespace at or before the limit (stripping a trailing clause mark
+ * like a comma, so it doesn't dangle) instead of a raw character slice. Only a
+ * single token longer than `max` itself falls back to a hard slice -- there is
+ * no boundary to honor. Deliberately not "nearest comma anywhere in range":
+ * an early comma can sit far before `max` (e.g. "Born in 1990, ...") and
+ * jumping back to it would throw away most of the available length for no
+ * benefit over just stopping at the last whole word. */
+function breakAtBoundary(text, max) {
+  if (text.length <= max) return text.trim();
+  const slice = text.slice(0, max);
+  const lastSpace = slice.lastIndexOf(" ");
+  if (lastSpace <= 15) return slice.trim(); // one long unbroken token -- nothing to break at
+  return slice.slice(0, lastSpace).replace(/[,;:]$/, "").trim();
+}
+
 function docHook(title, body) {
   const flat = body.trim().replace(/\s+/g, " ");
   // Skip boilerplate the first line often is: a bare link, an image, a badge.
   const prose = flat.replace(/^(!\[[^\]]*\]\([^)]*\)|\[[^\]]*\]\([^)]*\)|[|>#*`-]+)\s*/, "").trim();
-  const m = /^(.{15,170}?[.!?])(?:\s|$)/.exec(prose);
-  const sentence = (m ? m[1] : prose.slice(0, 140)).trim();
+  // Prefer a real sentence boundary; if none exists within range (no terminal
+  // punctuation at all, or only abbreviations), fall back to a clause/word
+  // boundary rather than an arbitrary character cutoff that can land mid-word.
+  const sentence = firstSentence(prose, 170) || breakAtBoundary(prose, 140);
   if (!sentence) return title;
   // Only rescue headings that carry almost no signal on their own: short AND
   // verbless, the "Stack" / "TL;DR" / "The Atlas" shape. Appending a sentence to
@@ -273,7 +327,13 @@ function docHook(title, body) {
   const hasVerb = /\b(is|are|was|were|use[sd]?|add(ed|s)?|fix(ed|es)?|must|should|never|always|requires?|needs?|because)\b/i.test(title);
   const words = title.trim().split(/\s+/).length;
   if (hasVerb || words > 4) return title;
-  return `${title} — ${sentence}`.slice(0, 120);
+  const prefix = `${title} — `;
+  const budget = 120 - prefix.length;
+  // The sentence/clause already respects a boundary; re-apply the same
+  // boundary-aware trim (not a raw slice) if the 120-char hook cap still
+  // requires shortening it further.
+  const fitted = sentence.length <= budget ? sentence : breakAtBoundary(sentence, budget);
+  return prefix + fitted;
 }
 
 export function learnDocs(root) {
