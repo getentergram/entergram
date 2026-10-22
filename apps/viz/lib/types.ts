@@ -23,6 +23,11 @@ export interface CellNode {
   effector: string;
   confidence: number;
 
+  // trust boundary — who's vouching for this text, and does it read like it's
+  // trying to redirect an agent (see cli/src/safety.js)
+  trust: "curated" | "auto-ingested";
+  suspicious: boolean;
+
   // graph intelligence
   pagerank: number;
   importance: number;   // 0..1, normalized PageRank — drives node size
@@ -50,7 +55,7 @@ export interface CellNode {
 
 export type EdgeType =
   | "cites" | "related" | "supersedes" | "caused_by"
-  | "constrained_by" | "considered" | "rejected";
+  | "constrained_by" | "considered" | "rejected" | "derived_from";
 
 export interface CellEdge {
   from: string;

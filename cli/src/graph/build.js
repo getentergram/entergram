@@ -6,6 +6,7 @@
 
 import { openDb, ensureIndex } from "../db.js";
 import { deserializeVector } from "../embeddings.js";
+import { classifyTrust, scanSuspiciousContent } from "../safety.js";
 import {
   buildAdjacency, pageRank, degreeCentrality, betweennessCentrality,
   louvainCommunities, suggestLinks, orphans,
@@ -72,6 +73,12 @@ export function buildGraph(root, { history = true, suggest = true } = {}) {
       file: r.file,
       effector: r.effector || "",
       confidence: r.confidence == null ? 1 : r.confidence,
+
+      // Trust boundary (issue #30/#49): who's vouching for this text, and does it read
+      // like it's trying to redirect an agent. Same signal the CLI's recall/trace
+      // surface shows via trustFlags() -- viz was silently dropping it.
+      trust: classifyTrust(r.source),
+      suspicious: scanSuspiciousContent(`${r.hook || ""}\n${r.body || ""}`).length > 0,
 
       // Graph intelligence
       pagerank: rank.get(r.id) || 0,

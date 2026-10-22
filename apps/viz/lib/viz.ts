@@ -50,6 +50,7 @@ export const EDGE_STYLE: Record<string, { dash: number[]; width: number; label: 
   cites:          { dash: [],        width: 1.0, label: "cites" },
   considered:     { dash: [4, 4],    width: 1.2, label: "considered" },
   rejected:       { dash: [1, 4],    width: 1.2, label: "rejected" },
+  derived_from:   { dash: [1, 2],    width: 1.0, label: "learned from" },
 };
 
 export function edgeStyle(type: string) {
@@ -87,6 +88,10 @@ export function toElements(graph: Graph, nodes: CellNode[], opts: BuildOptions) 
         // fragments recall, which raw size does not reveal.
         ring: n.betweenness > 0.05 ? 1 : 0,
         orphan: n.degree === 0 ? 1 : 0,
+        // Flagged content gets the strongest border channel — see the
+        // node[suspicious = 1] rule below, ordered after ring/orphan so it wins
+        // when a cell is more than one of these at once.
+        suspicious: n.suspicious ? 1 : 0,
       },
     };
   });
@@ -159,6 +164,13 @@ export const stylesheet = [
     // Orphans carry a status color AND a dashed ring — never color alone.
     selector: "node[orphan = 1]",
     style: { "border-width": 2, "border-color": STATUS.warning, "border-style": "dashed", "border-opacity": 0.8 },
+  },
+  {
+    // Content that scanned as possibly trying to redirect an agent (issue #30/#49)
+    // — the strongest border on the map, since this outranks bridge/orphan status
+    // when a cell is also one of those.
+    selector: "node[suspicious = 1]",
+    style: { "border-width": 3, "border-color": STATUS.critical, "border-opacity": 0.9 },
   },
   {
     selector: "edge",
