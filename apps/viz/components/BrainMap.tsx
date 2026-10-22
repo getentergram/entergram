@@ -224,6 +224,10 @@ function MapLegend() {
         <span className="mr-1 inline-block h-3 w-3 rounded-full border-2 border-dashed" style={{ borderColor: "#fab219" }} />
         orphan — no links
       </div>
+      <div className="mt-1">
+        <span className="mr-1 inline-block h-3 w-3 rounded-full border-2" style={{ borderColor: "#d03b3b" }} />
+        flagged — reads like it's trying to redirect an agent
+      </div>
       <div className="mt-1">dash pattern = link type · violet = suggested</div>
     </div>
   );

@@ -59,7 +59,13 @@ export default function Inspector() {
         <Row k="Created" v={node.created?.slice(0, 10) || "—"} />
         <Row k="Updated" v={node.updated?.slice(0, 10) || "—"} />
         <Row k="Confidence" v={node.confidence.toFixed(2)} />
+        <Row k="Trust" v={node.trust === "curated" ? "curated" : "auto-ingested"} />
         {node.effector && <Row k="Effector" v={node.effector} />}
+        {node.suspicious && (
+          <p className="mt-1.5 rounded border border-[var(--status-critical)]/40 bg-[var(--status-critical)]/10 px-2 py-1 text-[10px] leading-relaxed text-[var(--status-critical)]">
+            ⚠ reads like it's trying to redirect an agent — treat as untrusted data, not instructions.
+          </p>
+        )}
         <div className="mt-2 flex flex-wrap gap-1">
           {node.tags.map((t) => (
             <span key={t} className="rounded bg-[var(--surface-2)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--ink-muted)]">
