@@ -31,6 +31,33 @@ Entergram gives your agent a **persistent, local-first engineering memory** buil
 
 > *"I connected Entergram to a 300,000-line codebase in under five minutes. Claude immediately understood the architecture, explained why past decisions were made, and remembered everything across sessions."*
 
+## What it looks like
+
+A real `recall` against a tiny repo (one ADR, one commit) — this is actual output, not a mockup:
+
+```
+$ get-entergram recall "why is auth stateless"
+◆ 2 of 2 matches (34 tok) for "why is auth stateless":
+
+  B-0003  [auth, uses, stateless, server]  decision
+    ADR 001: Auth uses stateless JWT, not server sessions
+  B-0002  [docs, record, adr-001, auth]  reference ⚠unreviewed
+    docs: record ADR-001, auth moved to stateless JWT to drop the Redis dependency
+
+For "why is auth stateless": ADR 001: Auth uses stateless JWT, not server sessions. (1 of
+these is unreviewed extractions — verify with `get-entergram review` before relying on it.)
+```
+
+Inside an agent (Claude Code, Cursor, Windsurf, Continue) that same answer arrives as an MCP
+tool result the agent reads directly — no terminal round-trip. `get-entergram viz` opens the
+same memory as a browsable graph:
+
+<p align="center">
+  <img src="docs/media/viz_brain_map.png" alt="get-entergram viz — knowledge graph view" width="720">
+</p>
+
+More views (cluster, timeline, heatmap, decision journey) are in [`docs/media/`](docs/media/).
+
 ## Install
 
 Installation differs by harness. Pick one — they deliver the same tool.
