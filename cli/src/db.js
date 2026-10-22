@@ -9,7 +9,7 @@ import { createHash } from "node:crypto";
 import { readCells, paths } from "./lib.js";
 import { embedQuery, embedCell, serializeVector, deserializeVector, cosineSimilarity } from "./embeddings.js";
 import { computeDynamicConfidence, checkStaleness } from "./temporal.js";
-import { initProvenanceSchema, traceDecisionProvenance } from "./provenance.js";
+import { initProvenanceSchema, traceDecisionProvenance, originEdgeFor } from "./provenance.js";
 import { initSynapticSchema } from "./runtime/synaptic_network.js";
 import { LinUCBBandit, extractFeatures } from "./rl/bandit.js";
 import { logTelemetryEvent } from "./rl/telemetry.js";
@@ -121,6 +121,18 @@ export function reindex(root) {
           edge.run(c.id, m[1]);
           provStmt.run(c.id, m[1], "related", JSON.stringify({ context: "cited in text" }), nowIso);
         }
+      }
+
+      // Auto-ingestion provenance (issue #23): `learn` stamps every cell it writes
+      // (git/docs/PR/issue) with a `source` field, but until now nothing turned that
+      // into a provenance edge, so trace()/why() had nothing to show for a cell unless
+      // a human also hand-wrote a [[B-NNNN]] link into it. This coexists with the
+      // "related" edges above -- different edge_type on the same from_id, never
+      // conflicting -- and is idempotent across repeat reindex() calls because
+      // provStmt upserts on the (from_id, to_id, edge_type) unique key.
+      const origin = originEdgeFor(c.source);
+      if (origin) {
+        provStmt.run(c.id, origin.toId, "derived_from", JSON.stringify(origin.metadata), nowIso);
       }
     }
 
