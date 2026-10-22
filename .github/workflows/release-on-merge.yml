@@ -49,6 +49,11 @@ jobs:
       # "Resource not accessible by integration (HTTP 403)".
       checks: read
       actions: read
+      # The release commit now lands via a PR (see "Commit, tag, and push"
+      # below) because main requires every change to go through one -- a
+      # direct push got GH013-rejected after npm had already published
+      # v0.1.7, orphaning that version the same way v0.1.6 was orphaned.
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -185,13 +190,14 @@ jobs:
           sed -i -E -e "s|^(  url \").*(\")$|\1$url\2|" -e "s|^(  sha256 \").*(\")$|\1$sha\2|" Formula/get-entergram.rb
           grep -E '^\s+(url|sha256)' Formula/get-entergram.rb
 
-      - name: Commit, tag, and push
+      - name: Commit, tag, and open the release PR
         env:
           # GITHUB_TOKEN is sufficient: this job declares contents: write and
           # the push, tag and release all succeed with it. RELEASE_TOKEN is no
           # longer preferred -- an unapproved fine-grained PAT took precedence
           # and failed the release step with 403.
           PUSH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           v="${{ steps.ver.outputs.version }}"
@@ -205,12 +211,23 @@ jobs:
 
           [skip ci]"
           git tag "v$v"
-          # Push with the PAT when one is configured, else the built-in token.
-          # GITHUB_TOKEN can push when the workflow declares contents: write and
-          # org policy permits it; the PAT is the fallback when it does not.
+          # Tags aren't covered by the main-branch ruleset, so they still push
+          # directly. The commit does need to reach main, and main now rejects
+          # every direct push ("Changes must be made through a pull request") --
+          # a direct push here got GH013-rejected once already, after npm had
+          # already published (orphaning v0.1.7 the same way v0.1.6 was
+          # orphaned earlier). So: open a PR instead of pushing straight to
+          # main, and stop there. This deliberately does NOT auto-merge --
+          # a human merges it. Scripting the merge away would just relocate
+          # the direct push one level up, defeating the point of requiring a
+          # PR at all.
           remote="https://x-access-token:${PUSH_TOKEN}@github.com/${{ github.repository }}.git"
-          git push "$remote" HEAD:main
+          branch="release/v$v"
+          git push "$remote" "HEAD:refs/heads/$branch"
           git push "$remote" "v$v"
+          gh pr create --repo "${{ github.repository }}" --base main --head "$branch" \
+            --title "chore(release): v$v" \
+            --body "Automated release commit for v$v: manifests bumped, Homebrew formula pointed at the tarball already published to npm. Needs a human merge to land on main -- opened as a PR because main requires one for every change; not auto-merged on purpose."
 
       - name: GitHub release
         env:
