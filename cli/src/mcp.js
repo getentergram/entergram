@@ -4,6 +4,9 @@
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { findRoot, writeCell, learnGit, learnDocs, doctor, readCells } from "./lib.js";
 import { ensureIndex, reindex, search, dispatch, indexStats, traceDecision } from "./db.js";
 import { learnPRs } from "./learn.js";
@@ -13,14 +16,41 @@ import { SynapticNetwork } from "./runtime/synaptic_network.js";
 
 const textResult = (text) => ({ content: [{ type: "text", text }] });
 
-export async function serve() {
-  const root = findRoot();
+// Read the version from package.json rather than hardcoding it: a literal here
+// silently drifts from the published version on every release. Resolved relative
+// to this module (not process.cwd()) since this server is typically launched via
+// `npx get-entergram serve` from whatever directory the MCP client happens to use.
+const { version } = JSON.parse(
+  readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "package.json"), "utf8"),
+);
+
+const NO_STORE_MESSAGE =
+  "No .entergram/ memory store found in this directory. Run `get-entergram init` here, then restart this MCP server.";
+
+/**
+ * Start the MCP server.
+ *
+ * @param {object} [opts]
+ * @param {import("@modelcontextprotocol/sdk/shared/transport.js").Transport} [opts.transport]
+ *   Transport to connect on — defaults to stdio. Tests inject an in-memory transport.
+ * @param {string} [opts.cwd] Directory to search for `.entergram/` from — defaults to
+ *   process.cwd(). Mainly for tests.
+ *
+ * If no `.entergram/` store is found, the server still starts (idle) instead of
+ * exiting: plugins may load this server in a directory that hasn't run `init` yet,
+ * and a hard `process.exit(1)` just looks like a crashed MCP connection to the
+ * client. Every tool below reports NO_STORE_MESSAGE in that case instead of
+ * throwing on a null root.
+ */
+export async function serve({ transport, cwd } = {}) {
+  const root = findRoot(cwd);
   if (!root) {
-    process.stderr.write("get-entergram serve: no .entergram/ found — run `get-entergram init` first.\n");
-    process.exit(1);
+    process.stderr.write(
+      `get-entergram serve: no .entergram/ found in ${cwd || process.cwd()} — starting idle (run \`get-entergram init\` here, then restart this server).\n`,
+    );
   }
 
-  const server = new McpServer({ name: "get-entergram", version: "0.1.0" });
+  const server = new McpServer({ name: "get-entergram", version });
 
   server.registerTool(
     "recall",
@@ -34,6 +64,7 @@ export async function serve() {
       },
     },
     async ({ query, budget }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       ensureIndex(root);
       const { hits, total, synthesis } = search(root, query, budget ?? 2000);
       if (!hits.length) return textResult(`No memory matches "${query}".`);
@@ -56,6 +87,7 @@ export async function serve() {
       },
     },
     async ({ query, budget }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       ensureIndex(root);
       const result = dispatch(root, query, budget ?? 2000);
       if (result.winner === "procedure") {
@@ -86,6 +118,7 @@ export async function serve() {
       },
     },
     async ({ id }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       ensureIndex(root);
       const trace = traceDecision(root, id);
       return textResult(formatProvenance(trace));
@@ -102,6 +135,7 @@ export async function serve() {
       },
     },
     async ({ query }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       ensureIndex(root);
       const network = SynapticNetwork.load(root);
       const activations = network.stimulate(query);
@@ -122,6 +156,7 @@ export async function serve() {
       },
     },
     async ({ cell_id, outcome }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       const signals = {
         cited: outcome === "cited",
         commitLanded: outcome === "commit_landed",
@@ -150,6 +185,7 @@ export async function serve() {
       },
     },
     async ({ what, why, tags, scope, type }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       const { id } = writeCell(root, { what, hook: what, why, tags, scope: scope || "global", type: type || "convention" });
       reindex(root);
       return textResult(`Remembered ${id}.`);
@@ -167,6 +203,7 @@ export async function serve() {
       },
     },
     async ({ source, limit }) => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       const src = source || "all";
       let g = { added: 0 }, d = { added: 0 }, pr = { added: 0 };
       if (src === "git" || src === "all") g = learnGit(root, { limit: limit ?? 50 });
@@ -181,6 +218,7 @@ export async function serve() {
     "doctor",
     { title: "Memory health", description: "Report memory health, index coverage, and stale decisions.", inputSchema: {} },
     async () => {
+      if (!root) return textResult(NO_STORE_MESSAGE);
       const { count, problems } = doctor(root);
       const stats = indexStats(root);
       const staleStr = stats.staleDecisions?.length ? ` ${stats.staleDecisions.length} stale decision(s).` : "";
@@ -193,6 +231,7 @@ export async function serve() {
     new ResourceTemplate("get-entergram://cell/{id}", { list: undefined }),
     { title: "Memory cell", description: "One entergram memory cell's raw markdown, by id (e.g. B-0012)." },
     async (uri, { id }) => {
+      if (!root) return { contents: [{ uri: uri.href, mimeType: "text/plain", text: NO_STORE_MESSAGE }] };
       const cell = readCells(root).find((c) => c.id === id);
       return {
         contents: [{ uri: uri.href, mimeType: "text/markdown", text: cell ? cell.text : `No cell ${id}.` }],
@@ -205,6 +244,7 @@ export async function serve() {
     "get-entergram://index",
     { title: "Memory index", description: "One line per cell: id, type, tags, hook — the recall-addressable map." },
     async (uri) => {
+      if (!root) return { contents: [{ uri: uri.href, mimeType: "text/plain", text: NO_STORE_MESSAGE }] };
       const cells = readCells(root);
       const text = cells
         .map((c) => `${c.id}  [${(c.tags || []).join(", ")}]  ${c.type}  — ${c.hook}`)
@@ -213,6 +253,10 @@ export async function serve() {
     },
   );
 
-  await server.connect(new StdioServerTransport());
-  process.stderr.write("get-entergram MCP server ready (stdio).\n");
+  await server.connect(transport ?? new StdioServerTransport());
+  process.stderr.write(
+    root
+      ? "get-entergram MCP server ready (stdio).\n"
+      : "get-entergram MCP server ready (stdio, idle — no .entergram/ store found).\n",
+  );
 }

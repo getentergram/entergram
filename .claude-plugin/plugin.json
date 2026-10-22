@@ -13,7 +13,7 @@
   "mcpServers": {
     "entergram": {
       "command": "npx",
-      "args": ["-y", "get-entergram@latest", "serve"]
+      "args": ["-y", "get-entergram@0.1.5", "serve"]
     }
   }
 }
