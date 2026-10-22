@@ -50,13 +50,7 @@ these is unreviewed extractions — verify with `get-entergram review` before re
 
 Inside an agent (Claude Code, Cursor, Windsurf, Continue) that same answer arrives as an MCP
 tool result the agent reads directly — no terminal round-trip. `get-entergram viz` opens the
-same memory as a browsable graph:
-
-<p align="center">
-  <img src="docs/media/viz_brain_map.png" alt="get-entergram viz — knowledge graph view" width="720">
-</p>
-
-More views (cluster, timeline, heatmap, decision journey) are in [`docs/media/`](docs/media/).
+same memory as a browsable graph — run it yourself with `get-entergram viz` after `init`/`learn`.
 
 ## Install
 
