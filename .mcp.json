@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "get-entergram": {
-      "command": "get-entergram",
-      "args": ["serve"]
-    }
-  }
-}
